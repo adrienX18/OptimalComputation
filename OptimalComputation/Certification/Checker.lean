@@ -55,11 +55,11 @@ theorem checkOutputs_sound (s : State box c) (index : Nat) (addresses : List Add
         · contradiction
 
 def program (candidate : Candidate shape) : List (Evaluation.TimedAction candidate.configuration) :=
-  sort (candidate.schedule.map (fun s => ⟨s.cycle, ⟨s.lane, s.instruction⟩⟩)) (fun a b => a.cycle ≤ b.cycle)
+  sortByNat (candidate.schedule.map (fun s => ⟨s.cycle, ⟨s.lane, s.instruction⟩⟩)) (·.cycle)
 
 theorem program_eq (candidate : Candidate shape) : program candidate = Evaluation.program candidate := by
   unfold program Evaluation.program
-  rw [sort_eq]
+  rw [sortByNat_eq]
 
 /-- The checker produces diagnostics or completion cycles. Success has a
 single soundness theorem against the existing machine and workload. -/

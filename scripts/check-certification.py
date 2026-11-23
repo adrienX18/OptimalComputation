@@ -4,7 +4,9 @@ from copy import deepcopy
 import json
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
+import time
 
 import certify as c
 import experiment as e
@@ -26,6 +28,42 @@ with tempfile.TemporaryDirectory(prefix='certification-regressions-') as directo
     tmp = Path(directory)
     path = tmp / 'candidate.json'
     source = tmp / 'Certificate.lean'
+
+    # Separate processes must queue for the kernel slot, and a killed holder
+    # must not leave a stale lock that prevents an experiment from continuing.
+    lock_root = tmp / 'lock-root'
+    (lock_root / '.lake').mkdir(parents=True)
+    lock_code = '''import pathlib,sys,time
+sys.path.insert(0, 'scripts')
+import certify
+certify.ROOT = pathlib.Path(sys.argv[1])
+pathlib.Path(sys.argv[2] + '.request').write_text('waiting')
+with certify.kernel_slot():
+    pathlib.Path(sys.argv[2]).write_text('acquired')
+    time.sleep(float(sys.argv[3]))
+'''
+    holder = subprocess.Popen([sys.executable, '-c', lock_code, str(lock_root), str(tmp/'holder'), '30'], cwd=ROOT)
+    waiter = None
+    try:
+        deadline = time.monotonic() + 10
+        while not (tmp/'holder').exists() and time.monotonic() < deadline:
+            time.sleep(.01)
+        assert (tmp/'holder').exists(), 'Kernel lock holder did not start'
+        waiter = subprocess.Popen([sys.executable, '-c', lock_code, str(lock_root), str(tmp/'waiter'), '0'], cwd=ROOT)
+        deadline = time.monotonic() + 10
+        while not (tmp/'waiter.request').exists() and time.monotonic() < deadline:
+            time.sleep(.01)
+        assert (tmp/'waiter.request').exists(), 'Kernel lock waiter did not start'
+        time.sleep(.2)
+        assert not (tmp/'waiter').exists(), 'Two processes entered the kernel slot'
+        holder.terminate()
+        holder.wait(timeout=10)
+        assert waiter.wait(timeout=10) == 0 and (tmp/'waiter').exists(), 'Stale kernel lock'
+    finally:
+        for process in (holder, waiter):
+            if process is not None and process.poll() is None:
+                process.kill()
+                process.wait()
 
     def check_raw(raw, category=None, **budgets):
         path.write_text(json.dumps(raw))
@@ -116,13 +154,52 @@ with tempfile.TemporaryDirectory(prefix='certification-regressions-') as directo
     source.write_text(tampered)
     rejected = c.run_process(['lake', 'env', 'lean', str(source)], 120)
     assert rejected.returncode != 0
+    # The untrusted formatter cannot substitute a different typed candidate,
+    # even if that substitute computes the same mathematical result.
+    source.write_text(previous.decode().replace('identifier := raw.identifier',
+                                               'identifier := "substituted-candidate"'))
+    rejected = c.run_process(['lake', 'env', 'lean', str(source)], 120)
+    assert rejected.returncode != 0 and 'exactBinding' in rejected.stdout
     assert not c.audit_kernel_output('')
     assert not c.audit_kernel_output("'GeneratedCertificate.checked' depends on axioms: [untrusted]")
+
+    # Direct candidate emission must handle sparse, nonmonotone addresses and
+    # scratch storage, not assume the contiguous reference layout.
+    _, sparse = e.cli('export-candidate', 'tiny-multiply-v1')
+    sparse['identifier'] = 'sparse-layout-kernel-regression'
+    sparse['layout'] = dict(inputs=[4095, 42], outputs=[303], scratch=[11])
+    for row in sparse['schedule']:
+        instruction = row['instruction']
+        if 'address' in instruction:
+            instruction['address'] = {0:4095, 1:42, 2:11}[instruction['address']]
+    sparse['schedule'] += [
+        dict(cycle=7, lane=0, instruction=dict(kind='load', destination=4, address=11)),
+        dict(cycle=8, lane=0, instruction=dict(kind='store', source=4, address=303))]
+    sparse['schedule'].reverse()
+    path.write_text(json.dumps(sparse))
+    result = c.certify(path)
+    assert result['accepted'] and result['cycles'] == 9, result
 
     # The polynomial reference uses powers; the program uses an Estrin-style tree.
     path.write_text(json.dumps(e.hand_reference('polynomial', (8, 8))))
     result = c.certify(path)
     assert result['accepted'] and result['cycles'] == 63, result
 
+    # Hundreds of harmless instructions exercise a longer execution with an
+    # automatically reduced proof budget, including pending effects at the end.
+    _, padded = e.cli('export-candidate', 'tiny-multiply-v1')
+    padded['identifier'] = 'proof-budget-regression'
+    shifted = [dict(row, cycle=row['cycle']+31) for row in padded['schedule']]
+    def zero_add(i):
+        return dict(cycle=i, lane=0, instruction=dict(kind='add', destination=13+i%3, left=0, right=0))
+    padded['schedule'] = [zero_add(i) for i in range(28)] + shifted + [zero_add(i) for i in range(40,520)]
+    path.write_text(json.dumps(padded))
+    result = c.certify(path, output=source, boundaries=530)
+    assert result['accepted'] and result['cycles'] == 522, result
+    assert result['certificateBoundaryBudget'] == 524 and result['boundaryBudget'] == 530, result
+    assert 'candidate 524 4096' in source.read_text()
+    exhausted = c.certify(path, boundaries=32)
+    assert not exhausted['accepted'] and exhausted['category'] == 'boundary-budget', exhausted
+
 print('PASS: automatic kernel certificates, exact binding, mutants, budgets, duplicate keys, '
-      'Horner rejection, all 12 hand references, and unchanged generated artifact')
+      'Horner rejection, all 12 hand references, proof budgets/tampering, and unchanged generated artifact')

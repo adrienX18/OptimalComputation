@@ -31,6 +31,15 @@ last. Multiplication checks the size of the term cross product before expanding
 it, even when later cancellation could reduce the result. Degree is checked
 when constructing each value. A higher budget cannot make an invalid proof pass.
 
+The precheck uses the requested boundary cap. The generated proof uses the
+smaller of that cap and the observed completion cycles plus two. The kernel
+checks that this is a sufficient budget; the compiled observation is not trusted
+as proof. JSON retains `boundaryBudget` and separately records
+`certificateBoundaryBudget`. This avoids unnecessary reduction work on large
+programs. The full workload suite uses a 600-second checking limit, five
+concurrent search loops and one kernel check at a time because large proofs
+require more memory than the initial matrix-vector example.
+
 Success exits with code 0 and prints `Correct`. JSON contains `accepted: true`,
 `status: "correct"`, the candidate/workload/model versions, budgets, modeled
 cycles, proof-check time, hashes and the artifact's Lean declaration name.

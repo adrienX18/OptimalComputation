@@ -24,17 +24,27 @@ private def expectTinyFailure (raw : RawCandidate) (expected : Diagnostic) : IO 
   | .ok (.error e) => require "wrong diagnostic" (e == expected)
   | other => throw (IO.userError s!"Expected symbolic rejection: {repr other}")
 
+private def singleBox (interval : Interval) : Box :=
+  fun i => if i = 0 then interval else Interval.point 0
+
 def certification : IO Unit := do
-  require "degree cap" (!(Value.ofPolynomial [⟨-1,1⟩] [(List.replicate 65 0,1)] 64).isOk)
+  require "degree cap" (!(Value.ofPolynomial (singleBox ⟨-1,1⟩) [(List.replicate 65 0,1)] 64).isOk)
   let x := Polynomial.input 0
   let y := Polynomial.input 1
   require "commuting multiplication" (x.mul y == y.mul x)
   require "cancellation before interval analysis"
     (((x.mul x).add ((Polynomial.constant (-1)).mul (x.mul x))) == [])
-  require "nonnegative square" (((x.mul x).bound [⟨-4,3⟩]) == ⟨0,16⟩)
+  let p := (x.add y).pow 4
+  let q := ((x.mul x).add y).pow 3
+  let r := (x.add (Polynomial.constant 2)).pow 2
+  require "canonical merge commutes and associates"
+    (p.add q == q.add p && (p.add q).add r == p.add (q.add r))
+  require "canonical merge cancels a larger polynomial"
+    (p.add ((Polynomial.constant (-1)).mul p) == [])
+  require "nonnegative square" (((x.mul x).bound (singleBox ⟨-4,3⟩)) == ⟨0,16⟩)
   require "range refusal is not success"
-    (!(Value.ofPolynomial [⟨-140737488355328,140737488355327⟩] (x.add x) 64).isOk)
-  require "term cap" (!(Value.ofPolynomial [⟨-4,3⟩] x 0).isOk)
+    (!(Value.ofPolynomial (singleBox ⟨-140737488355328,140737488355327⟩) (x.add x) 64).isOk)
+  require "term cap" (!(Value.ofPolynomial (singleBox ⟨-4,3⟩) x 0).isOk)
   require "sort agrees including equal keys" (sort [(2,1),(1,2),(2,3)] (fun a b => a.1 ≤ b.1) == [(1,2),(2,1),(2,3)])
   match Evaluation.evaluateObjective [checkedTiny] Examples.TinyMultiply.raw [-7,6] 7 "regression" Evaluation.latency with
   | .accepted score => require "checker artifact uses existing scorer" (score.result.value == 6)

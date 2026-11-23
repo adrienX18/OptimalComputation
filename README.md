@@ -90,6 +90,13 @@ at once. `scripts/search_batch.py --smoke` tests two attempts per model;
 The [first five-model experiment analysis](analysis/2026-11-23-five-model-search/report.md)
 reports convergence, certified results, failures and resource use across 1,250 attempts.
 
+The [full workload suite](docs/search.md#full-workload-suite) uses
+[`configs/search.suite.json`](configs/search.suite.json): all four workloads,
+three latency configurations and one energy case each. Its 16 cases expand to
+400 loops / 20,000 attempts. Use `--smoke --smoke-attempts 3` for the 240-attempt
+test, or `--prepare-only` to save the full plan without launching it.
+See the [readiness checks and archive audits](docs/results/full-suite-readiness-v1/README.md).
+
 ## Earlier experiments
 
 [Section 9 usage, algorithms, proof status, and measurements](docs/experiments.md)

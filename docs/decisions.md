@@ -1,9 +1,76 @@
 # Recorded decisions
 
-These decisions were confirmed on 2026-11-22. All seven questions from the
-Section 9 discussion are resolved. Implementation details and commands are in
-[certification.md](certification.md). The subsequently approved minimal search
-loop is recorded below and described in [search.md](search.md).
+The original seven Section 9 decisions were confirmed on 2026-11-22 and are
+resolved. Later search and experiment decisions are recorded here as well.
+See [certification](certification.md) and [the search guide](search.md) for usage.
+
+## Full workload suite readiness (2026-11-23)
+
+Extend the existing batch Cartesian product with named cases instead of adding
+another orchestration framework. Every case keeps an independent model/seed loop,
+archive and incumbent. A shared limit of five search loops applies to all cases.
+Large kernel checks use many gigabytes each, and even two simultaneous matrix
+proofs caused paging. A checkout-wide OS file lock therefore serializes the
+kernel phase while model calls and other work remain parallel. This retains
+request throughput without overlapping the memory-heavy proofs.
+Lock waiting is archived separately and does not consume the active proof budget;
+the lock releases automatically when its process exits.
+All four workloads get three pinned latency cases and a free-configuration energy
+case: sixteen cases, 400 loops, 20,000 attempts. Include polynomial `(8,8)` again
+under the common new settings and preserve the earlier campaign independently.
+
+Before the full launch, run known-design Docker/Lean checks for all cases and
+three live attempts per model/case with seed 11 (240 slots). Failed model designs
+are expected feedback, not automatically infrastructure failures. Audit every
+archived file and accepted certificate binding. Full execution awaits the user's
+go; preparing a manifest must not call a model.
+
+Provide energy's frozen formula and BRAM rule explicitly in the prompt, plus its
+actual baseline breakdown. Keep the checker and objective authoritative. Raise the
+suite's prompt cap to 48,000 bytes to fit larger layouts and full best/latest code,
+and verification phases to 600 seconds for larger proofs. This costs potential
+context and checking time but avoids conflating a too-small budget with invalid
+designs. Keep the 8,000-byte code cap and all mathematical/machine rules fixed.
+Record these changes rather than claiming identical conditions to the first run.
+
+Store new traces once, as lossless gzip with the original byte count and hash.
+Check decompression before removing the redundant plain JSON; audit it again
+after the batch. This preserves every event while making the larger matrix
+campaign practical on the available disk. Older raw archives are not modified.
+
+Large reference certificates exposed a structural-validation bottleneck. Reflect
+address distinctness and membership through Boolean checks with proved equivalence;
+sorted layouts get a linear distinctness check, while arbitrary layouts retain a
+complete fallback. Emit the typed candidate directly, with shared bounded
+registers, lanes and addresses and one membership proof per declared address.
+This avoids repeatedly expanding the structural validator during symbolic
+execution. Every structural obligation is still proved, and the kernel checks
+that the resulting artifact serializes to the complete original raw candidate.
+The formatter is untrusted: substituting a different candidate fails that exact
+binding check even when the substitute computes the same result. Sparse and
+nonmonotone layouts, scratch storage and reversed schedules have regression
+coverage. The generated grid certificate is refreshed to that syntax.
+No axiom, native-evaluation shortcut,
+machine rule, mathematical domain or acceptance condition is added or relaxed.
+
+The symbolic state uses bounded register/pending arrays and sparse indexed memory,
+with read/write interpretation proofs against the original machine. Exposing
+state fields between boundaries avoids chains of delayed projections and is
+proved to leave the state unchanged. Input-range lookup uses a directly indexed
+bound function, proved equal to the finite input table, including zero outside
+the input range. Polynomial addition merges canonical term lists in one pass;
+its evaluation theorem covers every input. Sorted schedules and monomials have
+a linear fast path, proved equal to the original stable sort. These are verifier
+implementation changes, not changes to the hardware being optimized.
+
+Generate each certificate with `min(requested boundaries, completion cycles + 2)`
+as its sufficient execution budget. Retain the requested cap for the precheck and
+report both budgets. The smaller bound avoids paying for an unnecessarily large
+closed reduction. The kernel still proves the entire execution at that bound;
+compiled timing is only a hint and cannot cause an invalid candidate to pass.
+The large-case preflight established that some valid proofs need more than five
+minutes, motivating the common ten-minute cap. Timeouts remain inconclusive
+rejections and may bias search against designs that are expensive to verify.
 
 ## Proof evaluation: preserve the current trust boundary
 

@@ -1,0 +1,18 @@
+{
+  "validation-ready.log": {
+    "path": "runs/suite-readiness-checks-20261123/validation-ready.log",
+    "sha256": "956cbd5678767add72e9b58acb29fcd07882bd0fb27577083b8499bf06c77986"
+  },
+  "batch-ready.log": {
+    "path": "runs/suite-readiness-checks-20261123/batch-ready.log",
+    "sha256": "d8948ccc7fbf7d3e951f0069a33ba94bfe98ee6a24f7e678331224d7827300b4"
+  },
+  "providers.log": {
+    "path": "runs/suite-readiness-checks-20261123/providers.log",
+    "sha256": "083c6c398dc12ddb80c26c26e339cd4bff2728f0d66b303104459b2bc80d9194"
+  },
+  "historical-archive-audit.json": {
+    "path": "runs/suite-readiness-checks-20261123/historical-archive-audit.json",
+    "sha256": "ac522fb3515e3ae2e1ac80409a224103d034b7f9da7215c0fc823ee18b18472b"
+  }
+}

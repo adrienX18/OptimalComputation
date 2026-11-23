@@ -1,0 +1,37 @@
+{
+  "models": {
+    "fable": "anthropic/claude-fable-5-2",
+    "opus": "anthropic/claude-opus-5-5",
+    "sonnet": "anthropic/claude-sonnet-5-5",
+    "astra": "openai/gpt-6.2-astra",
+    "sol": "openai/gpt-6.2-sol"
+  },
+  "seeds": [11, 23, 37, 53, 71],
+  "concurrency": 5,
+  "run": {
+    "attempts": 50,
+    "reasoning_effort": "medium",
+    "max_tokens": 32768,
+    "prompt_bytes": 48000,
+    "request_timeout": 600,
+    "check_timeout": 600
+  },
+  "instances": {
+    "matmul-latency-8x8": {"task": "matmul", "objective": "latency-v1", "configuration": [8, 8]},
+    "matmul-latency-8x1": {"task": "matmul", "objective": "latency-v1", "configuration": [8, 1]},
+    "matmul-latency-2x8": {"task": "matmul", "objective": "latency-v1", "configuration": [2, 8]},
+    "matmul-energy": {"task": "matmul", "objective": "energy-proxy-v1", "configuration": [8, 8]},
+    "polynomial-latency-8x8": {"task": "polynomial", "objective": "latency-v1", "configuration": [8, 8]},
+    "polynomial-latency-8x1": {"task": "polynomial", "objective": "latency-v1", "configuration": [8, 1]},
+    "polynomial-latency-2x8": {"task": "polynomial", "objective": "latency-v1", "configuration": [2, 8]},
+    "polynomial-energy": {"task": "polynomial", "objective": "energy-proxy-v1", "configuration": [8, 8]},
+    "gram-latency-8x8": {"task": "gram", "objective": "latency-v1", "configuration": [8, 8]},
+    "gram-latency-8x1": {"task": "gram", "objective": "latency-v1", "configuration": [8, 1]},
+    "gram-latency-2x8": {"task": "gram", "objective": "latency-v1", "configuration": [2, 8]},
+    "gram-energy": {"task": "gram", "objective": "energy-proxy-v1", "configuration": [8, 8]},
+    "two-stage-latency-8x8": {"task": "two-stage", "objective": "latency-v1", "configuration": [8, 8]},
+    "two-stage-latency-8x1": {"task": "two-stage", "objective": "latency-v1", "configuration": [8, 1]},
+    "two-stage-latency-2x8": {"task": "two-stage", "objective": "latency-v1", "configuration": [2, 8]},
+    "two-stage-energy": {"task": "two-stage", "objective": "energy-proxy-v1", "configuration": [8, 8]}
+  }
+}

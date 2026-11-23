@@ -1,0 +1,19 @@
+{
+  "asOfUTC": "2026-11-23T21:14:33.388633+00:00",
+  "status": "unfinished-running",
+  "runDirectory": "runs/suite-smoke-20261123",
+  "terminalSession": 14393,
+  "completedAttempts": 11,
+  "plannedAttempts": 240,
+  "completedLoops": 1,
+  "plannedLoops": 80,
+  "savedResponses": 15,
+  "outcomes": {
+    "certified": 7,
+    "proposal-error": 2,
+    "kernel-timeout": 1,
+    "simulation-failed": 1
+  },
+  "fullExperimentLaunched": false,
+  "fullExperimentPrepared": false
+}

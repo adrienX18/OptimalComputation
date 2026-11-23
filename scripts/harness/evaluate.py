@@ -1,12 +1,11 @@
 """Sandbox generation and the existing Lean verification/scoring pipeline."""
-import gzip
 import json
 from pathlib import Path
 import shutil
 import uuid
 
 import certify
-from .archive import command, output, read_json, write_json
+from .archive import command, compress_trace, output, read_json, write_json
 
 ROOT = Path(__file__).resolve().parents[2]
 TOOLS = Path(__file__).parent
@@ -64,7 +63,7 @@ def initialize(config, directory):
     directory.mkdir()
     task = TASKS[config['task']]
     cfg = ','.join(map(str, config['configuration']))
-    result, raw = cli(['export-candidate', task[1], '--configuration', cfg], directory / 'export')
+    result, raw = cli(['export-candidate', task[1], '--configuration', cfg], directory / 'export', config['check_timeout'])
     if result['exitCode'] != 0 or not isinstance(raw, dict):
         raise ValueError(f'Cannot export the selected baseline: {raw}')
     write_json(directory / 'candidate.json', raw)
@@ -72,7 +71,7 @@ def initialize(config, directory):
     fixtures = {}
     for name in task[3]:
         result, report = cli(['evaluate', task[1], '--configuration', cfg,
-                              '--fixture', name, '--objective', config['objective']], directory / name)
+                              '--fixture', name, '--objective', config['objective']], directory / name, config['check_timeout'])
         if result['exitCode'] != 0 or not report or report.get('verificationStatus') != 'all-input-certified':
             raise ValueError(f'Cannot evaluate baseline fixture {name}: {report}')
         fixtures[name] = report['inputScalars']
@@ -81,7 +80,7 @@ def initialize(config, directory):
     score = read_json(directory / score_fixture / 'stdout.txt')
     write_json(directory / 'score.json', score)
     return dict(fixtures=fixtures, scoreFixture=score_fixture, score=score['objective']['score'],
-                unit=score['objective']['unit'], raw=raw)
+                unit=score['objective']['unit'], objective=score['objective'], raw=raw)
 
 
 def resolve_image(image, directory):
@@ -152,9 +151,7 @@ def evaluate(config, baseline, directory):
                               '--budget', config['boundaries'], '--trace', (work / 'trace.json').resolve()],
                              work / 'process', config['check_timeout'])
         if (work / 'trace.json').exists():
-            # Keep the original and a compressed archive; no trace is truncated.
-            with (work / 'trace.json').open('rb') as src, gzip.open(work / 'trace.json.gz', 'wb') as dst:
-                shutil.copyfileobj(src, dst)
+            compress_trace(work / 'trace.json')
         passed = result['status'] == 'completed' and result['exitCode'] == 0 and report is not None
         checks.append(dict(fixture=name, passed=passed, process=result, report=report))
     write_json(directory / 'simulations.json', checks)

@@ -93,6 +93,38 @@ class BatchTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 batch.settings(self.config | change)
 
+    def test_full_suite_and_three_step_smoke(self):
+        self.config = read_json(batch.ROOT/'configs/search.suite.json')
+        config = batch.settings(self.config)
+        full = batch.jobs(config)
+        short = batch.jobs(config, smoke=True, smoke_attempts=3)
+        self.assertEqual((len(full), sum(j['config']['attempts'] for j in full)), (400, 20000))
+        self.assertEqual((len(short), sum(j['config']['attempts'] for j in short)), (80, 240))
+        self.assertEqual(len({j['key'] for j in full}), 400)
+        self.assertEqual(len({j['configPath'] for j in full}), 400)
+        self.assertEqual({j['seed'] for j in short}, {11})
+        for task in ['matmul', 'polynomial', 'gram', 'two-stage']:
+            selected = [j for j in short if j['config']['task'] == task]
+            self.assertEqual(len(selected), 20)
+            self.assertEqual({(j['config']['objective'], tuple(j['config']['configuration'])) for j in selected},
+                {('latency-v1', (8,8)), ('latency-v1', (8,1)), ('latency-v1', (2,8)), ('energy-proxy-v1', (8,8))})
+        result = self.run_batch(smoke=True, smoke_attempts=3)
+        self.assertEqual(result['completedAttempts'], 240)
+        self.assertEqual({r['instance'] for r in result['runs']}, set(config['instances']))
+        before = list(self.calls)
+        self.run_batch(resume=True)
+        self.assertEqual(before, self.calls)
+
+    def test_invalid_instances_and_smoke_budget(self):
+        instance = dict(task='polynomial', objective='latency-v1', configuration=[8,8])
+        for instances in [{}, {'../escape': instance}, {'a': instance, 'b': instance},
+                          {'a': instance | {'attempts': 3}}, {'a': instance | {'configuration': [3,8]}}]:
+            with self.assertRaises(ValueError):
+                batch.settings(self.config | dict(instances=instances))
+        for attempts in [0,101,True,3.5]:
+            with self.assertRaises(ValueError):
+                batch.jobs(batch.settings(self.config), smoke=True, smoke_attempts=attempts)
+
     def test_partial_failure_is_retained_and_resume_only_retries_that_run(self):
         def partial(root, job, cancel):
             if job['name'] == 'fable':

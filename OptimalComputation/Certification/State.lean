@@ -1,4 +1,5 @@
 import OptimalComputation.Certification.Value
+import Std.Data.TreeMap.Lemmas
 
 namespace OptimalComputation.Certification
 open Hardware
@@ -30,16 +31,25 @@ def Pending.eval (x : Nat → Int) (hx : box.Allowed x) (p : Pending box) : Pend
 @[simp] theorem Pending.eval_destination (p : Pending box) (x : Nat → Int) (hx : box.Allowed x) :
     (p.eval x hx).effect.destination = p.effect.destination := Effect.eval_destination _ _ _
 
-/-- Functional tables avoid allocating 4,096 symbolic slots during kernel
-checking. Updates are explicit and the interpretation is the bounded hardware
-state, including full-slot encoding at each store. -/
+/-- Sparse memory avoids allocating 4,096 symbolic slots or scanning a growing
+chain of prior stores. Its interpretation is the bounded hardware state,
+including full-slot encoding at each store. -/
 structure State (box : Box) (c : ValidConfig) where
-  registers : Lane c → Register → Option (Value box)
-  memory : Address → Option (Value box)
-  pending : Lane c → List (Pending box)
+  registerTable : Vector (Vector (Option (Value box)) registersPerLane) c.val.lanes
+  memoryTable : Std.TreeMap Nat (Value box)
+  pendingTable : Vector (List (Pending box)) c.val.lanes
+
+def State.registers (s : State box c) (l : Lane c) (r : Register) : Option (Value box) :=
+  s.registerTable[l.val][r.val]
+
+def State.pending (s : State box c) (l : Lane c) : List (Pending box) :=
+  s.pendingTable[l.val]
+
+def State.memory (s : State box c) (a : Address) : Option (Value box) :=
+  s.memoryTable[a.val]?
 
 def State.empty (box : Box) (c : ValidConfig) : State box c :=
-  ⟨fun _ _ => none, fun _ => none, fun _ => []⟩
+  ⟨Vector.replicate _ (Vector.replicate _ none), ∅, Vector.replicate _ []⟩
 
 def State.eval (s : State box c) (x : Nat → Int) (hx : box.Allowed x) : Hardware.State c := {
   registers := Vector.ofFn fun lane => Vector.ofFn fun r => (s.registers lane r).map (·.eval x hx)
@@ -51,13 +61,24 @@ def State.readRegister (s : State box c) (l : Lane c) (r : Register) : Option (V
   if r.val = 0 then some (Value.zero box) else s.registers l r
 
 def State.writeRegister (s : State box c) (l : Lane c) (r : WritableRegister) (v : Value box) : State box c :=
-  {s with registers := fun l' r' => if l = l' ∧ r.val = r' then some v else s.registers l' r'}
+  {s with registerTable := s.registerTable.set l.val (s.registerTable[l.val].set r.val.val (some v) r.val.isLt) l.isLt}
 
 def State.writeMemory (s : State box c) (a : Address) (v : Value box) : State box c :=
-  {s with memory := fun b => if a = b then some v else s.memory b}
+  {s with memoryTable := s.memoryTable.insert a.val v}
 
 def State.setPending (s : State box c) (l : Lane c) (ps : List (Pending box)) : State box c :=
-  {s with pending := fun l' => if l = l' then ps else s.pending l'}
+  {s with pendingTable := s.pendingTable.set l.val ps l.isLt}
+
+/-- Expose each field before continuing a long closed reduction. This avoids
+carrying chains of projections through unrelated record updates. -/
+def State.materialize (s : State box c) : State box c :=
+  match s.registerTable, s.memoryTable, s.pendingTable with
+  | ⟨rs, hr⟩, ⟨⟨mem, hm⟩⟩, ⟨ps, hp⟩ => ⟨⟨rs, hr⟩, ⟨⟨mem, hm⟩⟩, ⟨ps, hp⟩⟩
+
+@[simp] theorem State.materialize_eq (s : State box c) : s.materialize = s := by
+  cases s with
+  | mk rs mem ps => cases rs; cases mem with
+    | mk mem => cases mem; cases ps; rfl
 
 def State.drained (s : State box c) : Bool := (List.finRange c.val.lanes).all fun l => (s.pending l).isEmpty
 
@@ -70,11 +91,11 @@ theorem State.eval_empty (box : Box) (c : ValidConfig) (x : Nat → Int) (hx : b
   apply hardwareState_ext
   · apply Vector.ext; intro i hi
     apply Vector.ext; intro j hj
-    simp [eval, empty, Hardware.State.empty]
+    simp [eval, empty, registers, Hardware.State.empty]
   · apply Vector.ext; intro i hi
-    simp [eval, empty, Hardware.State.empty]
+    simp [eval, empty, memory, Hardware.State.empty]
   · apply Vector.ext; intro i hi
-    simp [eval, empty, Hardware.State.empty]
+    simp [eval, empty, pending, Hardware.State.empty]
 
 @[simp] theorem State.eval_readRegister (s : State box c) (x : Nat → Int) (hx : box.Allowed x)
     (l : Lane c) (r : Register) :
@@ -95,11 +116,8 @@ theorem State.eval_writeRegister (s : State box c) (x : Nat → Int) (hx : box.A
   apply hardwareState_ext
   · apply Vector.ext; intro i hi
     apply Vector.ext; intro j hj
-    simp [eval, writeRegister, Hardware.State.writeRegister, Fin.ext_iff, Vector.getElem_set]
-    split <;> simp_all [Vector.getElem_set]
-    all_goals split <;> simp_all
-    have hl : (⟨i, hi⟩ : Lane c) = l := Fin.ext (by simpa only [Fin.val_mk] using (show l.val = i from by assumption).symm)
-    simp [hl]
+    by_cases hl : l.val = i <;> by_cases hr : r.val.val = j <;>
+      simp [eval, writeRegister, registers, Hardware.State.writeRegister, Vector.getElem_set, hl, hr]
   · rfl
   · rfl
 
@@ -109,7 +127,8 @@ theorem State.eval_writeMemory (s : State box c) (x : Nat → Int) (hx : box.All
   apply hardwareState_ext
   · rfl
   · apply Vector.ext; intro i hi
-    simp [eval, writeMemory, Hardware.State.writeMemory, Fin.ext_iff]
+    simp [eval, writeMemory, memory, Hardware.State.writeMemory, Fin.ext_iff,
+      Std.TreeMap.getElem?_insert]
     split <;> simp_all
   · rfl
 
@@ -120,8 +139,8 @@ theorem State.eval_setPending (s : State box c) (x : Nat → Int) (hx : box.Allo
   · rfl
   · rfl
   · apply Vector.ext; intro i hi
-    simp [eval, setPending, Hardware.State.setPending, Fin.ext_iff]
-    split <;> simp_all
+    by_cases hl : l.val = i <;>
+      simp [eval, setPending, pending, Hardware.State.setPending, Vector.getElem_set, hl]
 
 @[simp] theorem State.eval_drained (s : State box c) (x : Nat → Int) (hx : box.Allowed x) :
     (s.eval x hx).drained = s.drained := by

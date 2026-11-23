@@ -11,14 +11,14 @@ namespace Polynomial
 
 def dotPrefix {n : Nat} (a b : Fin n → Polynomial) : (k : Nat) → k ≤ n → Polynomial
   | 0, _ => []
-  | k+1, h => (dotPrefix a b k (by omega)).add ((a ⟨k, by omega⟩).mul (b ⟨k, by omega⟩))
+  | k+1, h => ((a ⟨k, by omega⟩).mul (b ⟨k, by omega⟩)).add (dotPrefix a b k (by omega))
 def dot {n : Nat} (a b : Fin n → Polynomial) : Polynomial := dotPrefix a b n (Nat.le_refl n)
 
 theorem eval_dotPrefix {n : Nat} (a b : Fin n → Polynomial) (k : Nat) (hk : k ≤ n) (x : Nat → Int) :
     (dotPrefix a b k hk).eval x = Workloads.dotPrefix (fun i => (a i).eval x) (fun i => (b i).eval x) k hk := by
   induction k with
   | zero => rfl
-  | succ k ih => simp [dotPrefix, eval_add, eval_mul, Workloads.dotPrefix, ih]
+  | succ k ih => simp [dotPrefix, eval_add, eval_mul, Workloads.dotPrefix, ih, Int.add_comm]
 
 theorem eval_dot {n : Nat} (a b : Fin n → Polynomial) (x : Nat → Int) :
     (dot a b).eval x = Workloads.dot (fun i => (a i).eval x) (fun i => (b i).eval x) :=
@@ -31,7 +31,14 @@ theorem eval_outputs {n : Nat} (polys : Fin n → Polynomial) (result : Fin n �
 
 end Polynomial
 
-def scalarBox (a : ScalarAdapter spec) (bounds : Fin a.shape.inputCount → Interval) : Box := List.ofFn bounds
+def scalarBox (a : ScalarAdapter spec) (bounds : Fin a.shape.inputCount → Interval) : Box :=
+  fun i => if h : i < a.shape.inputCount then bounds ⟨i, h⟩ else Interval.point 0
+
+/-- Direct indexing has exactly the same bounds, including the out-of-range
+zero, as the finite input table. -/
+theorem scalarBox_at (a : ScalarAdapter spec) (bounds : Fin a.shape.inputCount → Interval) (i : Nat) :
+    (scalarBox a bounds).at i = ((List.ofFn bounds)[i]?).getD (Interval.point 0) := by
+  by_cases hi : i < a.shape.inputCount <;> simp [scalarBox, Box.at, hi]
 
 theorem scalarBox_sound (a : ScalarAdapter spec) (bounds : Fin a.shape.inputCount → Interval)
     (x : spec.Input) (h : ∀ i : Fin a.shape.inputCount, (bounds i).Contains ((a.inputScalars x)[i.val])) :

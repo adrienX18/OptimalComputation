@@ -16,7 +16,7 @@ if not __debug__:
 
 import search
 from harness import evaluate as e, prompt
-from harness.archive import read_json, write_json, command, output
+from harness.archive import read_json, write_json, command, output, compress_trace
 from harness.model import ReplayModel, scrub
 from harness.randomness import attempt_seed
 
@@ -162,6 +162,29 @@ class SearchTests(unittest.TestCase):
         self.assertEqual(result['attempts'][0]['category'], 'proposal-error')
         self.assertTrue((self.root/'attempts/0001/response.json').exists())
 
+    def test_objective_instructions_and_largest_bounded_prompt(self):
+        self.config['objective'] = 'energy-proxy-v1'
+        self.run_search([reply('80')] * 4)
+        messages = read_json(self.root/'attempts/0004/request.json')['messages']
+        self.assertIn('allocated_BRAM36', messages[0]['content'])
+        self.assertIn('not just cycles', messages[0]['content'])
+        # Largest ordinary baseline layout: Gram inputs + outputs + scratch.
+        baseline = dict(score=100, unit='cycles', raw=dict(schedule=[], layout=dict(
+            inputs=list(range(256)), outputs=list(range(256,512)), scratch=list(range(512,768)))))
+        cfg = search.settings(dict(model='replay', task='gram', prompt_bytes=48000))
+        (self.root/'attempts/0001/generator.py').write_text('x'*8000)
+        (self.root/'attempts/0004/generator.py').write_text('y'*8000)
+        rows = [dict(attempt=i, accepted=i==1, score=80 if i==1 else None,
+                     category='certified' if i==1 else 'proposal-error',
+                     directory=f'attempts/{1 if i==1 else 4:04d}', idea='i'*100)
+                for i in range(1,51)]
+        messages = prompt.build(cfg, baseline, rows, self.root)
+        context = json.loads(messages[1]['content'])
+        self.assertEqual(len(context['history']), 50)
+        self.assertEqual(len(context['best']['code']), 8000)
+        self.assertEqual(len(context['latest']['code']), 8000)
+        self.assertLessEqual(len(json.dumps(messages,ensure_ascii=False).encode()),48000)
+
     def test_secret_scrub_and_process_timeout(self):
         with patch.dict('os.environ', {'ANTHROPIC_API_KEY':'secret-test-key'}):
             cleaned = scrub({'x-api-key':'other-secret', 'body':'echo secret-test-key'})
@@ -172,6 +195,23 @@ class SearchTests(unittest.TestCase):
         self.assertEqual(result['status'], 'timeout')
         self.assertEqual(output(d), 'before\n')
         self.assertTrue((d/'result.json').exists())
+
+    def test_trace_compression_is_lossless_and_deterministic(self):
+        import gzip
+        data = (b'{"full":"trace record with all events"}\n' * 10000)
+        path = Path(self.temp.name)/'trace.json'
+        path.write_bytes(data)
+        compress_trace(path)
+        self.assertFalse(path.exists())
+        packed = path.with_suffix('.json.gz')
+        first = packed.read_bytes()
+        self.assertEqual(gzip.decompress(first),data)
+        metadata = read_json(path.with_suffix('.metadata.json'))
+        self.assertEqual(metadata['originalBytes'],len(data))
+        self.assertEqual(metadata['originalSha256'],hashlib.sha256(data).hexdigest())
+        path.write_bytes(data)
+        compress_trace(path)
+        self.assertEqual(first,packed.read_bytes())
 
 
 def integration():

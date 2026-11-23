@@ -5,7 +5,8 @@ The compiled checker emits a closed Lean obligation. Only a successful kernel
 check and standard-axiom audit produce acceptance. No third-party Python packages.
 """
 import argparse
-from contextlib import nullcontext
+from contextlib import contextmanager, nullcontext
+import fcntl
 import hashlib
 import json
 import math
@@ -22,6 +23,30 @@ ROOT = Path(__file__).resolve().parents[1]
 CHECKER = ROOT / '.lake/build/bin/certification_check'
 ALLOWED_AXIOMS = {'propext', 'Quot.sound', 'Classical.choice'}
 MAX_FILE_BYTES = 8 * 1024 * 1024
+
+
+@contextmanager
+def kernel_slot(archive=None):
+    """One memory-heavy kernel process per checkout; model calls stay parallel.
+
+    OS file locks work across both batch processes and integration-test threads,
+    and release automatically if a worker dies. Queue time is recorded separately
+    from the active checking budget.
+    """
+    from harness.archive import write_json
+    started = time.time()
+    with (ROOT / '.lake/certification-kernel.lock').open('a') as lock:
+        if archive is not None:
+            write_json(archive / 'kernel-queue.json', dict(started=started, status='waiting'))
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        try:
+            if archive is not None:
+                write_json(archive / 'kernel-queue.json',
+                           dict(started=started, status='acquired', acquired=time.time(),
+                                waitSeconds=time.time()-started))
+            yield
+        finally:
+            fcntl.flock(lock, fcntl.LOCK_UN)
 
 
 def failure(category, message, **details):
@@ -132,9 +157,10 @@ def _certify(path, *, boundaries, terms, timeout, output, archive, objective, fi
             source += f'\n#eval OptimalComputation.Certification.printScore {namespace}.artifact "{objective}" "{fixture}"\n'
         lean_file = temp / 'Certificate.lean'
         lean_file.write_text(source, encoding='utf-8')
-        proof_started = time.monotonic()
         try:
-            kernel = run_process(['lake', 'env', 'lean', str(lean_file)], timeout, archive / 'kernel' if archive else None)
+            with kernel_slot(archive):
+                proof_started = time.monotonic()
+                kernel = run_process(['lake', 'env', 'lean', str(lean_file)], timeout, archive / 'kernel' if archive else None)
         except subprocess.TimeoutExpired:
             return failure('kernel-timeout', 'Kernel checking exceeded its time budget; no certificate was accepted.', **binding)
         except OSError as exc:

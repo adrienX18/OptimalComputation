@@ -19,7 +19,7 @@ def run (maxTerms : Nat) : Nat → Nat → List (Evaluation.TimedAction c) → S
       | fuel + 1 => do
           let (batch, rest) := queue.span (fun i => i.cycle == boundary)
           let next ← step maxTerms boundary (batch.map Evaluation.TimedAction.action) state
-          run maxTerms fuel (boundary+1) rest next
+          run maxTerms fuel (boundary+1) rest next.materialize
 
 theorem run_sound (maxTerms fuel boundary : Nat) (queue : List (Evaluation.TimedAction c))
     (state : State box c) (result : RunResult box c) (h : run maxTerms fuel boundary queue state = .ok result)
@@ -43,7 +43,7 @@ theorem run_sound (maxTerms fuel boundary : Nat) (queue : List (Evaluation.Timed
       · have hn : (queue.isEmpty && state.drained) = false := Bool.eq_false_iff.mpr hd
         obtain ⟨batch, rest, hq⟩ : ∃ batch rest,
             queue.span (fun i => i.cycle == boundary) = (batch, rest) := ⟨_, _, rfl⟩
-        simp only [run, hn, Bool.false_eq_true, ↓reduceIte, hq] at h
+        simp only [run, hn, Bool.false_eq_true, ↓reduceIte, hq, State.materialize_eq] at h
         cases hs : step maxTerms boundary (batch.map Evaluation.TimedAction.action) state with
         | error e => simp [hs, bind, Except.bind] at h
         | ok next =>

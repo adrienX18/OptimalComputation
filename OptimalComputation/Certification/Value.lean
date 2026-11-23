@@ -5,9 +5,11 @@ namespace OptimalComputation.Certification
 open Hardware
 set_option linter.unusedSimpArgs false
 
-abbrev Box := List Interval
+/-- Bounds are indexed directly, so every polynomial term does not rebuild or
+scan a list containing all input bounds during kernel reduction. -/
+abbrev Box := Nat → Interval
 
-def Box.at (box : Box) (i : Nat) : Interval := (box[i]?).getD (Interval.point 0)
+def Box.at (box : Box) (i : Nat) : Interval := box i
 def Box.Allowed (box : Box) (x : Nat → Int) : Prop := ∀ i, (box.at i).Contains (x i)
 
 def Monomial.bound (box : Box) : Monomial → Interval
@@ -95,7 +97,9 @@ def Value.mac (maxTerms : Nat) (a b acc : Value box) : Except ArithmeticFailure 
   b.require16 "right"
   if a.polynomial.length * b.polynomial.length > maxTerms then
     throw (.expressionBudget (a.polynomial.length * b.polynomial.length))
-  ofPolynomial box (acc.polynomial.add (a.polynomial.mul b.polynomial)) maxTerms
+  -- Insert the usually small product into the accumulator, rather than
+  -- rebuilding the accumulator by inserting each of its terms from scratch.
+  ofPolynomial box ((a.polynomial.mul b.polynomial).add acc.polynomial) maxTerms
 
 theorem Value.ofPolynomial_eq {box : Box} {p : Polynomial} {maxTerms : Nat} {v : Value box}
     (h : ofPolynomial box p maxTerms = .ok v) : v.polynomial = p := by
@@ -157,7 +161,7 @@ theorem Value.mac_sound (a b acc v : Value box) (maxTerms : Nat)
   · simp [throw] at h
   · have he := ofPolynomial_eq h
     have hv : (v.eval x hx).val = (acc.eval x hx).val + (a.eval x hx).val * (b.eval x hx).val := by
-      simp only [Value.eval, he, Polynomial.eval_add, Polynomial.eval_mul]
+      simp only [Value.eval, he, Polynomial.eval_add, Polynomial.eval_mul, Int.add_comm]
     have hr := (v.eval x hx).property
     rw [hv] at hr
     have hh := checkedMac_accepts (require16_sound a "left" x hx (by simpa using ha))

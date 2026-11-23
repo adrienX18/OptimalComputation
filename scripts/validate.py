@@ -29,7 +29,7 @@ command("python3", "scripts/check-search-batch.py")
 command("lake", "env", "lean", "scripts/check-doc-examples.lean")
 
 for name, count in [("verification", 48), ("matvec", 65), ("objectives", 26), ("matmul", 34),
-                    ("naive-v2", 32), ("section9", 14), ("certification", 20)]:
+                    ("naive-v2", 32), ("section9", 14), ("certification", 23)]:
     output = command("lake", "env", "lean", f"scripts/audit-{name}.lean", capture=True).decode()
     declarations = re.findall(r"'[^']+' (?:does not depend on any axioms|depends on axioms:)", output)
     assert len(declarations) == count, (name, len(declarations), output)

@@ -76,20 +76,62 @@ def rawSource (raw : RawCandidate) : String :=
   "  schedule := [\n" ++ String.intercalate ",\n" (raw.schedule.map fun s =>
     s!"    ⟨{s.cycle}, {s.lane}, {instructionSource s.instruction}⟩") ++ "]\n}"
 
+private def boundedInstructionSource : RawInstruction → String × String
+  | .load d a => (s!".load d{d} a{a}", s!"load{a}")
+  | .store r a => (s!".store r{r} a{a}", s!"store{a}")
+  | .add d l r => (s!".add d{d} r{l} r{r}", "True.intro")
+  | .multiply d l r => (s!".multiply d{d} r{l} r{r}", "True.intro")
+  | .multiplyAdd d l r a => (s!".multiplyAdd d{d} r{l} r{r} r{a}", "True.intro")
+
+/-- Emit shared, bounded values directly. Re-expanding `validateCandidate` at
+every use of a large schedule costs the kernel far more than checking these
+small structural obligations once. `exactBinding` below still checks every
+submitted field, so this formatter is not trusted. -/
+private def candidateSource (raw : RawCandidate) : String := Id.run do
+  let declared := raw.layout.inputs ++ raw.layout.outputs ++ raw.layout.scratch
+  let writable := raw.layout.outputs ++ raw.layout.scratch
+  let mut source := "def cfg : ValidConfig := ⟨raw.configuration, by decide⟩\n"
+  for r in List.range registersPerLane do
+    source := source ++ s!"def r{r} : Register := ⟨{r}, by decide⟩\n"
+    if r > 0 then
+      source := source ++ s!"def d{r} : WritableRegister := ⟨r{r}, by decide⟩\n"
+  for l in List.range raw.configuration.lanes do
+    source := source ++ s!"def l{l} : Lane cfg := ⟨{l}, by decide⟩\n"
+  for a in declared do
+    source := source ++ s!"def a{a} : Address := ⟨{a}, by decide⟩\n"
+  source := source ++ "def lay : Layout entry.adapter.shape := {\n"
+  for (name, addresses) in [("inputs", raw.layout.inputs), ("outputs", raw.layout.outputs),
+      ("scratch", raw.layout.scratch)] do
+    source := source ++ name ++ " := [" ++ String.intercalate ", " (addresses.map (s!"a{·}")) ++ "]\n"
+  source := source ++ "inputCount := by decide\noutputCount := by decide\n" ++
+    "separate := (distinctAddresses_iff _).mp (by decide +kernel)\n}\n"
+  for (a, index) in declared.zipIdx do
+    source := source ++ s!"theorem load{a} : a{a} ∈ lay.declared := by " ++
+      s!"exact List.getElem_mem (l := lay.declared) (n := {index}) (by decide)\n"
+  for (a, index) in writable.zipIdx do
+    source := source ++ s!"theorem store{a} : a{a} ∈ lay.writable := by " ++
+      s!"exact List.getElem_mem (l := lay.writable) (n := {index}) (by decide)\n"
+  source := source ++ "def candidate : Candidate entry.adapter.shape := {\n" ++
+    "identifier := raw.identifier\nidentifier_nonempty := by decide\n" ++
+    "configuration := cfg\nlayout := lay\nschedule := [\n" ++
+    String.intercalate ",\n" (raw.schedule.map fun s =>
+      let (instruction, proof) := boundedInstructionSource s.instruction
+      s!"⟨{s.cycle}, l{s.lane}, {instruction}, {proof}⟩") ++ "]\n}\n\n"
+  return source
+
 /-- The generated term inhabits the existing VerifiedArtifact API. No status
 string, hash or runtime result is used as a proof premise. -/
 def certificateSource (entryName : String) (raw : RawCandidate) (boundaries maxTerms cycles : Nat) : String :=
   "import OptimalComputation.Certification.Catalog\n\n" ++
   "namespace GeneratedCertificate\n" ++
-  "open OptimalComputation OptimalComputation.Candidates OptimalComputation.Certification\n" ++
+  "open OptimalComputation OptimalComputation.Hardware OptimalComputation.Candidates OptimalComputation.Certification\n" ++
   "set_option maxRecDepth 100000\nset_option maxHeartbeats 20000000\n\n" ++
   s!"def entry := {entryName}\n" ++
   "def raw : RawCandidate := " ++ rawSource raw ++ "\n\n" ++
-  "def candidate : Candidate entry.adapter.shape :=\n" ++
-  "  (validateCandidate entry.adapter.shape raw).toOption.get (by decide)\n\n" ++
+  candidateSource raw ++
   s!"theorem checked : (check entry.problem candidate {boundaries} {maxTerms}).toOption = some {cycles} := by decide +kernel\n\n" ++
   s!"def artifact := entry.artifact candidate {boundaries} {maxTerms} {cycles} checked\n\n" ++
-  "theorem exactBinding : artifact.verified.candidate.toRaw = raw := by decide\n\n" ++
+  "theorem exactBinding : artifact.verified.candidate.toRaw = raw := by decide +kernel\n\n" ++
   "#print axioms checked\n#print axioms artifact\n#print axioms exactBinding\n" ++
   "end GeneratedCertificate\n"
 
@@ -106,10 +148,16 @@ def prepareFile (contents : String) (boundaries maxTerms : Nat) : Json :=
       | .ok candidate =>
         match check entry.problem candidate boundaries maxTerms with
         | .error e => e.toJson
-        | .ok cycles => Json.mkObj [
+        | .ok cycles =>
+          -- A successful execution needs no more than its completion boundary
+          -- plus the final drained-state check. The kernel checks this smaller
+          -- sufficient budget directly; the caller's search cap stays intact.
+          let proofBoundaries := min boundaries (cycles + 2)
+          Json.mkObj [
             ("accepted", Lean.toJson false), ("status", Lean.toJson "requires-kernel-check"),
             ("candidateIdentifier", Lean.toJson raw.identifier), ("workloadIdentifier", Lean.toJson raw.workloadIdentifier),
             ("modelVersion", Lean.toJson raw.modelVersion), ("candidateFormatVersion", Lean.toJson raw.formatVersion),
             ("cycles", Lean.toJson cycles), ("boundaryBudget", Lean.toJson boundaries), ("termBudget", Lean.toJson maxTerms),
-            ("source", Lean.toJson (certificateSource name raw boundaries maxTerms cycles))]
+            ("certificateBoundaryBudget", Lean.toJson proofBoundaries),
+            ("source", Lean.toJson (certificateSource name raw proofBoundaries maxTerms cycles))]
 end OptimalComputation.Certification

@@ -61,10 +61,10 @@ private def validateMemory (layout : Layout shape) (i : BoundedInstruction) :
     Except ScheduleRule { i : BoundedInstruction // MemoryAllowed layout i } :=
   match i with
   | .load r a =>
-      if h : a ∈ layout.declared then .ok ⟨.load r a, h⟩
+      if h : layout.declared.contains a = true then .ok ⟨.load r a, List.contains_iff_mem.mp h⟩
       else .error (.undeclaredRead a.val)
   | .store r a =>
-      if h : a ∈ layout.writable then .ok ⟨.store r a, h⟩
+      if h : layout.writable.contains a = true then .ok ⟨.store r a, List.contains_iff_mem.mp h⟩
       else if a ∈ layout.inputs then .error (.writeToInput a.val)
       else .error (.undeclaredWrite a.val)
   | .add d l r => .ok ⟨.add d l r, True.intro⟩

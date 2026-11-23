@@ -1,0 +1,275 @@
+{
+  "version": "full-suite-offline-audit-v1",
+  "acceptedCases": 16,
+  "nonoverlappingKernelChecks": true,
+  "archives": [
+    {
+      "archive": "suite-serial-kernel-20261123",
+      "inventorySha256": "eb149d86728ae41735bcabb3281866aa0f20a5dd86ffdbd03fb795d4d6d2c5c0",
+      "files": 889,
+      "storedBytes": 63012930,
+      "traces": 20,
+      "traceOriginalBytes": 72242725,
+      "traceStoredBytes": 2959986
+    },
+    {
+      "archive": "suite-other-cases-ready-20261123",
+      "inventorySha256": "d0d01475a7d72474dc0cb1b915aebf0c682b0c6991068658ff0c45fc116c66ea",
+      "files": 2665,
+      "storedBytes": 77536212,
+      "traces": 60,
+      "traceOriginalBytes": 66735919,
+      "traceStoredBytes": 2985272
+    }
+  ],
+  "cases": [
+    {
+      "instance": "matmul-latency-8x8",
+      "accepted": true,
+      "score": 1372,
+      "unit": "cycles",
+      "hardware": [
+        8,
+        8
+      ],
+      "archive": "suite-serial-kernel-20261123",
+      "kernelSeconds": 126.037,
+      "sourceDifferencesFromFinal": [
+        "scripts/certify.py",
+        "scripts/check-certification.py",
+        "scripts/search_batch.py"
+      ],
+      "candidateSha256": "6c4f7035068d6a9cbe0183b4640c19bc276d99369b3f67be173271bb3dfb1a82",
+      "certificateSha256": "5b8e7b0b9ba2ef755521a415adcd39a8ce5a158d875964fcfcfc36ea83935ad4"
+    },
+    {
+      "instance": "matmul-latency-8x1",
+      "accepted": true,
+      "score": 2824,
+      "unit": "cycles",
+      "hardware": [
+        8,
+        1
+      ],
+      "archive": "suite-serial-kernel-20261123",
+      "kernelSeconds": 134.876,
+      "sourceDifferencesFromFinal": [
+        "scripts/certify.py",
+        "scripts/check-certification.py",
+        "scripts/search_batch.py"
+      ],
+      "candidateSha256": "11305bdb5428cf199ab1d147819e5998a32b2dc0affe56bb033a31906afac515",
+      "certificateSha256": "c7d6b41d6b3494eb53b89fa51d29a42e864cdc464e61123b0c015a243baeb1a8"
+    },
+    {
+      "instance": "matmul-latency-2x8",
+      "accepted": true,
+      "score": 5408,
+      "unit": "cycles",
+      "hardware": [
+        2,
+        8
+      ],
+      "archive": "suite-serial-kernel-20261123",
+      "kernelSeconds": 118.413,
+      "sourceDifferencesFromFinal": [],
+      "candidateSha256": "7501a871858baa0ebd93063780f9c0a6c55059588280c228bbf87b7174201020",
+      "certificateSha256": "de2333ef5fc4f94a9273d90855d3b4c48411e2c628cfefb2bd723d2156bbc232"
+    },
+    {
+      "instance": "matmul-energy",
+      "accepted": true,
+      "score": 116421,
+      "unit": "abstract energy units",
+      "hardware": [
+        4,
+        4
+      ],
+      "archive": "suite-serial-kernel-20261123",
+      "kernelSeconds": 118.349,
+      "sourceDifferencesFromFinal": [],
+      "candidateSha256": "14dedff2af05bcb1f5f1fcecf66926f11391df62d317fc491f5e0a5a90131d29",
+      "certificateSha256": "6e2cfa271605d98092e6a0ba4b4413ebe782e26434bdc5a7379656b84db1e3f7"
+    },
+    {
+      "instance": "polynomial-latency-8x8",
+      "accepted": true,
+      "score": 63,
+      "unit": "cycles",
+      "hardware": [
+        8,
+        8
+      ],
+      "archive": "suite-other-cases-ready-20261123",
+      "kernelSeconds": 2.75,
+      "sourceDifferencesFromFinal": [],
+      "candidateSha256": "1e9ddbf08ee09127a173334b182420017e3c7fa2b875bd76b75bf7a13ab78757",
+      "certificateSha256": "e7f97f7a3baf654abff83bc7b01808ca23dafd8a605fba39d4f45b16bc26a2f7"
+    },
+    {
+      "instance": "polynomial-latency-8x1",
+      "accepted": true,
+      "score": 103,
+      "unit": "cycles",
+      "hardware": [
+        8,
+        1
+      ],
+      "archive": "suite-other-cases-ready-20261123",
+      "kernelSeconds": 2.8,
+      "sourceDifferencesFromFinal": [],
+      "candidateSha256": "2dcc985709ed2e4e7d86483db21a2246e9bb9d6d666ef4149469716e0461f0b3",
+      "certificateSha256": "95e80023a8f7502334b4e160d6c8a745ea7964b4711b1516e2be141f13f32737"
+    },
+    {
+      "instance": "polynomial-latency-2x8",
+      "accepted": true,
+      "score": 240,
+      "unit": "cycles",
+      "hardware": [
+        2,
+        8
+      ],
+      "archive": "suite-other-cases-ready-20261123",
+      "kernelSeconds": 2.531,
+      "sourceDifferencesFromFinal": [],
+      "candidateSha256": "3544b4f05fbe848885e746495699facdd9b2861a8f4b754b7128d608573391e7",
+      "certificateSha256": "a32db93aa581b5ad4179f7fd3dc3e4f5eebaf392d6f2e527076e86bcad65f05a"
+    },
+    {
+      "instance": "polynomial-energy",
+      "accepted": true,
+      "score": 4181,
+      "unit": "abstract energy units",
+      "hardware": [
+        4,
+        4
+      ],
+      "archive": "suite-other-cases-ready-20261123",
+      "kernelSeconds": 2.571,
+      "sourceDifferencesFromFinal": [],
+      "candidateSha256": "d79f5bf30e98c5d95317afc77c0ba16ee029b8b2ec3f7e09086fa8f39746151d",
+      "certificateSha256": "d1de9608622f664a8dfdc0064fcbf9f45e09d60d5a8a6eea6f75aeec3cd684ec"
+    },
+    {
+      "instance": "two-stage-latency-8x8",
+      "accepted": true,
+      "score": 536,
+      "unit": "cycles",
+      "hardware": [
+        8,
+        8
+      ],
+      "archive": "suite-other-cases-ready-20261123",
+      "kernelSeconds": 63.292,
+      "sourceDifferencesFromFinal": [],
+      "candidateSha256": "40be333639e6de49b971e8e407009ca73ae33ad8df48c2d973ca0278058dd11c",
+      "certificateSha256": "35fcf37d4034432dd723e3f273dbe922498221748cd5eb6a58a381a0ab00c8f0"
+    },
+    {
+      "instance": "two-stage-latency-8x1",
+      "accepted": true,
+      "score": 542,
+      "unit": "cycles",
+      "hardware": [
+        8,
+        1
+      ],
+      "archive": "suite-other-cases-ready-20261123",
+      "kernelSeconds": 61.82,
+      "sourceDifferencesFromFinal": [],
+      "candidateSha256": "deaf62ca36cc560903322c4233206a3a44f27142dbac85cb64dd8cdc6cad3a59",
+      "certificateSha256": "d3aff5a4104d4c018a6e1cbdc9a97146ecccbb9b45dd87dd52fecd4ca18ffece"
+    },
+    {
+      "instance": "two-stage-latency-2x8",
+      "accepted": true,
+      "score": 1060,
+      "unit": "cycles",
+      "hardware": [
+        2,
+        8
+      ],
+      "archive": "suite-other-cases-ready-20261123",
+      "kernelSeconds": 61.631,
+      "sourceDifferencesFromFinal": [],
+      "candidateSha256": "e8167083d3da29cdcb9da29d530ef98b992899e1c34d5b9213d6b5d5ba4ed6f8",
+      "certificateSha256": "f9f066379de06cacd88d113faacc7dcd887cadac851c9cc21acabfc298617620"
+    },
+    {
+      "instance": "two-stage-energy",
+      "accepted": true,
+      "score": 19032,
+      "unit": "abstract energy units",
+      "hardware": [
+        4,
+        4
+      ],
+      "archive": "suite-other-cases-ready-20261123",
+      "kernelSeconds": 60.338,
+      "sourceDifferencesFromFinal": [],
+      "candidateSha256": "bdc1762fe11947b6b5f70d27b5ed3ad2295b5088fb5191d5b600e15ecc647160",
+      "certificateSha256": "96bf7ec618244ea169858fb20aa1dd4336a81675b206c1711500a4bf630156b7"
+    },
+    {
+      "instance": "gram-latency-8x8",
+      "accepted": true,
+      "score": 1343,
+      "unit": "cycles",
+      "hardware": [
+        8,
+        8
+      ],
+      "archive": "suite-other-cases-ready-20261123",
+      "kernelSeconds": 78.189,
+      "sourceDifferencesFromFinal": [],
+      "candidateSha256": "4cb1e9544156296329eb06632768b85c3c7170e7e91373243633e7d7f0b6ee21",
+      "certificateSha256": "544faed03bb8c7eaff2e53983179290a6b22fe2529177752bb559fa811e14c34"
+    },
+    {
+      "instance": "gram-latency-8x1",
+      "accepted": true,
+      "score": 2479,
+      "unit": "cycles",
+      "hardware": [
+        8,
+        1
+      ],
+      "archive": "suite-other-cases-ready-20261123",
+      "kernelSeconds": 88.129,
+      "sourceDifferencesFromFinal": [],
+      "candidateSha256": "8d88466b6065b73d8aa1b7e0d5c63d6c8ba783d74f7ee4f523913dedac02215d",
+      "certificateSha256": "7439f43e7a682c19e18d4b2a3708228688644add0f113cbd6f0d7a2b5a5e81b1"
+    },
+    {
+      "instance": "gram-latency-2x8",
+      "accepted": true,
+      "score": 4565,
+      "unit": "cycles",
+      "hardware": [
+        2,
+        8
+      ],
+      "archive": "suite-other-cases-ready-20261123",
+      "kernelSeconds": 72.679,
+      "sourceDifferencesFromFinal": [],
+      "candidateSha256": "7da64a3b97432ca74b76b6738918a09dd54af13918d0c45a32fd2bf5be539c75",
+      "certificateSha256": "63e4cd62754f7d6c1d9f8f76f071fb41a05de6d3003444b8512e534ebca2d54f"
+    },
+    {
+      "instance": "gram-energy",
+      "accepted": true,
+      "score": 83293,
+      "unit": "abstract energy units",
+      "hardware": [
+        4,
+        4
+      ],
+      "archive": "suite-other-cases-ready-20261123",
+      "kernelSeconds": 74.543,
+      "sourceDifferencesFromFinal": [],
+      "candidateSha256": "4a1d26158a23f537e55b441c43a9dc0ae3d93bcdb2a3f17cc11e69b2ec37fe44",
+      "certificateSha256": "5a0c9741596988dfc71bf101313fd7ccedb0dc5c2e2a295ac500d3616ab44484"
+    }
+  ]
+}

@@ -473,4 +473,20 @@ claim a global optimum or add a new benchmark result to the historical ledger.
 - [x] Prepare without launching; resume unfinished loops without repeating consumed slots.
 - [x] Offline tests for planning, concurrency, partial failure, cancellation and resume.
 - [x] Complete the ten-call smoke test (two attempts per model) and audit its records.
-- [ ] Launch the full 1,250-attempt experiment only after the user's next approval.
+- [x] Launch the full 1,250-attempt experiment after approval; all 25 loops completed on 2026-11-23.
+
+### Full workload suite (2026-11-23)
+
+The next campaign covers all four Section 9 workloads: twelve pinned latency
+instances and four configuration-free energy instances. Each case has the same
+five models, five fixed seeds and 50 attempts: 400 loops / 20,000 attempts.
+Polynomial latency at (8,8) is included as a fresh run under the new common
+settings; its earlier archive remains separate. Preparation and smoke testing
+are authorized; the full campaign requires the user's next go.
+
+- [x] Extend the existing batch runner with explicit named instances.
+- [x] Make the energy formula and configuration freedom explicit in prompts.
+- [x] Complete offline end-to-end checks across the 16 instances.
+- [ ] Complete and audit three live attempts per instance/model (80 loops / 240 attempts).
+- [ ] Save the full campaign manifest without launching it.
+- [ ] Launch the full campaign only after the user's next go.

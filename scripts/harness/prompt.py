@@ -30,6 +30,17 @@ latest failure or explore a different design. All times in feedback are modeled 
 unless explicitly labeled seconds. Avoid repeating an unsuccessful idea unchanged.
 '''
 
+ENERGY_RULES = '''Minimize energy-proxy-v1 (abstract units, not joules):
+cycles * (1 + lanes + allocated_BRAM36) + 4*loads + 4*stores + additions
++ 8*multiplications + 9*multiplyAdds + registerReads + registerWrites.
+allocated_BRAM36 is 16 for 8 banks, otherwise 8 (1, 2 or 4 banks).
+Provisioned lanes and BRAM are charged for every cycle, including idle time.
+Register reads count every operand, including r0 and repeated operands; stores
+do not write a register. A multiplyAdd is charged once, not also as add/multiply.
+You may change lanes and banks independently to 1,2,4,8. The configuration in
+context is the initial baseline only. Optimize the energy score, not just cycles.
+'''
+
 
 def clip(value, limit):
     return str(value).encode('utf-8')[:limit].decode('utf-8', errors='ignore')
@@ -70,6 +81,7 @@ def build(config, baseline, rows, root):
                    runSeed=config['seed'], attemptSeed=attempt_seed(config['seed'], len(rows)+1),
                    codeByteLimit=config['code_bytes'], notebookByteLimit=config['notes_bytes'],
                    baseline=dict(score=baseline['score'], unit=baseline['unit'],
+                                 objectiveBreakdown=baseline.get('objective'),
                                  layout=raw['layout'], scheduleSize=len(raw['schedule']),
                                  firstInstructions=raw['schedule'][:5], lastInstructions=raw['schedule'][-2:]),
                    best=dict(score=best_score, code=best_code),
@@ -78,7 +90,9 @@ def build(config, baseline, rows, root):
                    notebook=notes,
                    history=[dict(attempt=r['attempt'], idea=clip(r.get('idea', ''), 100),
                                  status=r['category'], score=r.get('score')) for r in rows])
-    system = RULES + '\nAvailable candidate_tools.py:\n' + Path(__file__).with_name('candidate_tools.py').read_text()
+    objective_rules = ENERGY_RULES if config['objective'] == 'energy-proxy-v1' else (
+        'Minimize latency-v1: elapsed cycles through final completion. Keep the configured lanes and banks fixed.\n')
+    system = RULES + objective_rules + '\nAvailable candidate_tools.py:\n' + Path(__file__).with_name('candidate_tools.py').read_text()
     def messages():
         return [dict(role='system', content=system),
                 dict(role='user', content=json.dumps(context, ensure_ascii=False))]

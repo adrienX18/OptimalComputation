@@ -29,13 +29,13 @@ theorem eval_perm (x : Nat → Int) {a b : Monomial} (h : a.Perm b) : eval x a =
   | swap i j a => simp only [eval]; ac_rfl
   | trans _ _ ih₁ ih₂ => exact ih₁.trans ih₂
 
-def mul (a b : Monomial) : Monomial := sort (a ++ b) (· ≤ ·)
+def mul (a b : Monomial) : Monomial := sortByNat (a ++ b) id
 
 theorem eval_mul (x : Nat → Int) (a b : Monomial) :
     eval x (mul a b) = eval x a * eval x b :=
   by
     unfold mul
-    rw [sort_eq]
+    rw [sortByNat_eq]
     exact (eval_perm x (List.mergeSort_perm _ _)).trans (eval_append x a b)
 end Monomial
 
@@ -56,9 +56,20 @@ def insert (m : Monomial) (c : Int) : Polynomial → Polynomial
       else if compare m n == .lt then (m, c) :: (n, d) :: rest
       else (n, d) :: insert m c rest
 
-def add : Polynomial → Polynomial → Polynomial
-  | [], q => q
-  | (m, c) :: rest, q => add rest (insert m c q)
+/-- Merge canonical term lists in one pass. The fallback preserves evaluation
+even with insufficient fuel; `add` always supplies enough to consume both lists. -/
+def addWithFuel : Nat → Polynomial → Polynomial → Polynomial
+  | 0, p, q => p ++ q
+  | _+1, [], q => q
+  | _+1, p, [] => p
+  | fuel+1, (m,c)::p, (n,d)::q =>
+      if m = n then
+        if c+d = 0 then addWithFuel fuel p q
+        else (m,c+d) :: addWithFuel fuel p q
+      else if compare m n == .lt then (m,c) :: addWithFuel fuel p ((n,d)::q)
+      else (n,d) :: addWithFuel fuel ((m,c)::p) q
+
+def add (p q : Polynomial) : Polynomial := addWithFuel (p.length+q.length) p q
 
 def scaleTerm (m : Monomial) (c : Int) : Polynomial → Polynomial
   | [] => []
@@ -100,14 +111,42 @@ theorem eval_insert (x : Nat → Int) (m : Monomial) (c : Int) (q : Polynomial) 
         · rfl
         · simp only [eval, ih]; omega
 
-theorem eval_add (x : Nat → Int) (p q : Polynomial) :
-    eval x (add p q) = eval x p + eval x q := by
+theorem eval_append (x : Nat → Int) (p q : Polynomial) :
+    eval x (p ++ q) = eval x p + eval x q := by
   induction p generalizing q with
-  | nil => simp [add, eval]
+  | nil => simp [eval]
   | cons t rest ih =>
     obtain ⟨m, c⟩ := t
-    simp only [add, ih, eval_insert, eval]
+    simp only [List.cons_append, eval, ih]
     omega
+
+theorem eval_addWithFuel (x : Nat → Int) (fuel : Nat) (p q : Polynomial) :
+    eval x (addWithFuel fuel p q) = eval x p + eval x q := by
+  induction fuel generalizing p q with
+  | zero => exact eval_append x p q
+  | succ fuel ih =>
+    cases p with
+    | nil => simp [addWithFuel, eval]
+    | cons t p =>
+      cases q with
+      | nil => simp [addWithFuel, eval]
+      | cons u q =>
+        obtain ⟨m,c⟩ := t
+        obtain ⟨n,d⟩ := u
+        simp only [addWithFuel]
+        split
+        · rename_i he
+          subst n
+          split
+          · rename_i hz
+            simp only [ih, eval]
+            have hzero : c * m.eval x + d * m.eval x = 0 := by rw [← Int.add_mul, hz]; simp
+            omega
+          · simp only [eval, ih, Int.add_mul]; omega
+        · split <;> simp only [eval, ih] <;> omega
+
+theorem eval_add (x : Nat → Int) (p q : Polynomial) :
+    eval x (add p q) = eval x p + eval x q := eval_addWithFuel x _ p q
 
 theorem eval_scaleTerm (x : Nat → Int) (m : Monomial) (c : Int) (q : Polynomial) :
     eval x (scaleTerm m c q) = (c * m.eval x) * eval x q := by

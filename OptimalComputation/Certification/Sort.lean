@@ -63,4 +63,44 @@ def sort (xs : List α) (le : α → α → Bool) : List α := sortWithFuel le x
 theorem sort_eq (xs : List α) (le : α → α → Bool) : sort xs le = xs.mergeSort le :=
   sortWithFuel_eq le xs.length xs (by omega)
 
+private def orderedFrom (key : α → Nat) (a : α) : List α → Bool
+  | [] => true
+  | b :: rest => decide (key a ≤ key b) && orderedFrom key b rest
+
+private theorem orderedFrom_sound (key : α → Nat) (a : α) (rest : List α)
+    (h : orderedFrom key a rest = true) :
+    rest.Pairwise (fun a b => key a ≤ key b) ∧ ∀ b ∈ rest, key a ≤ key b := by
+  induction rest generalizing a with
+  | nil => simp
+  | cons b rest ih =>
+    simp only [orderedFrom, Bool.and_eq_true, decide_eq_true_eq] at h
+    have hab : key a ≤ key b := h.1
+    obtain ⟨hp, hb⟩ := ih b h.2
+    refine ⟨List.pairwise_cons.mpr ⟨hb, hp⟩, ?_⟩
+    intro c hc
+    rcases List.mem_cons.mp hc with he | hm
+    · subst c; exact hab
+    · exact Nat.le_trans hab (hb c hm)
+
+/-- Already ordered schedules and monomials need only a linear scan. The
+fallback preserves stable merge-sort behavior for arbitrary input order. -/
+def sortByNat (xs : List α) (key : α → Nat) : List α :=
+  match xs with
+  | [] => []
+  | a :: rest => if orderedFrom key a rest then xs else sort xs (fun a b => key a ≤ key b)
+
+theorem sortByNat_eq (xs : List α) (key : α → Nat) :
+    sortByNat xs key = xs.mergeSort (fun a b => key a ≤ key b) := by
+  cases xs with
+  | nil => simp [sortByNat]
+  | cons a rest =>
+    simp only [sortByNat]
+    split
+    · rename_i h
+      obtain ⟨hp, ha⟩ := orderedFrom_sound key a rest h
+      have hs : (a :: rest).Pairwise (fun a b => decide (key a ≤ key b) = true) := by
+        simpa using List.pairwise_cons.mpr ⟨ha, hp⟩
+      exact (List.mergeSort_of_pairwise hs).symm
+    · exact sort_eq _ _
+
 end OptimalComputation.Certification

@@ -166,6 +166,69 @@ excluding locks and the inventory itself. Raw records are retained even for
 rejected designs. Batch resume refuses changed source, Python or saved configs;
 individual resume also checks the recorded SDK dependencies and Docker image.
 
+## Full workload suite
+
+[`search.suite.json`](../configs/search.suite.json) lists all sixteen cases:
+matrix multiplication, polynomial evaluation, Gram/symmetric product and the
+two-stage linear map, each on three fixed latency configurations `(8,8)`, `(8,1)`
+and `(2,8)`, plus one energy case with a free choice of all sixteen configurations.
+The energy baseline starts at `(8,8)`; proposals may change it. Matrix-vector
+remains a separate validation case, outside this measured suite.
+
+The same five fixed model IDs and seeds apply to every case. Fifty attempts per
+loop gives **400 loops and 20,000 attempt slots**, with at most five loops active
+across the entire suite. This is a new campaign: polynomial `(8,8)` is repeated,
+and the earlier 1,250-attempt archive remains unchanged.
+Only one memory-heavy Lean kernel check runs at a time per checkout, guarded by
+an OS file lock. Model calls can still overlap. `certification/kernel-queue.json`
+records waiting separately from the active verification timeout.
+
+The batch runner accepts an optional `instances` map. Each name specifies exactly
+`task`, `objective` and `configuration`; the shared `run` settings supply budgets.
+Names become directories under `runs/<instance>/<model>/seed-<seed>/`. The manifest,
+summary and attempt CSV retain the instance and objective, so unlike units are
+never implicitly pooled into one best score. Older single-case configurations
+continue to work with their original directory layout.
+
+Test three attempts for every case/model using the first seed (80 loops, 240 calls
+at most), then audit the complete archive:
+
+```sh
+.venv/bin/python scripts/search_batch.py --config configs/search.suite.json --output runs/suite-smoke --smoke --smoke-attempts 3
+python3 scripts/audit-search-batch.py runs/suite-smoke --output /tmp/suite-smoke-audit.json
+```
+
+Prepare the full campaign without any calls; launch it only after approval:
+
+```sh
+.venv/bin/python scripts/search_batch.py --config configs/search.suite.json --output runs/suite-full --prepare-only
+# Only after the go:
+.venv/bin/python scripts/search_batch.py --output runs/suite-full --resume
+```
+
+The suite uses a 48,000-byte prompt budget and 600 seconds per verification phase.
+The larger prompt fits larger workload layouts, two complete 8,000-byte generators
+and compact history; it is still bounded. The longer verification budget accommodates
+larger certificates. Output tokens (32,768), generator bytes (8,000), generator
+runtime (30 seconds) and the other machine/checker rules are unchanged. These budget
+and prompt changes are recorded, so the prior polynomial campaign is a historical
+comparison rather than an identical rerun. Energy prompts state the frozen formula,
+BRAM allocation rule, and the baseline's actual score breakdown.
+
+New simulation traces are stored as `trace.json.gz`, with original byte counts
+and SHA-256 hashes in `trace.metadata.json`. Compression is verified by a full
+decompression/hash check before removing the redundant plain JSON. No events are
+sampled, shortened or discarded. The archive auditor checks both stored-file
+hashes and the decompressed trace hashes. This matters for matrix workloads,
+where retaining both copies would multiply disk use. Read a trace with
+`gzip -dc path/to/trace.json.gz`; older archives retain their original format.
+
+`check-search-suite.py --output <new-directory>` runs all sixteen cases through
+real Docker generation, simulation, certification and scoring using known
+reference designs, with no API calls. Its energy designs change hardware to
+`(4,4)` and are also rejected under a pinned `(8,8)` latency objective. This tests
+the infrastructure independently of whether a model succeeds in three attempts.
+
 ### What the seeds reproduce
 
 For attempt `i`, derive a 31-bit seed from the first four bytes of

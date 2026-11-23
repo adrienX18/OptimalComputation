@@ -3,6 +3,9 @@ import OptimalComputation.Certification.Scoring
 import OptimalComputation.Tests.Certification
 
 #print axioms OptimalComputation.Certification.sort_eq
+#print axioms OptimalComputation.Certification.sortByNat_eq
+#print axioms OptimalComputation.Certification.scalarBox_at
+#print axioms OptimalComputation.Certification.State.materialize_eq
 #print axioms OptimalComputation.Certification.Polynomial.eval_mul
 #print axioms OptimalComputation.Certification.Polynomial.bound_sound
 #print axioms OptimalComputation.Certification.Value.mac_sound

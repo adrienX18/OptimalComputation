@@ -1,5 +1,7 @@
 """Durable files and fully captured subprocesses; no model or scoring logic."""
 import json
+import gzip
+import hashlib
 from contextlib import suppress
 import os
 from pathlib import Path
@@ -22,6 +24,35 @@ def write_json(path, value):
 
 def read_json(path):
     return json.loads(Path(path).read_text())
+
+
+def compress_trace(path):
+    """Keep a lossless, verified gzip trace instead of two large copies."""
+    path = Path(path)
+    packed = path.with_suffix(path.suffix + '.gz')
+    temporary = packed.with_suffix(packed.suffix + '.tmp')
+    digest = hashlib.sha256()
+    size = 0
+    with path.open('rb') as source, temporary.open('wb') as target:
+        with gzip.GzipFile(fileobj=target, mode='wb', filename='', mtime=0) as gz:
+            for chunk in iter(lambda: source.read(1024*1024), b''):
+                gz.write(chunk)
+                digest.update(chunk)
+                size += len(chunk)
+        target.flush()
+        os.fsync(target.fileno())
+    restored = hashlib.sha256()
+    restored_size = 0
+    with gzip.open(temporary, 'rb') as source:
+        for chunk in iter(lambda: source.read(1024*1024), b''):
+            restored.update(chunk)
+            restored_size += len(chunk)
+    if restored_size != size or restored.digest() != digest.digest():
+        raise OSError('Trace compression failed its round-trip integrity check.')
+    os.replace(temporary, packed)
+    write_json(path.with_suffix('.metadata.json'), dict(format='gzip', file=packed.name,
+               originalBytes=size, originalSha256=digest.hexdigest()))
+    path.unlink()  # Only after verified compression and durable metadata.
 
 
 def event(root, kind, **values):
