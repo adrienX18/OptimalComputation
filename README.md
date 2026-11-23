@@ -64,7 +64,8 @@ error categories, resource limits and use with the existing scoring API.
 ## Run an LLM search
 
 Choose a provider and model in [configs/search.example.json](configs/search.example.json),
-set its API key in your environment, then use the sequential search harness:
+put its API key in a local `.env` file (copy `.env.example`), then use the
+sequential search harness:
 
 ```sh
 python3 -m venv .venv

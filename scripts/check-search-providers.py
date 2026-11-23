@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Exercise real LiteLLM adapters with HTTP mocked: no network or paid calls."""
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -9,7 +10,8 @@ from unittest.mock import patch
 import httpx
 
 from harness.archive import read_json
-from harness.model import Model
+from harness import model as model_module
+from harness.model import Model, load_environment, scrub
 from search import proposal, settings
 
 PAYLOAD = json.dumps(dict(idea='baseline', code='def build(): return {}', notes='remember'))
@@ -17,6 +19,51 @@ KEY = 'fake-provider-secret-key'
 
 
 class ProviderTests(unittest.TestCase):
+    def setUp(self):
+        # Tests must never read the developer's actual local credentials.
+        self.temp = tempfile.TemporaryDirectory()
+        self.env_file = Path(self.temp.name) / '.env'
+        self.env_patch = patch.object(model_module, 'ENV_FILE', self.env_file)
+        self.env_patch.start()
+
+    def tearDown(self):
+        self.env_patch.stop()
+        self.temp.cleanup()
+
+    def test_local_env_is_optional_literal_and_does_not_override_shell(self):
+        with patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'shell-value'}):
+            os.environ.pop('OPENAI_API_KEY', None)
+            os.environ.pop('GEMINI_API_KEY', None)
+            load_environment()  # a missing .env is fine
+            self.assertNotIn('OPENAI_API_KEY', os.environ)
+            literal = 'literal-${HARNESS_TEST_NAME}-$(touch should-not-exist)'
+            self.env_file.write_text(f'# Local credentials\nOPENAI_API_KEY="{KEY}"\n'
+                                     f'ANTHROPIC_API_KEY=file-value\nGEMINI_API_KEY=\'{literal}\'\n')
+            load_environment()
+            self.assertEqual(os.environ['OPENAI_API_KEY'], KEY)
+            self.assertEqual(os.environ['ANTHROPIC_API_KEY'], 'shell-value')
+            self.assertEqual(os.environ['GEMINI_API_KEY'], literal)
+            self.assertEqual(scrub('echo ' + KEY), 'echo [REDACTED]')
+
+    def test_model_automatically_uses_local_env(self):
+        self.env_file.write_text(f'OPENAI_API_KEY={KEY}\n')
+        with patch.dict(os.environ):
+            os.environ.pop('OPENAI_API_KEY', None)
+            def send(client, request, **kwargs):
+                self.assertEqual(request.headers['authorization'], 'Bearer ' + KEY)
+                return httpx.Response(200, json=dict(id='chatcmpl-test', object='chat.completion',
+                    created=1, model='gpt-4o-mini', choices=[dict(index=0,
+                    message=dict(role='assistant', content=PAYLOAD), finish_reason='stop')],
+                    usage=dict(prompt_tokens=100, completion_tokens=20, total_tokens=120)), request=request)
+            adapter = Model(settings(dict(model='openai/gpt-4o-mini')))
+            folder = Path(self.temp.name) / 'attempt'
+            folder.mkdir()
+            with patch.object(httpx.Client, 'send', send):
+                adapter(dict(model='openai/gpt-4o-mini', messages=[dict(role='user', content='test')],
+                             max_tokens=100, timeout=5), folder)
+            for path in folder.iterdir():
+                self.assertNotIn(KEY, path.read_text())
+
     def test_adapters_archive_and_isolate_calls(self):
         samples = [
             ('openai/gpt-4o-mini', dict(id='chatcmpl-test', object='chat.completion', created=1,

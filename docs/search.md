@@ -18,7 +18,21 @@ cp configs/search.example.json /tmp/search.json
 ```
 
 Edit `/tmp/search.json`: replace `model` with a model you have access to and
-select a task. Set the provider's API key in your shell environment, then run:
+select a task. Copy `.env.example` to `.env` in the repository root and fill in
+the key for your chosen provider. For example:
+
+```dotenv
+ANTHROPIC_API_KEY=your_key_here
+```
+
+The harness loads `.env` automatically for live calls, including when resumed
+or launched by Codex. Shell exports still work and take precedence over `.env`.
+Values are read literally, without variable expansion or shell execution.
+The file is ignored by Git, omitted from run snapshots, and never mounted in
+generator containers. Loaded keys receive the same log redaction as exported
+keys. Do not put secrets in the JSON configuration or commit them.
+
+Then run:
 
 ```sh
 .venv/bin/python scripts/search.py --config /tmp/search.json --output runs/first

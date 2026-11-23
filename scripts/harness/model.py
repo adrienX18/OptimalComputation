@@ -11,6 +11,14 @@ import traceback
 
 from .archive import write_json
 
+ENV_FILE = Path(__file__).resolve().parents[2] / '.env'
+
+
+def load_environment():
+    """Load local credentials as data; never source shell commands or archive them."""
+    from dotenv import load_dotenv
+    load_dotenv(ENV_FILE, override=False, interpolate=False)
+
 
 def scrub(value):
     """Retain provider data while removing credentials, including echoed values."""
@@ -38,6 +46,7 @@ def scrub(value):
 class Model:
     def __init__(self, config):
         # Import only for live runs, so ordinary tests remain standard-library-only.
+        load_environment()
         os.environ.setdefault('LITELLM_LOCAL_MODEL_COST_MAP', 'True')
         import litellm
         from litellm.integrations.custom_logger import CustomLogger
@@ -45,7 +54,7 @@ class Model:
         self.logger_base = CustomLogger
         self.config = config
         self.version = importlib.metadata.version('litellm')
-        self.dependencies = {name: importlib.metadata.version(name) for name in ('litellm', 'openai', 'httpx')}
+        self.dependencies = {name: importlib.metadata.version(name) for name in ('litellm', 'openai', 'httpx', 'python-dotenv')}
         self.sdk.telemetry = False
         self.sdk.drop_params = False
 

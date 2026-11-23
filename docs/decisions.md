@@ -161,6 +161,13 @@ planner, learned selection policy, automatic provider fallback or model tool use
 LiteLLM is an optional local SDK dependency for selecting the provider/model;
 configuration uses JSON, which Python can read without another dependency.
 
+Local API keys can live in a Git-ignored root `.env` file. The live adapter loads
+it through `python-dotenv` (already a LiteLLM dependency, now explicitly pinned).
+Existing environment values take precedence; interpolation is disabled. The
+file is excluded from snapshots and containers, and loaded keys are redacted
+from provider logs. This lets either the user or Codex launch experiments
+without repeating shell exports or copying credentials into the conversation.
+
 The model returns a small Python generator rather than thousands of literal
 instructions. This allows algorithm, layout and schedule changes while keeping
 the prompt small. The generator runs as a restricted non-root Docker process

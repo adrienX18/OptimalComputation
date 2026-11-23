@@ -180,3 +180,10 @@ Two provider tests exercised the actual OpenAI, Anthropic and Gemini SDK
 adapters using mocked HTTP. They checked response/usage mapping, raw callback
 records, credential redaction, isolation of successive call archives and a
 rate-limit error with exactly one HTTP request. No paid model call was made.
+
+The subsequent `.env` addition passed all eight loop regressions and all four
+provider tests. The added cases verify optional file loading, quoted and literal
+values, existing environment precedence, automatic use of a file-loaded key by
+the API adapter, and redaction of that key from saved logs. Git ignore checks
+confirmed that `.env` and `.env.local` are excluded while `.env.example` remains
+trackable. These checks use temporary dummy credentials, never the user's `.env`.
