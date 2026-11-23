@@ -9,6 +9,8 @@ python3 scripts/validate.py
 Run without Python's `-O`/`-OO` flags and with `PYTHONOPTIMIZE` unset. The driver
 and standalone Python checkers refuse optimized mode because it disables their
 assertions; they must not report success after skipping validation.
+The [proof-evaluation decision](decisions.md#proof-evaluation-preserve-the-current-trust-boundary)
+keeps the existing kernel proof standard and axiom audits unchanged.
 
 This standard-library-only driver runs, in order:
 

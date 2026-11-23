@@ -194,7 +194,10 @@ they do not calculate reference outputs during machine initialization.
 `checkStatic candidate` reuses `Hardware.checkBatch` for input-independent issue,
 bank-port, and address rules. Readiness, initialization, arithmetic widths,
 pipeline reservations, termination, and outputs remain execution obligations.
-These checks are distinct from a certificate.
+Static boundaries are checked in increasing cycle order, with actions in lane
+order. The first failure uses the existing batch priority: issue collisions,
+bank capacity, then address conflicts. Permuting a structurally valid schedule
+does not change that diagnostic. These checks are distinct from a certificate.
 
 `VerifiedCandidate adapter` contains the exact candidate and separate all-input
 `ExecutionSafety` and `FunctionalCorrectness` proofs against `executeValues` at a
@@ -225,7 +228,12 @@ the accepted run before exporting it; this observed equality is not a generic pr
 Accepted objective scoring uses a separate proof-carrying execution API described below.
 
 `Candidates.RawCandidate.toJson` and `RawCandidate.fromJson?` give `RawCandidate` a
-strict JSON transport: every field is required and unknown fields are rejected.
+strict JSON value transport: every field is required and unknown fields are
+rejected. Text must first pass `Candidates.UniqueJson.parse`, which rejects
+duplicate decoded object keys at every depth before any map insertion can erase
+them. The CLI's `parseCandidate` applies numeric/nesting limits before this
+strict parser. Already-decoded JSON values cannot expose duplicates discarded
+by another parser.
 The CLI's `simulate` command wraps `simulate` with that decoder, the catalog
 workload's domain check and a single-input reference comparison; `export-candidate`
 prints a registered candidate in the same format. See [usage](usage.md#simulate-an-unverified-candidate-file).

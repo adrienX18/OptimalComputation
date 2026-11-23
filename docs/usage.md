@@ -158,6 +158,9 @@ that is not a scored candidate.
 
 Structural and machine failures name the violated rule in `details.violation`,
 an object with a `name` and named arguments. Only the first violation is reported.
+Static checks use increasing cycle/lane order and fixed rule priority; simulation
+keeps its existing completion-before-issue execution order. See the
+[diagnostic decision and deferred alternatives](decisions.md#diagnostics-fixed-order-one-failure-at-a-time).
 An early store in the tiny program, for example, returns:
 
 ```json
@@ -203,6 +206,11 @@ fails, the command exits nonzero and emits only a score-free error, even if the
 earlier certified execution succeeded.
 
 ## Simulate an unverified candidate file
+
+Candidate JSON rejects duplicate keys in every object, even when values match
+or the second key uses an equivalent escape spelling. The error category is
+`invalid-candidate-file`. Repeated field names in separate instruction objects
+are allowed. See the [file-format decision](decisions.md#candidate-json-reject-duplicate-object-keys).
 
 Use `simulate` to run a program written outside Lean, for example by an optimizer.
 Start from a registered candidate, edit the file, then simulate it:

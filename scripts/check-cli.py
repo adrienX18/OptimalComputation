@@ -220,6 +220,28 @@ with tempfile.TemporaryDirectory(prefix="optimal-sim-") as temp:
     located = simulate_file(wrong_store, code=1)["details"]
     assert (located["index"], located["cycle"], located["lane"]) == (3, 5, 0), located
 
+    # Raw JSON is essential here: a Python dict would erase duplicate keys.
+    candidate_text = json.dumps(tiny, separators=(",", ":"))
+    for original, replacement, key in [
+            ('"identifier":', '"identifier":"other","identifier":', "identifier"),
+            ('"identifier":', '"\\u0069dentifier":"other","identifier":', "identifier"),
+            ('"lanes":1', '"lanes":8,"lanes":1', "lanes"),
+            ('"lanes":1', '"lanes":1,"lanes":8', "lanes"),
+            ('"inputs":', '"inputs":[],"inputs":', "inputs"),
+            ('"cycle":0', '"cycle":0,"cycle":0', "cycle"),
+            ('"kind":"load"', '"kind":"store","kind":"load"', "kind"),
+            ('"address":0', '"address":0,"\\u0061ddress":0', "address")]:
+        assert original in candidate_text, original
+        duplicate = temp / "duplicate.json"
+        duplicate.write_text(candidate_text.replace(original, replacement, 1))
+        rejected = error("invalid-candidate-file", "simulate", str(duplicate))
+        assert f'duplicate object key "{key}"' in rejected["message"], rejected
+    # Duplicate diagnostics also keep control characters out of human output.
+    duplicate.write_text(candidate_text[:-1] + ',"a\\nb":1,"a\\u000ab":2}')
+    plain = run("simulate", str(duplicate), as_json=False, code=1)
+    assert not plain.stdout and plain.stderr.count("\n") == 1 and plain.stderr.isascii(), plain
+    assert "duplicate object key" in plain.stderr, plain
+
     # Text from a candidate file cannot add lines or terminal controls to
     # plain-text output, so it cannot imitate another command's result.
     forged = copy.deepcopy(tiny)

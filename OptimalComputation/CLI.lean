@@ -185,7 +185,7 @@ def identifierAllowed (identifier : String) : Bool :=
 
 def parseCandidate (contents : String) : Except Error RawCandidate := do
   preflightCandidate contents
-  let json ← (Json.parse contents).mapError fun e => invalidCandidateFile s!"Invalid JSON: {e}"
+  let json ← (UniqueJson.parse contents).mapError fun e => invalidCandidateFile s!"Invalid JSON: {e}"
   let raw ← (RawCandidate.fromJson? json).mapError invalidCandidateFile
   for (field, value) in [("identifier", raw.identifier), ("workloadIdentifier", raw.workloadIdentifier),
       ("modelVersion", raw.modelVersion), ("formatVersion", raw.formatVersion)] do

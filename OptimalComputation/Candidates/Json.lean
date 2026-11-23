@@ -1,5 +1,5 @@
 import OptimalComputation.Candidates.Program
-import Lean.Data.Json.Basic
+import Lean.Data.Json.Parser
 import Lean.Data.Json.FromToJson.Basic
 
 /-! JSON transport for `RawCandidate`, so a candidate can be written outside
@@ -50,6 +50,62 @@ def quoteText (text : String) : String :=
     else "\\u{" ++ String.ofList (Nat.toDigits 16 c.toNat) ++ "}"
   let shown := text.toList.take 64
   "\"" ++ String.join (shown.map escape) ++ (if text.length > 64 then "..." else "") ++ "\""
+
+namespace UniqueJson
+open Std.Internal.Parsec Std.Internal.Parsec.String
+
+-- Reuse Lean's scalar and string parsers. Only aggregate parsing differs:
+-- keys are checked after escape decoding, before an object map can erase them.
+mutual
+  private partial def value : Parser Json := do
+    let c ← peek!
+    if c == '{' then
+      skip; ws
+      if (← peek!) == '}' then
+        skip; ws
+        return Json.obj ∅
+      else
+        object ∅
+    else if c == '[' then
+      skip; ws
+      if (← peek!) == ']' then
+        skip; ws
+        return Json.arr #[]
+      else
+        array #[]
+    else
+      Json.Parser.anyCore
+
+  private partial def object (fields : Std.TreeMap.Raw String Json) : Parser Json := do
+    Json.Parser.lookahead (· == '"') "object key"; skip
+    let key ← Json.Parser.str
+    if fields.contains key then
+      fail s!"duplicate object key {quoteText key}"
+    ws
+    Json.Parser.lookahead (· == ':') ":"; skip; ws
+    let item ← value
+    let fields := fields.insert key item
+    match ← any with
+    | '}' => ws; return Json.obj fields
+    | ',' => ws; object fields
+    | _ => fail "unexpected character in object"
+
+  private partial def array (items : Array Json) : Parser Json := do
+    let item ← value
+    let items := items.push item
+    match ← any with
+    | ']' => ws; return Json.arr items
+    | ',' => ws; array items
+    | _ => fail "unexpected character in array"
+end
+
+/-- Strict JSON text transport: duplicate decoded keys fail at every depth.
+Callers must apply their numeric and nesting limits before parsing untrusted text.
+This parser supplies data only, never certification evidence. -/
+def parse (contents : String) : Except String Json :=
+  Parser.run (do ws; let result ← value; eof; return result) contents
+
+end UniqueJson
 
 /-- Require exactly the named keys, so typos and unexpected claims fail loudly. -/
 private def exactFields (context : String) (json : Json) (names : List String) : Except String Unit := do

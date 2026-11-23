@@ -116,6 +116,38 @@ private def candidateFiles : IO Unit := do
     | .error e =>
         checkCLI s!"candidate file rejected for: {reason}"
           (e.category == "invalid-candidate-file" && (e.message.splitOn reason).length > 1)
+  -- Duplicates must be caught before a map silently chooses either value.
+  -- Escape-equivalent keys also name the same field.
+  for (text, key) in [
+      (candidateText (extra := ",\"identifier\":\"other\""), "identifier"),
+      (candidateText (extra := ",\"identifier\":\"t\""), "identifier"),
+      (candidateText (extra := ",\"\\u0069dentifier\":\"other\""), "identifier"),
+      (candidateText.replace "\"lanes\":1" "\"lanes\":8,\"lanes\":1", "lanes"),
+      (candidateText.replace "\"lanes\":1" "\"lanes\":1,\"lanes\":8", "lanes"),
+      (candidateText.replace "\"inputs\":[0]" "\"inputs\":[0],\"inputs\":[0]", "inputs"),
+      (candidateText.replace "\"cycle\":0" "\"cycle\":0,\"cycle\":1", "cycle"),
+      (candidateText.replace "\"kind\":\"load\"" "\"kind\":\"store\",\"kind\":\"load\"", "kind"),
+      (candidateText.replace "\"address\":0" "\"address\":0,\"\\u0061ddress\":1", "address")] do
+    match parseCandidate text with
+    | .ok _ => throw <| IO.userError s!"CLI check failed: duplicate {key} accepted"
+    | .error e => checkCLI s!"duplicate {key} diagnosed" <|
+        e.category == "invalid-candidate-file" &&
+        (e.message.splitOn s!"duplicate object key {quoteText key}").length > 1
+  checkCLI "unique escaped field spelling accepted" <|
+    (parseCandidate (candidateText.replace "\"identifier\"" "\"\\u0069dentifier\"")).toOption.isSome
+  -- Object scopes are independent; key-like text inside values is not a key.
+  for text in ["[{\"x\":1},{\"x\":2}]", "{\"x\":{\"x\":1}}",
+      "{\"x\":\"\\\"x\\\":2,{[}]\"}"] do
+    checkCLI "unique JSON agrees with Lean parser" <|
+      (UniqueJson.parse text).toOption == (Json.parse text).toOption &&
+      (UniqueJson.parse text).toOption.isSome
+  for text in ["{\"a\\\"b\":1,\"a\\u0022b\":2}",
+      "{\"a\\\\b\":1,\"a\\u005cb\":2}",
+      "{\"😀\":1,\"\\ud83d\\ude00\":2}", "{\"a\\nb\":1,\"a\\u000ab\":2}"] do
+    match UniqueJson.parse text with
+    | .ok _ => throw <| IO.userError "CLI check failed: escaped duplicate accepted"
+    | .error e => checkCLI "escaped duplicate diagnosed" <|
+        (e.splitOn "duplicate object key").length > 1 && !e.contains '\n'
   checkCLI "longest allowed identifier accepted" <|
     (parseCandidate (candidateText (identifier := String.ofList (List.replicate 64 'a')))).toOption.isSome
   checkCLI "quoted text keeps printable ASCII, escapes the rest and is bounded" <|

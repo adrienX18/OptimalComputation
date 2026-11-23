@@ -60,6 +60,39 @@ def verification : IO Unit := do
       | .ok () => pure ()
       | .error error => throw <| IO.userError s!"Static check rejected the tiny program: {repr error}"
   | .error error => throw <| IO.userError s!"Tiny fixture malformed: {repr error}"
+  -- Static diagnostics use cycle order, then fixed batch-rule/lane order,
+  -- independently of the serialized instruction order.
+  let early : List RawScheduledInstruction := [
+    ⟨2, 3, .store 1 2⟩, ⟨2, 2, .load 1 2⟩,
+    ⟨2, 1, .store 1 3⟩, ⟨2, 0, .load 1 3⟩]
+  let late : List RawScheduledInstruction := [⟨9, 4, .load 1 0⟩, ⟨9, 4, .load 2 1⟩]
+  let base := {raw with configuration := ⟨8, 8⟩, layout := ⟨[0, 1], [2], [3]⟩}
+  for entries in [late ++ early, early.reverse ++ late, (late ++ early).reverse] do
+    match inspect Examples.TinyMultiply.shape {base with schedule := entries} with
+    | .error error => throw <| IO.userError s!"Static ordering fixture malformed: {repr error}"
+    | .ok checked =>
+        match checkStatic checked.val with
+        | .error error =>
+            checkVerification "static errors use earliest cycle and canonical lanes"
+              (error == ⟨2, none, .addressConflict 3⟩)
+        | .ok () => throw <| IO.userError "Static ordering fixture unexpectedly passed"
+  -- Issue conflicts precede bank conflicts; banks precede address conflicts.
+  -- Among colliding lanes/banks, choose the lowest numbered one.
+  let issue : List RawScheduledInstruction := [
+    ⟨2, 4, .load 1 0⟩, ⟨2, 4, .load 2 0⟩,
+    ⟨2, 0, .load 1 0⟩, ⟨2, 0, .load 2 0⟩]
+  let bank : List RawScheduledInstruction := [
+    ⟨2, 5, .load 1 3⟩, ⟨2, 4, .load 1 3⟩, ⟨2, 3, .store 1 3⟩,
+    ⟨2, 2, .load 1 2⟩, ⟨2, 1, .load 1 2⟩, ⟨2, 0, .store 1 2⟩]
+  for (entries, reason) in [(issue, MachineError.mk 2 (some 0) .issueCollision),
+      (bank, MachineError.mk 2 none (.bankCapacity 2 3))] do
+    for ordered in [entries, entries.reverse] do
+      match inspect Examples.TinyMultiply.shape {base with schedule := ordered} with
+      | .error error => throw <| IO.userError s!"Static priority fixture malformed: {repr error}"
+      | .ok checked =>
+          match checkStatic checked.val with
+          | .error error => checkVerification "static rule priority is stable" (error == reason)
+          | .ok () => throw <| IO.userError "Static priority fixture unexpectedly passed"
   expectVerifiedFailure {raw with identifier := "renamed"} [1, 1] (.unverifiedCandidate "renamed")
   expectVerifiedFailure {raw with workloadIdentifier := "unknown-workload"} [1, 1]
     (.unverifiedCandidate raw.identifier)

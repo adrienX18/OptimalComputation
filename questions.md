@@ -48,18 +48,13 @@ parallel candidate.
 
 **Decisions still open.**
 
-1. How `check` is evaluated. Kernel `decide` adds no trust but may be too slow:
-   the runner uses `List.mergeSort` and 4,096-slot vectors, which reduce poorly
-   in the kernel. `native_decide` is fast but trusts the Lean compiler, and
-   `scripts/validate.py` forbids it today. First experiment: time a
-   kernel-friendly `check` on the 79-cycle candidate.
-2. Range analysis. Intervals suffice for the matrix workloads, where only inputs
+1. Range analysis. Intervals suffice for the matrix workloads, where only inputs
    are multiplied and sums of 16 products stay far inside 48 bits. They are
    conservative for correlated values such as `x * x ≥ 0`; the polynomial task
    in `PLAN.md` section 9 is chosen to expose this.
-3. Each workload needs a one-time proof that its reference equals a normal-form
+2. Each workload needs a one-time proof that its reference equals a normal-form
    polynomial.
-4. What the experiment measures. With an automatic checker the agent writes no
+3. What the experiment measures. With an automatic checker the agent writes no
    proofs, so the measurable quantity becomes "candidates that pass sampled
    inputs but fail certification", not proof effort. Confirm that this answers
    the question we care about.
@@ -67,13 +62,5 @@ parallel candidate.
 **Acceptance test for whatever is chosen:** certify `matvec-grid-exchange-v1`
 and reject single-instruction mutants of it.
 
-## Minor
-
-- Should static-checker errors follow a fixed order? Reordering an invalid
-  schedule can change its first reported conflict, but not its rejection.
-  Related: `simulate` stops at the first violation; reporting every
-  input-independent violation at once would save loop iterations. Defer until
-  optimization-loop work.
-- Should candidate files with duplicate JSON keys be rejected? Lean's parser
-  keeps the last value silently, so a file can read differently to a
-  first-wins parser. No certified result is affected.
+Resolved decisions on proof evaluation, diagnostics and duplicate JSON keys are
+recorded in [docs/decisions.md](docs/decisions.md).
