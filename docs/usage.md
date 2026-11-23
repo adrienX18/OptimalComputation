@@ -62,6 +62,14 @@ Neither candidate is claimed optimal. No search ran to choose them.
 It is mutually exclusive with `--fixture NAME`. Every scalar is checked against
 the selected workload's signed16 domain, `-32768` through `32767`, after exact
 count and codec validation. Values are runtime data, not generated instructions.
+The transport accepts only a flat numeric array. Before JSON parsing, it rejects
+numeric tokens longer than 4,096 characters (excluding surrounding whitespace)
+and positive exponents that expand the mantissa by more than 4,096 decimal places.
+These limits prevent a short exponent such as `0e1000000000` from causing enormous
+integer allocation. Violations return `invalid-input-file`, independently of the
+execution boundary budget. Ordinary scientific integer forms such as `1e2` and
+`1.2e1` are supported; decimal or negative-exponent forms must reduce to an integer
+representation in Lean's JSON parser (`1.0` and `10e-1` are rejected).
 
 | Workload / candidate family | Array order | Count |
 | --- | --- | ---: |

@@ -6,6 +6,10 @@ From a checkout with the pinned Lean toolchain installed:
 python3 scripts/validate.py
 ```
 
+Run without Python's `-O`/`-OO` flags and with `PYTHONOPTIMIZE` unset. The driver
+and standalone Python checkers refuse optimized mode because it disables their
+assertions; they must not report success after skipping validation.
+
 This standard-library-only driver runs `lake build`, `lake test`, the process-level
 CLI smoke suite, and compiled documentation examples. It then runs all four axiom
 audits (53 verification, 72 matrix-vector, 26 objectives and 40 matrix-matrix
@@ -93,8 +97,24 @@ The coordinator independently reran the full validation driver in the clean
 checkout and all checks passed again. Every milestone deliverable and all fourteen
 plan completion requirements then passed coordinator review.
 
-After the clean run, only this file, `STATUS.md`, and the fourteen completion
-checkboxes in `PLAN.md` changed to record validation and acceptance. All executable,
-proof, test, script, fixture, result and other documentation bytes match the
+For that implementation checkpoint, only validation/handoff documentation and the
+fourteen completion checkboxes in `PLAN.md` changed after the clean run. All executable,
+proof, test, script, fixture, result and other documentation bytes matched the
 snapshot manifest. Final documentation edits were separately checked for
-whitespace and links; no code changed after the clean gate.
+whitespace and links; no code changed between that gate and the checkpoint.
+
+## Subsequent sanity review
+
+The 2026-11-22 review rebuilt committed checkpoint `38961a9` in a fresh local clone
+and ran the full validation driver successfully without the optional external
+hash file. Three independent reviewers examined semantics/proofs, documentation
+and packaging, and CLI behavior. Twelve additional full-range random matrix inputs
+matched independent Python integer calculations.
+
+The review fixed bounded input parsing before JSON exponent expansion and added
+the optimized-Python rejection above. The full driver passed again after those
+fixes. Extreme exponent and deep-nesting regressions run as separate processes
+with timeouts in `scripts/check-cli.py`, so a parser regression cannot indefinitely
+block the test process. Hardware rules, workload definitions, proof-bearing
+evaluation, objective formulas and saved baseline records were unchanged.
+See [questions.md](../questions.md) for the remaining minor diagnostic-ordering decision.

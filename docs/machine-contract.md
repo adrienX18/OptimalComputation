@@ -10,8 +10,8 @@ checks. The tiny multiply candidate, naive matrix-vector and matrix-matrix basel
 product-pair candidates have all-input execution/correctness certificates. Pure
 latency and abstract-energy objectives score verified executions. The small
 [CLI](usage.md) exposes these artifacts and optional observational traces.
-[STATUS.md](../STATUS.md) records progress. The [assumptions table](assumptions.md)
-classifies the hardware facts, project choices, and deferred physical details.
+The [assumptions table](assumptions.md) classifies the hardware facts, project
+choices, and deferred physical details.
 
 ## Scope and identifiers — project modeling choices
 

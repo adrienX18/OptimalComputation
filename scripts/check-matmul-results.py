@@ -2,6 +2,9 @@
 import json
 from pathlib import Path
 
+if not __debug__:
+    raise SystemExit("Validation requires Python assertions. Unset PYTHONOPTIMIZE and omit -O/-OO.")
+
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "docs" / "results"
 SEED = 23

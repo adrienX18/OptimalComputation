@@ -7,6 +7,9 @@ import re
 import subprocess
 import sys
 
+if not __debug__:
+    raise SystemExit("Validation requires Python assertions. Unset PYTHONOPTIMIZE and omit -O/-OO.")
+
 ROOT = Path(__file__).resolve().parents[1]
 
 

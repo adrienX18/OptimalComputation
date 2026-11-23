@@ -22,6 +22,14 @@ def cli : IO Unit := do
   for input in ["not-json", "{}", "[true]", "[\"1\"]", "[1.5]", "[null]"] do
     checkCLI "noninteger input rejected" (parseInputs input).toOption.isNone
   checkCLI "signed input JSON" ((parseInputs "[-32768,0,32767]").toOption == some [-32768, 0, 32767])
+  checkCLI "scientific integer JSON" ((parseInputs "[-2e+1,1.2e1,3e0]").toOption == some [-20, 12, 3])
+  checkCLI "positive exponent expansion boundary"
+    ((parseInputs "[0e4096,0.0e4097]").toOption == some [0, 0])
+  -- Extreme exponent regressions run in check-cli.py under a process timeout.
+  for input in ["[0e4097,2]", "[0.0e4098,2]",
+      "[[1],2]", "[{\"a\":1},2]", "[01,2]", "[1e,2]", "[1,2,]",
+      "[" ++ String.ofList (List.replicate 4097 '1') ++ ",2]"] do
+    checkCLI "unsafe or malformed input rejected" (parseInputs input).toOption.isNone
   for args in [["evaluate"], ["bad"], ["list-candidates", "extra"],
       ["evaluate", "tiny-multiply-v1", "--budget", "-1"],
       ["evaluate", "tiny-multiply-v1", "--budget", "1.5"],

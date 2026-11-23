@@ -87,11 +87,44 @@ def fixtureValues (workload name : String) : Except Error (List Int) := do
     if name == "zeros" then return [0, 0, 0, 0]
   throw ⟨"unknown-fixture", s!"Unknown fixture {name} for {workload}.", Json.null, 1⟩
 
+private def invalidInputFile (message : String) : Error :=
+  ⟨"invalid-input-file", message, Json.null, 1⟩
+
+/-- Bound numeric work before Lean's JSON parser expands positive exponents.
+Only a flat numeric array is needed here; rejecting nested values also keeps
+untrusted input out of the general parser's recursive array/object paths.
+These are transport limits, not changes to the workload or machine domains. -/
+private def preflightInputs (contents : String) : Except Error Unit := do
+  let input := contents.trimAscii
+  unless input.startsWith '[' && input.endsWith ']' do
+    throw (invalidInputFile "Expected a JSON array of integers.")
+  let body := (input.drop 1).dropEnd 1
+  for part in body.toString.splitOn "," do
+    let token := part.trimAscii.toString
+    if token.length > 4096 then
+      throw (invalidInputFile "Numeric input tokens must contain at most 4096 characters.")
+    let chars := token.toList
+    unless chars.all (fun c => c.isDigit || c.isWhitespace ||
+        c == '-' || c == '+' || c == '.' || c == 'e' || c == 'E') do
+      throw (invalidInputFile "Expected a flat JSON array of integers.")
+    let mantissa := chars.takeWhile (fun c => c != 'e' && c != 'E')
+    let exponent := (chars.drop mantissa.length).drop 1
+    unless exponent.head? == some '-' do
+      let digits := (if exponent.head? == some '+' then exponent.drop 1 else exponent)
+        |>.takeWhile Char.isDigit
+      let decimals := ((mantissa.dropWhile (· != '.')).drop 1).takeWhile Char.isDigit
+      let limit := decimals.length + 4096
+      -- Saturate rather than constructing an arbitrarily large exponent value.
+      let value := digits.foldl (fun n c => min (limit + 1) (10 * n + c.toNat - '0'.toNat)) 0
+      if value > limit then
+        throw (invalidInputFile "Positive exponents may expand a numeric input by at most 4096 decimal places.")
+
 def parseInputs (contents : String) : Except Error (List Int) := do
+  preflightInputs contents
   let json ← (Json.parse contents).mapError fun e =>
-    (⟨"invalid-input-file", s!"Invalid JSON: {e}", Json.null, 1⟩ : Error)
+    invalidInputFile s!"Invalid JSON: {e}"
   (fromJson? json : Except String (List Int)).mapError fun e =>
-    ⟨"invalid-input-file", s!"Expected a JSON array of integers: {e}", Json.null, 1⟩
+    invalidInputFile s!"Expected a JSON array of integers: {e}"
 
 def failureError (failure : Failure) : Error :=
   let category := match failure with

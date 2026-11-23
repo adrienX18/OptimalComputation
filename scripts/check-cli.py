@@ -5,13 +5,16 @@ from pathlib import Path
 import subprocess
 import tempfile
 
+if not __debug__:
+    raise SystemExit("Validation requires Python assertions. Unset PYTHONOPTIMIZE and omit -O/-OO.")
+
 ROOT = Path(__file__).resolve().parents[1]
 EXE = ROOT / ".lake/build/bin/optimal_computation"
 
 
 def run(*args, code=0, as_json=True):
     command = [str(EXE), *args, *(["--json"] if as_json else [])]
-    result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, check=False)
+    result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, check=False, timeout=60)
     assert result.returncode == code, (args, result.returncode, result.stdout, result.stderr)
     if as_json:
         assert not result.stderr, (args, result.stderr)
@@ -96,6 +99,23 @@ with tempfile.TemporaryDirectory(prefix="optimal-cli-") as temp:
                                ("[true,2]", "invalid-input-file"), ("[", "invalid-input-file")]:
         values.write_text(contents)
         error(category, "evaluate", "tiny-multiply-v1", "--input", str(values))
+    # The parser used to expand this tiny input into 10**1000000000 before
+    # domain validation. Keep a strict timeout so a regression cannot hang CI.
+    for contents in ["[0e1000000000,2]", "[1e999999999999999999999999999999,2]",
+                     "[" * 20000 + "0" + "]" * 20000,
+                     '[{"a":1},2]', "[01,2]", "[1e,2]", "[1,2,]",
+                     "[" + "1" * 4097 + ",2]"]:
+        values.write_text(contents)
+        result = subprocess.run([str(EXE), "evaluate", "tiny-multiply-v1", "--input", str(values), "--json"],
+                                cwd=ROOT, capture_output=True, text=True, check=False, timeout=5)
+        assert result.returncode == 1 and not result.stderr, result
+        rejected = json.loads(result.stdout)
+        assert rejected["category"] == "invalid-input-file", rejected
+        assert not ({"objective", "score", "acceptedResult", "execution"} & rejected.keys()), rejected
+    values.write_text("[-2e+1,1.2e1]")
+    scientific = run("evaluate", "tiny-multiply-v1", "--input", str(values))
+    assert scientific["inputScalars"] == [-20, 12]
+    assert scientific["execution"]["outputs"] == [-240]
     values.write_text("[1]")
     failed_trace = temp / "must-not-exist.json"
     error("invalid-input", "evaluate", "tiny-multiply-v1", "--input", str(values), "--trace", str(failed_trace))
