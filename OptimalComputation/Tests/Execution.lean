@@ -185,6 +185,45 @@ private def checkMemoryAndOrder : IO Unit := do
   let lc ← success loadCaptured [27]
   checkExecution "load payload captures earlier memory value" (lc.outputs == [0, 27] && lc.cycles == 4)
 
+/-- Register hazards are lane-local and bank limits count every access kind.
+The serial baselines never exercise these rules, so parallel schedules rely on
+the cases below: each hazard on a lane other than zero, the same register number
+used legally on two lanes, and port limits with stores and several banks. -/
+private def checkCrossLaneHazards : IO Unit := do
+  -- Lane 0 holds a pending write to its r1; lane 1's own r1 is unaffected.
+  let independent := fixture [0] [1] [] 2 1 [⟨0, 0, .add 1 0 0⟩,
+    ⟨1, 1, .load 1 0⟩, ⟨2, 1, .store 1 1⟩]
+  let ir ← success independent [-33]
+  checkExecution "pending register on one lane does not block the same register on another" <|
+    ir.outputs == [-33] && ir.cycles == 3 && ir.counters.laneIssues == [1, 2]
+  expectMachine (fixture [] [] [] 2 1 [⟨0, 1, .add 1 0 0⟩, ⟨1, 1, .add 2 1 0⟩]) []
+    1 (some 1) (.pendingRead 1)
+  expectMachine (fixture [] [] [] 2 1 [⟨0, 1, .add 1 0 0⟩, ⟨1, 1, .add 1 0 0⟩]) []
+    1 (some 1) (.pendingWrite 1)
+  -- r1 already holds 3 on lane 1; reading it while its new result is pending
+  -- must fail rather than return the stale value.
+  expectMachine (fixture [0] [1] [] 2 1 [⟨0, 1, .load 1 0⟩, ⟨1, 1, .add 1 1 1⟩,
+    ⟨2, 1, .store 1 1⟩]) [3] 2 (some 1) (.pendingRead 1)
+  expectMachine (fixture [0] [] [] 2 1 [⟨0, 1, .add 1 0 0⟩, ⟨2, 1, .load 2 0⟩]) [7]
+    2 (some 1) (.writebackCollision 3)
+  let separateWritebacks ← success (fixture [0] [] [] 2 1 [⟨0, 0, .add 1 0 0⟩,
+    ⟨2, 1, .load 2 0⟩]) [7]
+  checkExecution "results arriving together on different lanes do not collide" <|
+    separateWritebacks.cycles == 3 && separateWritebacks.counters.registerWrites == 2
+  -- Bank ports: stores count like loads, in any mix.
+  expectMachine (fixture [] [0, 1, 2] [] 4 1 [⟨0, 0, .store 0 0⟩, ⟨0, 1, .store 0 1⟩,
+    ⟨0, 2, .store 0 2⟩]) [] 0 none (.bankCapacity 0 3)
+  expectMachine (fixture [0, 1] [2] [] 4 1 [⟨0, 0, .load 1 0⟩, ⟨0, 1, .load 1 1⟩,
+    ⟨0, 2, .store 0 2⟩]) [7, 8] 0 none (.bankCapacity 0 3)
+  -- With eight banks, addresses 0, 8 and 16 share bank 0; 3, 11 and 19 share bank 3.
+  let sameBank := fun (a b c : Nat) => fixture [a, b, c] [] [] 4 8 [⟨0, 0, .load 1 a⟩,
+    ⟨0, 1, .load 1 b⟩, ⟨0, 2, .load 1 c⟩]
+  expectMachine (sameBank 0 8 16) [7, 8, 9] 0 none (.bankCapacity 0 3)
+  expectMachine (sameBank 3 11 19) [7, 8, 9] 0 none (.bankCapacity 3 3)
+  let spread ← success (sameBank 0 8 1) [7, 8, 9]
+  checkExecution "two accesses in one bank plus one in another pass" <|
+    spread.cycles == 1 && spread.counters.bankAccesses == [2, 1, 0, 0, 0, 0, 0, 0]
+
 private def checkInitializationAndArithmetic : IO Unit := do
   for instruction in [(.store 1 0 : RawInstruction), .add 2 1 0, .multiply 2 0 1,
       .multiplyAdd 2 0 0 1] do
@@ -296,10 +335,11 @@ def execution : IO Unit := do
   checkTiny
   checkTiming
   checkMemoryAndOrder
+  checkCrossLaneHazards
   checkInitializationAndArithmetic
   checkCapacity
   checkConfigurations
   checkPermutationsAndScale
-  IO.println "PASS: execution (complete tiny trace/counters, timing, pending/writeback/issue hazards, memory ports/order, initialization, arithmetic, completion, budgets)"
+  IO.println "PASS: execution (complete tiny trace/counters, timing, pending/writeback/issue hazards on every lane, memory ports/order, initialization, arithmetic, completion, budgets)"
 
 end OptimalComputation.Tests
