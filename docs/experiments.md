@@ -4,14 +4,15 @@ The four workloads now have executable naive baselines with all-input Lean
 certificates on all sixteen admissible configurations. A deterministic greedy
 scheduler and hand-built schedules supply comparison points. The experiment
 runner records every proposal, including rejection and inconclusive outcomes.
-There is no LLM client or autonomous optimization loop.
+This historical runner has no LLM client. The separately approved
+[minimal LLM search harness](search.md) now builds on its evaluation blocks.
 
 [Automatic certification](certification.md) now handles arbitrary candidate files,
 including the 79-cycle `matvec-grid-exchange-v1`. The saved experiment and its
 runner retain their original catalog-based acceptance policy for reproducibility;
 its deferred entries describe that historical run. Use the standalone certifier
-to check an exported proposal. Connecting it to a future optimization loop is a
-separate task.
+to check an exported proposal, or the new search harness to generate and check
+new proposals in a loop.
 
 ## Run
 

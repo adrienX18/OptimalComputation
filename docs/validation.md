@@ -16,10 +16,11 @@ This standard-library-only driver runs, in order:
 
 1. `lake build` and `lake test`.
 2. The process-level CLI suite, Section 9 integration and saved-result checks,
-   automatic certification regressions, and the compiled documentation examples.
+   automatic certification regressions, offline search regressions, and the
+   compiled documentation examples.
 3. Seven axiom audits, allowing only `propext`, `Quot.sound` and `Classical.choice`:
    48 verification, 65 matrix-vector, 26 objectives, 34 matrix-matrix,
-   32 naive-v2, 14 Section 9 and 19 certification declarations.
+   32 naive-v2, 14 Section 9 and 20 certification declarations.
 4. Byte-for-byte reproduction of the ten saved artifacts in `docs/results/`.
 5. Both independent Python result checkers.
 6. `git diff --check`, whitespace checks on every tracked or untracked nonignored
@@ -38,6 +39,7 @@ python3 scripts/check-cli.py
 python3 scripts/check-experiments.py
 python3 scripts/check-section9-results.py
 python3 scripts/check-certification.py
+python3 scripts/check-search.py
 lake env lean scripts/check-doc-examples.lean
 lake env lean scripts/audit-verification.lean
 lake env lean scripts/audit-matvec.lean
@@ -144,3 +146,37 @@ closed kernel certificates were generated.
 The 232-proposal historical ledger retained all exact bindings and metrics.
 The generated grid certificate was reproduced byte for byte. No additional
 axioms or alternative proof-evaluation trust path were introduced.
+
+## Minimal search validation
+
+On 2026-11-22, the full `python3 scripts/validate.py` run passed: 170 build jobs,
+all fourteen Lean test suites, CLI/experiment/certification/search checks, seven
+axiom audits (now including 20 certification roots), and byte-identical
+reproduction of all ten saved artifacts. The 232-proposal historical ledger and
+the original generated grid certificate remained unchanged.
+
+The fast, standard-library-only `scripts/check-search.py` suite is included in
+the full driver. Its eight tests cover 100 attempt slots, bounded prompts,
+retained history and notes, malformed/oversized responses, invalid configuration,
+unchanged completed archives on resume, interrupted calls without reissue,
+three-error stopping, baseline retention, secret redaction and process timeouts.
+
+Additional integration checks require Docker or the optional SDK:
+
+```sh
+python3 scripts/check-search.py --integration
+.venv/bin/python scripts/check-search-providers.py
+```
+
+On 2026-11-22 both commands passed with Python 3.14.6, Docker 29.9.2, the local
+`python:3.12-slim-bookworm` image and LiteLLM 1.110.2. The Docker/Lean checks
+accepted a fresh six-cycle candidate, rejected a broken one, preserved a resumed
+run, kept host credentials out of the container, rejected writes to its input
+mount and stopped an infinite generator. They also exercised fresh energy
+scoring (86 units), retained failed certification logs, and selected a certified
+63-cycle polynomial design over the original baseline.
+
+Two provider tests exercised the actual OpenAI, Anthropic and Gemini SDK
+adapters using mocked HTTP. They checked response/usage mapping, raw callback
+records, credential redaction, isolation of successive call archives and a
+rate-limit error with exactly one HTTP request. No paid model call was made.

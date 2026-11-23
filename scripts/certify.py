@@ -5,6 +5,7 @@ The compiled checker emits a closed Lean obligation. Only a successful kernel
 check and standard-axiom audit produce acceptance. No third-party Python packages.
 """
 import argparse
+from contextlib import nullcontext
 import hashlib
 import json
 import math
@@ -39,7 +40,15 @@ def audit_kernel_output(output, namespace="GeneratedCertificate"):
                for m in matches)
 
 
-def run_process(args, timeout):
+def run_process(args, timeout, archive=None):
+    if archive is not None:
+        from harness.archive import command, output
+        result = command(args, archive, cwd=ROOT, timeout=timeout)
+        if result["status"] != "completed":
+            if result["status"] == "timeout":
+                raise subprocess.TimeoutExpired(args, timeout)
+            raise OSError(f"Process stopped: {result['status']}")
+        return subprocess.CompletedProcess(args, result["exitCode"], output(archive), output(archive, "stderr"))
     # Lake can launch Lean as a child. A timeout must stop the whole checking phase.
     with subprocess.Popen(args, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                           text=True, start_new_session=(os.name == 'posix')) as process:
@@ -58,10 +67,28 @@ def run_process(args, timeout):
         return subprocess.CompletedProcess(args, process.returncode, stdout, stderr)
 
 
-def certify(path, *, boundaries=1000000, terms=4096, timeout=120, output=None):
+def certify(path, *, boundaries=1000000, terms=4096, timeout=120, output=None,
+            archive=None, objective=None, fixture='generated-23'):
+    """Optionally retain every intermediate and score a fresh artifact in Lean."""
+    from harness.archive import write_json
+    if archive is not None:
+        archive = Path(archive).resolve()
+        archive.mkdir(parents=True, exist_ok=False)
+    result = _certify(path, boundaries=boundaries, terms=terms, timeout=timeout, output=output,
+                      archive=archive, objective=objective, fixture=fixture)
+    if archive is not None:
+        write_json(archive / 'result.json', result)
+    return result
+
+
+def _certify(path, *, boundaries, terms, timeout, output, archive, objective, fixture):
     """Return an auditable result. Rejection never yields a proof artifact."""
     if boundaries < 0 or terms < 0 or not math.isfinite(timeout) or timeout <= 0:
         return failure('invalid-arguments', 'Budgets must be nonnegative and timeout positive.')
+    if objective not in (None, 'latency-v1', 'energy-proxy-v1'):
+        return failure('invalid-arguments', 'Unknown objective.')
+    if not re.fullmatch(r'[A-Za-z0-9_.-]{1,64}', fixture):
+        return failure('invalid-arguments', 'Invalid fixture name.')
     if not CHECKER.is_file():
         return failure('not-built', 'Run lake build before certification.')
     try:
@@ -77,12 +104,13 @@ def certify(path, *, boundaries=1000000, terms=4096, timeout=120, output=None):
     binding = dict(candidateSha256=hashlib.sha256(snapshot).hexdigest(),
                    checkerVersion='symbolic-certifier-v1')
     started = time.monotonic()
-    with tempfile.TemporaryDirectory(prefix='optimal-certify-') as directory:
+    context = nullcontext(archive) if archive is not None else tempfile.TemporaryDirectory(prefix='optimal-certify-')
+    with context as directory:
         temp = Path(directory)
         candidate = temp / 'candidate.json'
         candidate.write_bytes(snapshot)
         try:
-            precheck = run_process([str(CHECKER), str(candidate), str(boundaries), str(terms)], timeout)
+            precheck = run_process([str(CHECKER), str(candidate), str(boundaries), str(terms)], timeout, archive / 'precheck' if archive else None)
             if precheck.returncode:
                 return failure('checker-process', 'The symbolic checker did not complete.', **binding,
                                exitCode=precheck.returncode, log=precheck.stderr[-4000:])
@@ -96,14 +124,17 @@ def certify(path, *, boundaries=1000000, terms=4096, timeout=120, output=None):
         if report.get('status') != 'requires-kernel-check':
             return report
         source = report.pop('source')
-        namespace = 'Certificate_' + hashlib.sha256(source.encode('utf-8')).hexdigest()
+        namespace = 'Certificate_' + hashlib.sha256((source + (objective or '') + (fixture if objective else '')).encode('utf-8')).hexdigest()
         source = source.replace('namespace GeneratedCertificate\n', f'namespace {namespace}\n')
         source = source.replace('end GeneratedCertificate\n', f'end {namespace}\n')
+        if objective:
+            source = 'import OptimalComputation.Certification.Scoring\n' + source
+            source += f'\n#eval OptimalComputation.Certification.printScore {namespace}.artifact "{objective}" "{fixture}"\n'
         lean_file = temp / 'Certificate.lean'
         lean_file.write_text(source, encoding='utf-8')
         proof_started = time.monotonic()
         try:
-            kernel = run_process(['lake', 'env', 'lean', str(lean_file)], timeout)
+            kernel = run_process(['lake', 'env', 'lean', str(lean_file)], timeout, archive / 'kernel' if archive else None)
         except subprocess.TimeoutExpired:
             return failure('kernel-timeout', 'Kernel checking exceeded its time budget; no certificate was accepted.', **binding)
         except OSError as exc:
@@ -112,6 +143,17 @@ def certify(path, *, boundaries=1000000, terms=4096, timeout=120, output=None):
         if kernel.returncode or not audit_kernel_output(log, namespace):
             return failure('kernel-check', 'The generated certificate failed kernel checking or its axiom audit.',
                            **binding, exitCode=kernel.returncode, log=log[-6000:])
+        score = None
+        if objective:
+            lines = [line.removeprefix('CERTIFIED_SCORE ') for line in kernel.stdout.splitlines()
+                     if line.startswith('CERTIFIED_SCORE ')]
+            try:
+                score = json.loads(lines[0]) if len(lines) == 1 else None
+            except ValueError:
+                pass
+            if not isinstance(score, dict) or score.get('verificationStatus') != 'all-input-certified':
+                return failure('scoring-failed', 'Certified scoring did not return an accepted result.',
+                               **binding, score=score)
         report.update(accepted=True, status='correct',
                       message='Safe and correct for every allowed input on the specified machine model.',
                       proof='Lean kernel; standard axioms only',
@@ -119,6 +161,8 @@ def certify(path, *, boundaries=1000000, terms=4096, timeout=120, output=None):
                       certificateDeclaration=namespace + '.artifact',
                       kernelSeconds=round(time.monotonic() - proof_started, 3),
                       totalSeconds=round(time.monotonic() - started, 3))
+        if score is not None:
+            report['score'] = score
         if output is not None:
             destination = Path(output).resolve()
             staging = None
@@ -145,10 +189,14 @@ def main():
     parser.add_argument('--terms', type=int, default=4096)
     parser.add_argument('--timeout', type=float, default=120, help='seconds per checking phase')
     parser.add_argument('--output', type=Path, help='save the reusable Lean certificate after acceptance')
+    parser.add_argument('--archive', type=Path, help='retain all intermediate files and full process logs in a new directory')
+    parser.add_argument('--objective', choices=['latency-v1', 'energy-proxy-v1'])
+    parser.add_argument('--fixture', default='generated-23')
     parser.add_argument('--json', action='store_true')
     args = parser.parse_args()
     result = certify(args.candidate, boundaries=args.boundaries, terms=args.terms,
-                     timeout=args.timeout, output=args.output)
+                     timeout=args.timeout, output=args.output, archive=args.archive,
+                     objective=args.objective, fixture=args.fixture)
     if args.json:
         print(json.dumps(result, indent=2, ensure_ascii=False))
     elif result['accepted']:

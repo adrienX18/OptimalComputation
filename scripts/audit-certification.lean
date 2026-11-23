@@ -1,4 +1,5 @@
 import OptimalComputation.Certification.Catalog
+import OptimalComputation.Certification.Scoring
 import OptimalComputation.Tests.Certification
 
 #print axioms OptimalComputation.Certification.sort_eq
@@ -20,3 +21,4 @@ import OptimalComputation.Tests.Certification
 #print axioms OptimalComputation.Certification.TwoStageProblem.problem
 #print axioms OptimalComputation.Certification.Entry.artifact
 #print axioms OptimalComputation.Tests.checkedTiny
+#print axioms OptimalComputation.Certification.printScore

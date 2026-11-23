@@ -2,7 +2,8 @@
 
 These decisions were confirmed on 2026-11-22. All seven questions from the
 Section 9 discussion are resolved. Implementation details and commands are in
-[certification.md](certification.md). The optimization loop comes later.
+[certification.md](certification.md). The subsequently approved minimal search
+loop is recorded below and described in [search.md](search.md).
 
 ## Proof evaluation: preserve the current trust boundary
 
@@ -147,6 +148,51 @@ cost and failure categories separately from execution cost. A timeout must not
 be counted as a discovered correctness bug. Keep the original Section 9 run
 as historical evidence rather than relabeling its old deferred proposals.
 
-This change delivers modular certification, reference and reporting blocks.
-It does not add an optimization loop, alter objectives, rerun the historical
-experiment with new acceptance rules, or claim physical hardware performance.
+That change delivered modular certification, reference and reporting blocks.
+The subsequent search harness leaves those objectives and the historical
+experiment unchanged. None of these results claim physical hardware performance.
+
+## Minimal search loop: sequential proposals and bounded memory
+
+The approved first optimizer is deliberately a single loop: ask one model for
+one design, generate it, simulate it, certify it, report the result, repeat.
+Use at most 100 attempt slots. There is no agent framework, parallel population,
+planner, learned selection policy, automatic provider fallback or model tool use.
+LiteLLM is an optional local SDK dependency for selecting the provider/model;
+configuration uses JSON, which Python can read without another dependency.
+
+The model returns a small Python generator rather than thousands of literal
+instructions. This allows algorithm, layout and schedule changes while keeping
+the prompt small. The generator runs as a restricted non-root Docker process
+with no network, credentials or writable host mount. Docker is the extra runtime
+dependency this decision introduces. The Lean checker and scorer run separately
+on the host; generated Python never runs there.
+
+Every request starts fresh with the best certified generator, latest generator
+and bounded feedback, a compact attempt history, and a bounded model-written
+notebook. Drop the oldest history entries if necessary. Retain the last notebook
+through malformed responses. This is cheap and transparent, but can forget old
+details or preserve a mistaken note. The notebook is advice, never evidence of
+correctness. The complete archive remains available for later analysis.
+
+Keep the original certified baseline as the incumbent. Only a strictly lower
+certified score replaces it. Latency fixes the lane/bank configuration; energy
+allows changing it. Fixture results alone cannot win, and inconclusive proofs
+remain distinct from concrete counterexamples. Fresh certificates are scored by
+the existing Lean `evaluateObjective` API, without a Python score formula.
+
+Save before calling the model, record every attempt including malformed replies
+and failures, and retain all provider-exposed response data and verifier output.
+Credentials are redacted; private provider reasoning that is not returned cannot
+be recorded. Plain files, JSONL events and a CSV summary suffice. Storage can be
+large because traces and proofs are retained. This favors analysis over disk use.
+
+No automatic API retries: errors consume slots, and three consecutive API errors
+stop the run for explicit resume. Interrupted slots also consume their number;
+resume never reissues a possibly billed request. Resume requires the same source,
+Python, recorded adapter dependencies and Docker image. This is conservative but
+keeps one run comparable. Provider inference itself need not be deterministic.
+
+Deferred alternatives include richer retrieval of old attempts, deduplication,
+parallel search, automatic repairs, a run database, full environment locking and
+measured hardware objectives. These can be evaluated against this simple loop.

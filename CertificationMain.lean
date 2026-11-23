@@ -1,3 +1,4 @@
+import OptimalComputation.Certification.Scoring
 import OptimalComputation.Certification.Transport
 
 /-- Internal transport for scripts/certify.py. It never reports acceptance. -/

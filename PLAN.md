@@ -367,7 +367,7 @@ Test failure behavior as carefully as successful execution. Prefer a small test 
 - [x] Manual examples demonstrate meaningful differences between the objectives.
 - [x] New workloads and objectives can be added without changing machine semantics.
 - [x] The evaluation interface is documented for future interchangeable search strategies.
-- [x] No optimization strategy or autonomous AI loop has been implemented as part of this scope.
+- [x] No optimization strategy or autonomous AI loop was implemented as part of Sections 1–8; Section 10 adds the separately approved loop.
 
 ## 8. Instructions for the coding agent
 
@@ -436,7 +436,7 @@ commands and limits are in [docs/certification.md](docs/certification.md).
 Implementation note (2026-11-22): the initial Section 9 run preceded the
 certification decision. The subsequent implementation adds the general checker,
 one-time reference proofs for all seven workloads, bounded diagnostics and
-portable kernel-checked artifacts. The optimization loop remains subsequent work.
+portable kernel-checked artifacts. Section 10 implements the subsequently approved loop.
 
 See [the experiment guide](docs/experiments.md) and
 [the recorded results](docs/results/section9-v1/summary.md). The run records 232
@@ -445,3 +445,22 @@ proposals that pass public fixtures but are refuted on an allowed held-out input
 The other 152 evaluations were deferred in that historical run; they have not
 been retroactively recertified or counted as failed proofs. Counting floors use
 compulsory I/O and are conservative.
+
+## 10. Minimal sequential LLM search
+
+Approved on 2026-11-22: build the simplest useful propose/check/repeat loop over
+the existing blocks, with a maximum of 100 attempts and a selectable provider
+and model. Preserve all attempts and feedback for analysis, while keeping the
+next prompt bounded. See [the search guide](docs/search.md) and
+[recorded trade-offs](docs/decisions.md#minimal-search-loop-sequential-proposals-and-bounded-memory).
+
+- [x] One model call per attempt, fresh prompt, compact history and notebook.
+- [x] Generator programs execute in restricted Docker containers.
+- [x] Reuse simulation, all-input certification and the existing accepted-score API.
+- [x] Only a certified improvement replaces the original certified baseline.
+- [x] Save prompts, provider responses, candidates, traces, proofs, scores and failures.
+- [x] Resume without repeating completed or interrupted model calls.
+- [x] Exercise 100 attempts offline, real Docker/Lean integration and mocked provider adapters.
+
+This harness finds the best certified design among its attempts. It does not
+claim a global optimum or add a new benchmark result to the historical ledger.

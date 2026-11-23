@@ -1,0 +1,17 @@
+{
+  "model": "anthropic/REPLACE_WITH_MODEL_ID",
+  "task": "matmul",
+  "objective": "latency-v1",
+  "configuration": [8, 8],
+  "attempts": 100,
+  "max_tokens": 4096,
+  "prompt_bytes": 32000,
+  "code_bytes": 8000,
+  "notes_bytes": 2000,
+  "request_timeout": 120,
+  "generator_timeout": 30,
+  "check_timeout": 120,
+  "boundaries": 1000000,
+  "terms": 4096,
+  "image": "python:3.12-slim-bookworm"
+}

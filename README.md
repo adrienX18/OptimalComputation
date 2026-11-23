@@ -13,8 +13,9 @@ We will start with small mathematical computations in software. Testing on physi
 The foundation now has verified naive matrix-vector and matrix-matrix baselines,
 a fixed hardware model, and independent latency and abstract-energy objectives.
 Section 9 adds certified polynomial, symmetric-product and two-stage baselines,
-a deterministic scheduling heuristic, and reproducible experiment records. There
-is no autonomous optimizer or AI loop. [PLAN.md](PLAN.md) defines the scope;
+a deterministic scheduling heuristic, and reproducible experiment records. A
+minimal LLM loop now proposes up to 100 designs, learns from feedback, and saves
+every attempt. [PLAN.md](PLAN.md) defines the scope;
 [docs/decisions.md](docs/decisions.md) records the resolved design choices.
 
 Install [elan](https://github.com/leanprover/elan), then run from this directory:
@@ -59,6 +60,27 @@ python3 scripts/certify.py docs/candidates/matvec-grid-exchange-v1.json --output
 It reports `Correct` after kernel verification or `Not certified` with a reason.
 See [automatic certification](docs/certification.md) for the proof artifact,
 error categories, resource limits and use with the existing scoring API.
+
+## Run an LLM search
+
+Choose a provider and model in [configs/search.example.json](configs/search.example.json),
+set its API key in your environment, then use the sequential search harness:
+
+```sh
+python3 -m venv .venv
+.venv/bin/pip install -r requirements-search.txt
+docker pull python:3.12-slim-bookworm
+.venv/bin/python scripts/search.py --config configs/search.example.json --output runs/first
+```
+
+Run `lake build` first and keep Docker running. Each attempt generates a candidate
+inside Docker, receives simulation and proof feedback, and can replace the best
+design only after certification. Fresh bounded prompts carry the best design,
+latest feedback, compact history and a short notebook. The complete records stay
+on disk. See [the search guide](docs/search.md) for configuration, provider selection,
+resume, archive contents and limitations.
+
+## Earlier experiments
 
 [Section 9 usage, algorithms, proof status, and measurements](docs/experiments.md)
 explain the new workloads and configuration-specific certificates. For example:

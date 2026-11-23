@@ -141,16 +141,38 @@ correlations across different terms. Expansion and closed kernel evaluation can
 be costly for large programs; a compiled precheck passing does not guarantee
 that kernel evaluation finishes within its budget. Richer range reasoning,
 shared expression representations and compact proof traces are future options.
-There is no new trust assumption, native proof evaluation, optimizer or LLM loop.
+There is no new trust assumption or native proof evaluation. The optional
+[search harness](search.md) reuses this checker without changing its proof standard.
 
 `python3 scripts/check-certification.py` checks the 79-cycle kernel certificate,
 its exact saved source, a renamed/reordered candidate, a polynomial certificate,
 tampered proof claims, single-instruction mutants, duplicate keys, budgets and
 Horner range failures. It also runs compiled prechecks for all 12 hand references.
 `lake test` checks all 71 existing artifacts against the new checker, alongside
-arithmetic, ordering and diagnostic regressions. The 19-root certification axiom
+arithmetic, ordering and diagnostic regressions. The 20-root certification axiom
 audit is included in `python3 scripts/validate.py`.
 
-The old Section 9 proposal ledger remains historical. A future experiment can
+The old Section 9 proposal ledger remains historical. New search runs can
 use these blocks, but must distinguish actual counterexamples, inconclusive
 certification and accepted proofs rather than relabel all rejections as bugs.
+
+## Retained diagnostics and fresh accepted scores
+
+The optional `--archive` names a new directory. It retains the input snapshot,
+generated source, full precheck and kernel stdout/stderr, commands, limits,
+process results and final report, including on failure. A saved source becomes
+a certificate only when the final report accepts it.
+
+The optional `--objective` invokes the existing `evaluateObjective` API on the
+new proof-bearing artifact. `--fixture` selects the measurement input; use
+`mixed-signs` for toy workloads or the default `generated-23` for larger ones:
+
+```sh
+python3 scripts/certify.py /tmp/candidate.json --archive /tmp/certificate-run \
+  --objective latency-v1 --fixture generated-23 --json
+```
+
+The accepted JSON then includes the complete score and execution record.
+`Certification.Scoring.printScore` is a thin Lean adapter, covered by the axiom
+audit. Python never substitutes a performance formula. The original invocation
+without an objective still produces the same certificate source byte for byte.
