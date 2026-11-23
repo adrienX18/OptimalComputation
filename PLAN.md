@@ -204,7 +204,7 @@ With 64-bit storage slots, the matrix-vector inputs and outputs occupy 2,304 byt
 7. Include every intermediate in a register, pending pipeline result, or declared memory slot. The mathematical reference implementation must never provide extra storage or computation to the candidate.
 8. Use a deterministic representation and stable identifiers for fixtures. Hashes may identify content but do not replace proofs.
 
-**Exit checks:** a tiny program can load two values, multiply them, and store a result; malformed addresses, overlapping layouts, writes to inputs, and writes to `r0` are rejected.
+**Exit checks:** a tiny program representing two loads, a multiplication, and a result store can be constructed and structurally validated; malformed addresses, overlapping layouts, writes to inputs, and writes to `r0` are rejected. Its actual execution is checked in Milestone 5, after the simulator exists.
 
 ### Milestone 5: Implement cycle semantics and objective-free execution
 
@@ -236,7 +236,7 @@ Record cycle count, outputs, instruction counts by kind, loads, stores, register
 
 Completion requires all scheduled instructions to have been processed, all pending effects to have committed, and every output slot to have been written. Record elapsed cycles through that final boundary. In particular, do not stop at the final arithmetic instruction before its output store finishes.
 
-**Exit checks:** hand-worked traces cover dependent and independent arithmetic, loads, stores, writeback collisions, bank contention, and completion. Permuting the representation order of simultaneous instructions cannot change the result. Event counts reconcile with the trace.
+**Exit checks:** the tiny program from Milestone 4 executes its two loads, multiplication, and result store correctly. Hand-worked traces cover dependent and independent arithmetic, loads, stores, writeback collisions, bank contention, and completion. Permuting the representation order of simultaneous instructions cannot change the result. Event counts reconcile with the trace.
 
 ### Milestone 6: Establish verification and failure reporting
 
