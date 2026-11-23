@@ -1,12 +1,13 @@
-import OptimalComputation.Evaluation.Registry
 import OptimalComputation.Evaluation.Objectives
+import OptimalComputation.Examples.MatVecProof
+import OptimalComputation.Examples.MatMulProof
 import OptimalComputation.Examples.ProductPairProof
 
 namespace OptimalComputation.Evaluation
 
-/-- The objective catalog is data, not dispatch logic. Adding a computation
-requires its adapter/certificate and an entry, with no scoring/machine changes.
-The earlier evaluation registry remains intact for backwards-compatible errors. -/
+/-- The only registry of certified candidates: data, not dispatch logic. Adding
+a computation requires its adapter/certificate and an entry, with no
+scoring/machine changes. `evaluateObjective` is the single acceptance path. -/
 def objectiveCatalog : List VerifiedArtifact := [
   ⟨Examples.TinyMultiply.specification, Examples.TinyMultiply.adapter,
     inferInstance, Examples.TinyMultiply.verified⟩,

@@ -97,13 +97,17 @@ full raw equality including configuration, layout, schedule and versions before
 scoring. Changing any of those fields invalidates lookup for that catalog entry.
 Reusing an identifier for a different specification is not an acceptable extension.
 
-The older `evaluateRegistered` API contains workload-specific dispatch for the
-tiny and two matrix candidates and provides structural/static diagnostics before
-certificate lookup. New scoring integrations should use the generic
-`evaluateObjective`; extending the older compatibility registry is optional.
-Never accept JSON correctness labels or a manually constructed `Outcome.verified`
-as certificate authority. Only `CertifiedExecution` supplies the actual-run and
-input equalities needed by `AcceptedScore`.
+The catalog is the only registry and `evaluateObjective` the only acceptance
+path; an artifact that is not exactly registered returns `unverifiedCandidate`.
+Use `inspect`, `checkStatic` and `simulate` to diagnose such an artifact. Never
+accept JSON correctness labels or status strings as certificate authority. Only
+`CertifiedExecution` supplies the actual-run and input equalities needed by
+`AcceptedScore`.
+
+Adding a catalog entry changes the catalog sizes asserted in
+`OptimalComputation/Tests/CLI.lean` and `scripts/check-cli.py`; update those
+counts, add the new proof roots to an audit script, and adjust its declaration
+count in `scripts/validate.py`.
 
 ## Add an independent objective
 

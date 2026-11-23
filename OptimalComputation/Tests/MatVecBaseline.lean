@@ -1,4 +1,5 @@
 import OptimalComputation.Examples.MatVecBaseline
+import OptimalComputation.Tests.Support
 
 namespace OptimalComputation.Tests
 open Hardware Workloads Candidates Evaluation
@@ -67,9 +68,11 @@ private def checkSmallTrace : IO Unit := do
     record.counters.multiplyAdds == 2 && record.counters.registerReads == 9 && record.counters.registerWrites == 7
 
 def matvecBaseline : IO Unit := do
-  let some raw := selectCandidate "matvec-naive-v1" | throw <| IO.userError "Missing baseline registration"
+  let some raw := selectArtifact objectiveCatalog "matvec-naive-v1"
+    | throw <| IO.userError "Missing baseline registration"
   checkBaseline "selection binds exact primary artifact" (raw == candidate.toRaw)
-  checkBaseline "unknown identifier is not selectable" ((selectCandidate "matvec-naive-v0").isNone)
+  checkBaseline "unknown identifier is not selectable" <|
+    (selectArtifact objectiveCatalog "matvec-naive-v0").isNone
   checkBaseline "independent complete schedule" (raw.schedule == expectedSchedule)
   checkBaseline "row-major complete layout" <|
     raw.layout == ⟨List.range 272, (List.range 16).map (272 + ·), []⟩
@@ -78,8 +81,8 @@ def matvecBaseline : IO Unit := do
     checkBaseline s!"{label}: independent mathematical reference" <|
       (vectorScalars (MatVec.reference input)).toList == expected
     let scalars := (MatVec.scalarInput input).toList
-    let .verified accepted := evaluateRegistered raw scalars 2144
-      | throw <| IO.userError s!"{label}: registered evaluation failed"
+    let .accepted accepted := certify raw scalars 2144
+      | throw <| IO.userError s!"{label}: certified evaluation failed"
     checkRecord defaultConfig label expected accepted
     for config in allConfigs do
       let .ok c := validateConfig config | throw <| IO.userError "Invalid intended configuration"
@@ -95,21 +98,21 @@ def matvecBaseline : IO Unit := do
         checkBaseline "accepted record is actual common execution" (record == accepted)
   let scalars := (MatVec.scalarInput (generated 23)).toList
   checkBaseline "larger certified budget preserves record" <|
-    evaluateRegistered raw scalars 5000 == evaluateRegistered raw scalars 2144
+    certify raw scalars 5000 == certify raw scalars 2144
   checkBaseline "final store must drain before acceptance" <|
-    evaluateRegistered raw scalars 2143 == .resourceExhausted ⟨2143, 800, 0, 1⟩
+    certify raw scalars 2143 == .exhausted ⟨2143, 800, 0, 1⟩
   checkBaseline "domain rejection" <|
-    evaluateRegistered raw (32768 :: scalars.drop 1) 2144 ==
+    certify raw (32768 :: scalars.drop 1) 2144 ==
       .failure (.invalidInput (.outsideDomain MatVec.specification.identifier))
   checkBaseline "input count rejection" <|
-    evaluateRegistered raw [] 2144 == .failure (.invalidInput (.transport (.wrongScalarCount 272 0)))
+    certify raw [] 2144 == .failure (.invalidInput (.transport (.wrongScalarCount 272 0)))
   checkBaseline "renamed exact program is not certified" <|
-    evaluateRegistered {raw with identifier := "renamed"} scalars 2144 == .failure (.unverifiedCandidate "renamed")
+    certify {raw with identifier := "renamed"} scalars 2144 == .failure (.unverifiedCandidate "renamed")
   checkBaseline "same-name changed schedule is not certified" <|
-    evaluateRegistered {raw with schedule := raw.schedule.take 799} scalars 2144 ==
+    certify {raw with schedule := raw.schedule.take 799} scalars 2144 ==
       .failure (.unverifiedCandidate raw.identifier)
   checkBaseline "same-name changed configuration is not certified" <|
-    evaluateRegistered {raw with configuration := ⟨1, 1⟩} scalars 2144 ==
+    certify {raw with configuration := ⟨1, 1⟩} scalars 2144 ==
       .failure (.unverifiedCandidate raw.identifier)
   checkSmallTrace
   IO.println "PASS: matvec-naive-v1, 7 certified fixtures, 112 all-config conformance runs, independent schedule/counters, and 22-boundary trace"

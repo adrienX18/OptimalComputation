@@ -1,7 +1,7 @@
 import OptimalComputation.Evaluation.Checked
 
-/-! Proof-carrying concrete executions. Display tags (including Outcome.verified)
-are intentionally not inputs to this API. Every record has an actual-run equality
+/-! Proof-carrying concrete executions. Display tags and status strings are
+intentionally not inputs to this API. Every record has an actual-run equality
 for its exact candidate, allowed input and budget. -/
 namespace OptimalComputation.Evaluation
 open Hardware Candidates Workloads

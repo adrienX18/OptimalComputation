@@ -1,4 +1,4 @@
-import OptimalComputation.Evaluation.Registry
+import OptimalComputation.Evaluation.ObjectiveRegistry
 
 /-! Reproducible fixtures and objective-free reports for the frozen baseline.
 Expected values are used only after machine execution, never to initialize or
@@ -57,11 +57,12 @@ def summaryJson (config : Config) (status : String) (record : ExecutionRecord) :
   s!"  \"laneActiveCycles\": {reprStr record.counters.laneActiveCycles}\n" ++ "}"
 
 def reproduce : IO Unit := do
-  let some raw := selectCandidate "matmul-naive-v1" | throw <| IO.userError "Missing baseline"
+  let some raw := selectArtifact objectiveCatalog "matmul-naive-v1"
+    | throw <| IO.userError "Missing baseline"
   let inputs := (MatMul.scalarInput (generated 23)).toList
-  let .verified record := evaluateRegistered raw inputs 34304
+  let .accepted accepted := evaluateObjective objectiveCatalog raw inputs 34304 "generated-23" latency
     | throw <| IO.userError "Certified baseline did not finish"
-  IO.println (summaryJson defaultConfig.val "all-input-certified" record)
+  IO.println (summaryJson defaultConfig.val "all-input-certified" accepted.execution.record)
 
 def reproduceConfigurations : IO Unit := do
   let inputs := (MatMul.scalarInput (generated 23)).toList

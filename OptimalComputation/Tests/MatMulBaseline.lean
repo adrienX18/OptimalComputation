@@ -1,4 +1,5 @@
 import OptimalComputation.Examples.MatMulResults
+import OptimalComputation.Tests.Support
 
 namespace OptimalComputation.Tests
 open Hardware Workloads Candidates Evaluation
@@ -50,10 +51,11 @@ private def rejectsScore (raw : RawCandidate) (values : List Int) : IO Unit := d
   | _ => throw <| IO.userError "Changed artifact received an accepted score"
 
 def matmulBaseline : IO Unit := do
-  let some raw := selectCandidate "matmul-naive-v1" | throw <| IO.userError "Missing matmul registration"
-  checkMatMul "selection binds complete artifact in both registries" <|
-    raw == candidate.toRaw && selectArtifact objectiveCatalog "matmul-naive-v1" == some raw
-  checkMatMul "unknown identifier is not selectable" ((selectCandidate "matmul-naive-v0").isNone)
+  let some raw := selectArtifact objectiveCatalog "matmul-naive-v1"
+    | throw <| IO.userError "Missing matmul registration"
+  checkMatMul "selection binds complete artifact" (raw == candidate.toRaw)
+  checkMatMul "unknown identifier is not selectable" <|
+    (selectArtifact objectiveCatalog "matmul-naive-v0").isNone
   checkMatMul "independent entire i,j,k schedule" (raw.schedule == expectedSchedule)
   checkMatMul "row-major complete layout" <|
     raw.layout == ⟨List.range 512, (List.range 256).map (512 + ·), []⟩
@@ -61,8 +63,8 @@ def matmulBaseline : IO Unit := do
     checkMatMul s!"{label}: allowed input" (decide (MatMul.AllowedInput input))
     checkMatMul s!"{label}: independent mathematical reference" <|
       (matrixScalars (MatMul.reference input)).toList == expected
-    let .verified record := evaluateRegistered raw (MatMul.scalarInput input).toList 34304
-      | throw <| IO.userError s!"{label}: registered evaluation failed"
+    let .accepted record := certify raw (MatMul.scalarInput input).toList 34304
+      | throw <| IO.userError s!"{label}: certified evaluation failed"
     checkRecord defaultConfig label expected record
   let input := generated 23
   let scalars := (MatMul.scalarInput input).toList
@@ -72,8 +74,6 @@ def matmulBaseline : IO Unit := do
   let record := accepted.execution.record
   let scored := accepted.rescore energy
   checkRecord defaultConfig "proof-carrying execution" expected record
-  checkMatMul "exact certified record agrees with diagnostic registry" <|
-    evaluateRegistered raw scalars 34304 == .verified record
   checkMatMul "latency and energy use same execution" <|
     accepted.result.value == 34303 && scored.result.value == 954087 && scored.execution.record == record
   checkMatMul "exact energy terms and separate units" <|
@@ -103,26 +103,24 @@ def matmulBaseline : IO Unit := do
       expected.zipIdx.map (fun (v, q) => (134 * q + 133, 0, 512 + q, v))
   checkMatMul "full trace reconciles event counters" (Counters.ofEvents defaultConfig events == record.counters)
   checkMatMul "larger budget preserves record" <|
-    evaluateRegistered raw scalars 35000 == .verified record
+    certify raw scalars 35000 == .accepted record
   checkMatMul "last store must commit before success" <|
-    evaluateRegistered raw scalars 34303 == .resourceExhausted ⟨34303, 12800, 0, 1⟩
+    certify raw scalars 34303 == .exhausted ⟨34303, 12800, 0, 1⟩
   match evaluateObjective objectiveCatalog raw scalars 34303 "exhaustion" energy with
   | .resourceExhausted details => checkMatMul "exhaustion cannot score" (details == ⟨34303, 12800, 0, 1⟩)
   | _ => throw <| IO.userError "Exhausted matmul received a score"
   checkMatMul "left input domain rejection" <|
-    evaluateRegistered raw (32768 :: scalars.drop 1) 34304 ==
+    certify raw (32768 :: scalars.drop 1) 34304 ==
       .failure (.invalidInput (.outsideDomain MatMul.specification.identifier))
   checkMatMul "last right input domain rejection" <|
-    evaluateRegistered raw (scalars.take 511 ++ [-32769]) 34304 ==
+    certify raw (scalars.take 511 ++ [-32769]) 34304 ==
       .failure (.invalidInput (.outsideDomain MatMul.specification.identifier))
   checkMatMul "input count rejection" <|
-    evaluateRegistered raw [] 34304 == .failure (.invalidInput (.transport (.wrongScalarCount 512 0)))
+    certify raw [] 34304 == .failure (.invalidInput (.transport (.wrongScalarCount 512 0)))
   for changed in [{raw with identifier := "renamed"},
       {raw with configuration := ⟨1, 1⟩},
       {raw with schedule := raw.schedule.take 12799},
       {raw with layout := {raw.layout with outputs := raw.layout.outputs.reverse}}] do
-    checkMatMul "diagnostic registry rejects binding mutations" <|
-      evaluateRegistered changed scalars 34304 == .failure (.unverifiedCandidate changed.identifier)
     rejectsScore changed scalars
   rejectsScore {raw with modelVersion := "changed-model"} scalars
   rejectsScore {raw with formatVersion := "changed-format"} scalars

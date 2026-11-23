@@ -95,7 +95,7 @@ theorem energy_formula (r : ExecutionRecord) :
     Nat.mul_comm, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm]
 
 /-- Accepted results bind the raw program and exact runtime scalars to proof of
-an actual successful execution. Strings, Outcome.verified and caller-supplied
+an actual successful execution. Strings, status tags and caller-supplied
 ExecutionRecords cannot substitute for this evidence. Score fields are computed. -/
 structure AcceptedScore (raw : RawCandidate) (values : List Int) where
   artifact : VerifiedArtifact
@@ -124,7 +124,7 @@ inductive ScoringOutcome (raw : RawCandidate) (values : List Int) where
   | resourceExhausted (details : Exhaustion)
 
 /-- This entry point executes the exact registered proof-bearing artifact.
-It never promotes an unbound Outcome tag or an arbitrary record to acceptance. -/
+It never promotes a status tag or an arbitrary record to acceptance. -/
 def evaluateObjective (catalog : List VerifiedArtifact) (raw : RawCandidate) (values : List Int)
     (maxBoundaries : Nat) (inputIdentifier : String) (objective : Objective) : ScoringOutcome raw values :=
   match lookupArtifact catalog raw with

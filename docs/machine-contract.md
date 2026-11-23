@@ -273,8 +273,8 @@ outcome with real runner progress details. The reproducible axiom audit is
 The pure latency and abstract-energy objectives share the unchanged execution
 record. `CertifiedExecution` binds an actual trace-disabled `executeValues` success
 to an allowed runtime input and complete proof-bearing candidate. Accepted scoring
-requires this evidence and exact raw-artifact equality, not an `Outcome.verified`
-tag or JSON status. Failures, simulations and exhaustion are never promoted into
+requires this evidence and exact raw-artifact equality, not a status tag or
+JSON field. Failures, simulations and exhaustion are never promoted into
 accepted optimization scores. Rescoring preserves the original execution.
 
 The frozen energy formula and coefficient profile, default matrix-vector costs,

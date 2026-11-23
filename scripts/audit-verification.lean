@@ -45,14 +45,9 @@ may occur. This file has no proof declarations or candidate assumptions. -/
 #print axioms OptimalComputation.Evaluation.inspect_sound
 #print axioms OptimalComputation.Evaluation.checkStatic_sound
 #print axioms OptimalComputation.Evaluation.parseInput_values
-#print axioms OptimalComputation.Evaluation.evaluate_sound
-#print axioms OptimalComputation.Evaluation.lookupTiny_exact
-#print axioms OptimalComputation.Evaluation.registered_sound
 #print axioms OptimalComputation.Examples.TinyMultiply.execution_correct
 #print axioms OptimalComputation.Examples.TinyMultiply.adapter_encode
 #print axioms OptimalComputation.Examples.TinyMultiply.verified
 #print axioms OptimalComputation.Hardware.step
 #print axioms OptimalComputation.Evaluation.run
 #print axioms OptimalComputation.Evaluation.executeValues
-#print axioms OptimalComputation.Evaluation.evaluate
-#print axioms OptimalComputation.Evaluation.evaluateRegistered

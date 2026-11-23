@@ -103,8 +103,9 @@ def parseInput (adapter : ScalarAdapter spec) [∀ x, Decidable (spec.AllowedInp
     else throw (.invalidInput (.outsideDomain spec.identifier))
   else throw (.invalidInput (.transport (.wrongScalarCount adapter.shape.inputCount values.length)))
 
+/-- Result of running an unverified candidate. There is deliberately no
+verified case: certified results exist only as `CertifiedExecution` evidence. -/
 inductive Outcome where
-  | verified (record : ExecutionRecord)
   | simulated (record : ExecutionRecord)
   | failure (reason : Failure)
   | resourceExhausted (details : Exhaustion)
@@ -129,21 +130,6 @@ callers facing untrusted cycle values should cap this budget. -/
 def sufficientSimulationBoundaries (raw : RawCandidate) : Nat :=
   raw.schedule.foldl (fun last entry => max last entry.cycle) 0 + 4
 
-/-- The caller may impose a smaller budget. Executing the minimum retains true
-resource-exhaustion details and the certificate's sufficient bound. -/
-def evaluate {spec : Specification} {adapter : ScalarAdapter spec} (verified : VerifiedCandidate adapter) [∀ x, Decidable (spec.AllowedInput x)]
-    (inputs : List Int) (maxBoundaries : Nat) : Outcome :=
-  match parseInput adapter inputs with
-  | .error e => .failure e
-  | .ok input =>
-    match executeValues verified.candidate (adapter.encode input.val input.property)
-        (min maxBoundaries verified.sufficientBoundaries) false with
-    | .success record => .verified record
-    | .failure reason => .failure (executionFailure reason)
-    | .resourceExhausted details => .resourceExhausted details
-
-
-
 theorem parseInput_values (adapter : ScalarAdapter spec) [∀ x, Decidable (spec.AllowedInput x)]
     {values : List Int} {input : {x : spec.Input // spec.AllowedInput x}}
     (h : parseInput adapter values = .ok input) : (adapter.inputScalars input.val).toList = values := by
@@ -160,26 +146,5 @@ theorem parseInput_values (adapter : ScalarAdapter spec) [∀ x, Decidable (spec
       · contradiction
     · contradiction
   · contradiction
-
-theorem evaluate_sound {spec : Specification} {adapter : ScalarAdapter spec}
-    [∀ x, Decidable (spec.AllowedInput x)] (verified : VerifiedCandidate adapter)
-    {values : List Int} {fuel : Nat} {record : ExecutionRecord}
-    (h : evaluate verified values fuel = .verified record) :
-    ∃ x, ∃ _hx : spec.AllowedInput x,
-      (adapter.inputScalars x).toList = values ∧
-      record.outputs = (adapter.outputScalars (spec.reference x)).toList ∧
-      adapter.readOutput record.outputs = some (spec.reference x) := by
-  unfold evaluate at h
-  split at h
-  · contradiction
-  · rename_i input hi
-    split at h
-    · rename_i result hr
-      cases h
-      have hc := verified.success_correct input.val input.property _ (Nat.min_le_right _ _) record hr
-      exact ⟨input.val, input.property, parseInput_values adapter hi, hc,
-        by rw [hc]; exact adapter.readOutput_roundtrip _⟩
-    · contradiction
-    · contradiction
 
 end OptimalComputation.Evaluation

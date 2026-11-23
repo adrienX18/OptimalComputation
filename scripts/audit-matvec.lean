@@ -63,13 +63,6 @@ import OptimalComputation
 #print axioms OptimalComputation.Examples.MatVecNaive.filterMap_ofFn
 #print axioms OptimalComputation.Examples.MatVecNaive.finish_correct
 #print axioms OptimalComputation.Examples.MatVecNaive.execution_correct
-#print axioms OptimalComputation.Evaluation.lookupTiny_exact
-#print axioms OptimalComputation.Evaluation.tiny_registered_sound
-#print axioms OptimalComputation.Evaluation.lookupMatVec_exact
-#print axioms OptimalComputation.Evaluation.matvec_registered_sound
-#print axioms OptimalComputation.Evaluation.registered_sound
 #print axioms OptimalComputation.Examples.MatVecNaive.layout
 #print axioms OptimalComputation.Examples.MatVecNaive.candidateFor
 #print axioms OptimalComputation.Examples.MatVecNaive.verified
-#print axioms OptimalComputation.Evaluation.evaluateRegistered
-#print axioms OptimalComputation.Evaluation.selectCandidate

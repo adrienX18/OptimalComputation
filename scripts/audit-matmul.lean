@@ -32,12 +32,6 @@ import OptimalComputation
 #print axioms OptimalComputation.Examples.MatMulNaive.candidateFor
 #print axioms OptimalComputation.Examples.MatMulNaive.candidate
 #print axioms OptimalComputation.Examples.MatMulNaive.verified
-#print axioms OptimalComputation.Evaluation.lookupMatMul_exact
-#print axioms OptimalComputation.Evaluation.matmul_registered_sound
-#print axioms OptimalComputation.Evaluation.registered_sound
-#print axioms OptimalComputation.Evaluation.evaluateMatMulRegistered
-#print axioms OptimalComputation.Evaluation.evaluateRegistered
-#print axioms OptimalComputation.Evaluation.selectCandidate
 #print axioms OptimalComputation.Evaluation.objectiveCatalog
 #print axioms OptimalComputation.Evaluation.executeCertified
 #print axioms OptimalComputation.Evaluation.evaluateObjective_registered

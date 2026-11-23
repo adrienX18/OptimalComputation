@@ -24,6 +24,10 @@ def specification : Specification := {
   reference := reference
 }
 
+/-- Catalog evaluation decides the domain through the specification's own fields. -/
+instance (x : specification.Input) : Decidable (specification.AllowedInput x) := by
+  unfold specification at x ⊢; infer_instance
+
 def inputScalarCount : Nat := 16 * 16 + 16
 def outputScalarCount : Nat := 16
 

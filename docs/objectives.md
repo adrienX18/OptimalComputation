@@ -25,7 +25,7 @@ costs are abstracted into the coefficients. Control/routing/pipeline logic area
 remains uncalibrated.
 
 `scoreRecord objective record` is an arithmetic helper, not verification evidence.
-An arbitrary record, JSON label, or manually constructed `Outcome.verified` has
+An arbitrary record, JSON label, or status string has
 no authority to produce an accepted optimization result. `CertifiedExecution`
 contains the exact `executeValues` success equality, allowed logical input, raw
 scalar input equality, and budget bound for a `VerifiedCandidate`. The candidate
@@ -38,8 +38,8 @@ objective` looks up a complete artifact by equality, parses the workload input,
 and executes the certified trace-disabled path. The compiled catalog is the
 trusted specification/certificate registry. A matching name alone is insufficient.
 Unregistered artifacts return `unverifiedCandidate`; invalid inputs and exhaustion
-remain failures/outcomes without an accepted score. The earlier `evaluateRegistered`
-API retains its existing detailed structural/static diagnostics and behavior.
+remain failures/outcomes without an accepted score. Detailed structural and
+runtime diagnostics for an unregistered artifact come from `simulate`.
 Trace-enabled runs remain simulations; no equivalence certificate is claimed.
 
 `accepted.rescore objective` preserves the exact original execution and proof.

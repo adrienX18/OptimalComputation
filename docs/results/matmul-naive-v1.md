@@ -70,7 +70,7 @@ row-major output collector. `verified` packages safety and correctness for the
 exact artifact. Small generic runner/finisher lemmas keep the proof from unfolding
 the entire 12,800-instruction program during kernel checking.
 
-The diagnostic registry checks complete artifact equality. The generic objective
+Catalog lookup checks complete artifact equality. The generic objective
 catalog adds only a `VerifiedArtifact` entry; scoring uses `CertifiedExecution`
 and `AcceptedScore`, retaining the actual execution equality. Display labels and
 saved JSON are reports, not portable proof certificates. Accepted execution has
@@ -93,5 +93,5 @@ check recomputes all 256 products from the 512 runtime input scalars, counts ban
 accesses from nested loops, and checks every saved counter and objective term.
 Regressions also cover zeros, both identity orders, mixed signs, positive and
 negative signed16 endpoints, exact stores, budget exhaustion, and altered bindings.
-The 40-declaration audit includes every new public theorem and the certificate and
-registry roots, with only the standard Lean axioms.
+The 34-declaration audit includes every new public theorem and the certificate and
+catalog roots, with only the standard Lean axioms.

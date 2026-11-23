@@ -64,7 +64,7 @@ lake env lean scripts/reproduce-serial-dot-trace.lean
 ```
 
 The first command selects the exact artifact with
-`selectCandidate "matvec-naive-v1"` and uses `evaluateRegistered`; it prints
+`selectArtifact objectiveCatalog "matvec-naive-v1"` and uses `evaluateObjective`; it prints
 [the primary JSON record](matvec-naive-v1.json). The second prints
 [all configuration records](matvec-naive-v1-configurations.json). Both use the
 fixed `generated-23` fixture defined in `Examples/MatVecBaseline.lean`.
@@ -73,9 +73,8 @@ The third prints [the two-term trace](serial-dot-two-term-v1.txt):
 boundaries. Its issues, completions, payloads, active intervals and counters are
 checked by `lake test`.
 
-The proof audit is `lake env lean scripts/audit-matvec.lean`. Its 72 declarations
-include every new public theorem, the exact candidate and certificate, and
-registry roots. All depend only on Lean's standard `propext`, `Quot.sound`, and
+The proof audit is `lake env lean scripts/audit-matvec.lean`. Its 65 declarations
+include every new public theorem and the exact candidate and certificate. All depend only on Lean's standard `propext`, `Quot.sound`, and
 `Classical.choice` axioms. The proof derives execution from shared machine steps;
 fixtures are additional regression evidence.
 

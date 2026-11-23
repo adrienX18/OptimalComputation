@@ -369,9 +369,6 @@ private def simulateCommand (file : String) (options : Options) : IO (Except Err
   match simulate artifact.adapter.shape raw values budget options.trace.isSome with
   | .failure reason => return .error (failureError reason)
   | .resourceExhausted details => return .error (exhaustionError details)
-  | .verified _ =>
-      return .error ⟨"internal-error", "simulate returned a verified outcome; refusing to report it.",
-        Json.null, 1⟩
   | .simulated record =>
       let expected := (artifact.adapter.outputScalars (artifact.specification.reference input.val)).toList
       let outputsMatch := record.outputs == expected

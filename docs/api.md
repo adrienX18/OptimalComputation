@@ -199,13 +199,12 @@ sufficient boundary budget. Safety requires actual successful finite execution,
 including drained effects and written outputs. Correctness equates every returned
 output scalar to the mathematical reference through the workload codec.
 
-`selectCandidate identifier` selects the stored `tiny-multiply-v1`,
-`matvec-naive-v1`, or `matmul-naive-v1` artifact.
-`evaluateRegistered raw scalarInputs maxBoundaries` recognizes those complete
-artifacts, validates the signed16 workload domain, and returns `.verified record`,
-`.failure reason`, or `.resourceExhausted details`. The generic `objectiveCatalog`
-additionally contains both product-pair artifacts, through the proof-carrying
-scoring API described below.
+`objectiveCatalog` is the single registry of certified artifacts: all seven
+candidates listed by `list-candidates`. `selectArtifact objectiveCatalog identifier`
+returns a stored raw artifact, and `evaluateObjective` (described under
+[Interchangeable objectives](#interchangeable-objectives)) is the only acceptance
+path. It requires exact equality with a registered artifact, validates the
+workload domain, and returns proof-carrying evidence, a failure, or exhaustion.
 The tiny certificate uses seven boundaries; the matrix-vector certificate uses
 2,144 boundaries; matrix-matrix uses 34,304. All fix trace capture disabled, and
 accepted evaluation uses that exact path. Extra budget is capped at the certified bound.
@@ -213,9 +212,10 @@ Smaller budgets actually execute and remain inconclusive on exhaustion; proved
 fuel monotonicity establishes correctness if they finish successfully.
 
 `simulate shape raw scalarInputs maxBoundaries captureTrace` permits arbitrary
-structurally valid programs and returns `.simulated record` on success. Numerical
-success never upgrades them to verified status. It validates count and signed48
-transport only; workload-domain validation belongs to registered evaluation.
+structurally valid programs and returns `.simulated record` on success. Its
+result type has no verified case, so numerical success can never be reported as
+certified. It validates count and signed48 transport only; workload-domain
+validation belongs to catalog evaluation.
 Trace-enabled execution remains available as simulation, without a certificate
 for its trace. The CLI compares every nontrace field of a second traced run with
 the accepted run before exporting it; this observed equality is not a generic proof.
@@ -241,7 +241,7 @@ Run the reproducible proof-dependency audit with:
 lake env lean scripts/audit-verification.lean
 ```
 
-All 53 audited declarations depend only on Lean's standard `propext`, `Quot.sound`,
+All 48 audited declarations depend only on Lean's standard `propext`, `Quot.sound`,
 and `Classical.choice` axioms. There are no admitted proofs, custom axioms, or
 native-decision proof shortcuts. This is a software-model proof, not physical
 FPGA timing, placement, routing, or power validation.
@@ -275,7 +275,7 @@ lake env lean scripts/reproduce-matvec.lean
 lake env lean scripts/audit-matvec.lean
 ```
 
-The new audit covers 72 declarations and uses only the same standard Lean axioms.
+The new audit covers 65 declarations and uses only the same standard Lean axioms.
 The default baseline scores 2,143 cycles and 59,607 abstract energy units.
 
 ## Naive matrix-matrix baseline
@@ -316,11 +316,12 @@ lake env lean scripts/reproduce-matmul-v2-objectives.lean
 
 `Evaluation.Objectives` supplies `latency` and `energy`, both minimizing a pure
 score over the same execution record. Accepted scores require exact proof-carrying
-execution evidence; a record or `.verified` display tag alone is insufficient.
+execution evidence; a record or status label alone is insufficient.
 `evaluateObjective objectiveCatalog raw inputs budget inputId objective` executes
 an exactly registered artifact, while `accepted.rescore objective` preserves the
-same record. The compiled catalog contains tiny multiply, the default matrix-vector
-and matrix-matrix baselines, and the two manually scheduled product-pair comparison fixtures.
+same record. The compiled catalog contains seven artifacts: tiny multiply, the v1
+and v2 matrix-vector and matrix-matrix baselines, and the two manually scheduled
+product-pair comparison fixtures.
 
 The serial pair takes 12 cycles and 172 abstract energy units; the parallel pair
 takes 6 cycles and 202 units. Both are proved safe and correct for all signed16
