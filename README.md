@@ -13,7 +13,7 @@ We will start with small mathematical computations in software. Testing on physi
 The foundation now has verified naive matrix-vector and matrix-matrix baselines,
 a fixed hardware model, and independent latency and abstract-energy objectives.
 This release implements no search strategy or AI loop. [PLAN.md](PLAN.md) defines
-the scope; [questions.md](questions.md) records the remaining minor decision.
+the scope; [questions.md](questions.md) records open design questions.
 
 Install [elan](https://github.com/leanprover/elan), then run from this directory:
 
