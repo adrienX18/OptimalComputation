@@ -377,4 +377,55 @@ Choose ordinary data types, explicit functions, and small reusable proofs. Keep 
 
 If implementation exposes a contradiction in the proposed contract, record the smallest correction and its effect on existing examples before proceeding. Once a contract version is established, preserve its semantics and label incompatible revisions explicitly. Never change a rule solely to make a failing candidate pass.
 
-Stop when the completion checklist is satisfied. Exploring how AI should optimize over this foundation is a subsequent planning and implementation task.
+Stop when the completion checklist is satisfied. Exploring how AI should optimize over this foundation is a subsequent planning and implementation task; Section 9 fixes the workloads it must use.
+
+## 9. Next phase: workloads beyond matrix-vector
+
+Sections 1–8 are complete. This section scopes the workloads for the optimization experiments that follow. It changes no machine rule, and its checklist is separate from Section 7.
+
+### Why matrix-vector alone cannot carry the experiment
+
+`docs/candidates/matvec-grid-exchange-v1.json`, designed by hand in three attempts, simulates in 79 cycles against 1,344 for `matvec-naive-v2`. A counting argument puts the floor at about 77–78 instructions on the busiest lane, so 79 cycles is essentially optimal. On the default configuration one idea decides latency: split the work evenly over the lanes and count issue slots. The 3-cycle latency and the bank ports stop binding once accumulator chains are interleaved and the layout is bank-aware.
+
+A search loop therefore has almost nothing left to find there. Keep matrix-vector at `(8, 8)` as a smoke test and as the first certification target, not as the measured experiment.
+
+### Tasks, in order
+
+Each task isolates one freedom the brief gives the agent. All use the existing five instructions.
+
+| # | Task | Input domain | What it tests |
+| --- | --- | --- | --- |
+| 1 | Matrix-matrix product, `C = A·B` (existing `matmul-16x16-signed16-v1`) | all entries signed 16-bit | Scale and operand reuse |
+| 2 | Polynomial evaluation, `p(x_i) = Σ c_k·x_i^k` for `k ≤ 7` at 16 points | `c_k` in `[-8, 7]`, `x_i` in `[-4, 3]` | Rearranging arithmetic under width limits |
+| 3 | Symmetric product, `G = A·Aᵀ` | all entries signed 16-bit | Sharing intermediates |
+| 4 | Two-stage linear map, `y = B·(A·x)` | `A`, `x` in `[-45, 45]`; `B` signed 16-bit | Dependent stages and data movement |
+
+1. **Matrix-matrix product.** 4,096 products instead of 256. Every input value feeds 16 products, but a lane has 15 writable registers and each load costs an issue slot, so register allocation and reload order decide the instruction count. It also tests whether certification scales to thousands of instructions.
+2. **Polynomial evaluation.** 24 inputs, 16 outputs, `|p| ≤ 174,760`. Horner's rule uses the fewest multiplications, but its running value reaches 42,596 and is then a multiplicand, breaking the signed 16-bit rule. This happens only at `x = -4` with alternating extreme coefficients: under 1% of random inputs, and none of the uniform endpoint fixtures. Horner must therefore be rejected, although it passes most tests. The legal forms cost more multiplications: explicit powers (largest multiplicand 16,384) and Estrin's scheme (largest 680), which also shortens the dependency chain from seven steps to three. Latency and energy can therefore prefer different programs. The naive baseline is the explicit-power form, one point at a time.
+3. **Symmetric product.** 256 inputs, 256 outputs. `G[i][j] = G[j][i]`, so only 136 dot products are distinct; each of the other 120 outputs costs one extra store of a value already in a register. The naive baseline computes all 256. Exploiting the symmetry is a genuine algebraic step, so the certificate must prove more than a reordering of the same operations.
+4. **Two-stage linear map.** 528 inputs, 16 outputs. The bound 45 is the largest for which every intermediate `t = A·x` fits a signed 16-bit multiplicand: `16·45² = 32,400`, while 46 gives 33,856. Stage two cannot start before its `t` entries exist, and each entry is produced on one lane but needed for every output row, so intermediates or partial sums must travel through memory. This is the closest shape to layered inference in TinyTPU that the current instructions can express.
+
+Do not add tasks that need a new primitive. Activations, normalization and softmax need comparison, shifts or division, and so a new model version.
+
+### Rules for every task
+
+- **Baseline first.** Add the specification, scalar adapter and a certified naive baseline before any optimization, as Section 1 requires.
+- **Three reference points per instance.** Record the certified naive baseline, a hand-built reference schedule (it may be unverified if labeled so) and a counting lower bound. Report results as the share of the naive-to-floor gap closed. If the hand-built reference already sits at the floor, the instance is a smoke test and is reported as such.
+- **Pin the configuration for latency.** An instance is a workload, a configuration and an objective; a candidate using another configuration is rejected for that instance. Run each task on `(8, 8)`, on `(8, 1)` where memory binds (two accesses per cycle in total) and on `(2, 8)` where compute binds. Under `energy-proxy-v1` leave the configuration free, because provisioning is part of that trade-off.
+- **Extreme fixtures, and one held-out input.** Fixtures include the endpoints of the allowed domain. For the polynomial task, keep the alternating-coefficient input that breaks Horner out of the fixtures given to the optimizer.
+- **Record every proposal.** For each candidate, record whether it was structurally valid, whether it simulated correctly on the fixtures, and whether it was certified. Candidates that pass the fixtures and fail certification are the main measurement: they are the regressions that tests miss.
+- **Compare with a heuristic.** The brief requires a simple scheduling heuristic as a second baseline, for example a greedy list scheduler. It does not exist yet; build it before claiming an improvement.
+
+### Prerequisite
+
+Only serial one-lane schedules can be certified today. Settle the certification question in [questions.md](questions.md) first. Its acceptance test is to certify `matvec-grid-exchange-v1`.
+
+### Checklist
+
+- [ ] Certification path chosen, implemented and able to certify `matvec-grid-exchange-v1`.
+- [ ] Scheduling-heuristic baseline available for every instance.
+- [ ] Matrix-matrix product: hand-built reference and lower bound recorded on the three pinned configurations.
+- [ ] Polynomial evaluation: specification, certified naive baseline and a rejected Horner candidate.
+- [ ] Symmetric product: specification, certified naive baseline and a certified candidate that uses the symmetry.
+- [ ] Two-stage linear map: specification, certified naive baseline and reference points.
+- [ ] Every instance reports gap closed, proposals certified, and proposals that passed fixtures but failed certification.
