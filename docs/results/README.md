@@ -124,3 +124,34 @@ yields exactly the certified v2 schedules. All v1 records above stay frozen.
 lake env lean scripts/reproduce-matvec-v2-objectives.lean
 lake env lean scripts/reproduce-matmul-v2-objectives.lean
 ```
+
+## Hand-built unverified reference
+
+[`docs/candidates/matvec-grid-exchange-v1.json`](../candidates/matvec-grid-exchange-v1.json)
+is a manually designed eight-lane matrix-vector schedule that finishes in
+**79 cycles**, against 1,344 for `matvec-naive-v2`. It is **not certified and not
+scored**: `simulate` reports matching outputs on all seven fixtures, including
+the signed 16-bit endpoints, but no all-input proof exists for it. It shows how
+much headroom the naive baseline leaves and is the first target for certifying
+a parallel candidate ([questions](../../questions.md)).
+
+Lanes work in pairs on four rows. One lane of a pair handles columns 0–7 and
+the other columns 8–15: each loads its eight vector entries once, then
+alternates a matrix load with a multiply-add while interleaving two row
+accumulators. Halfway through, each lane stores two partial sums to scratch and
+loads its partner's two, so every row is finished by one lane. A bank-aware
+layout keeps every bank at one access per cycle.
+
+Each lane issues 78 instructions: 32 matrix loads, 32 multiply-adds, 8 vector
+loads, 2 scratch stores, 2 scratch loads and 2 output stores (624 in total, with
+16 scratch slots). Every product needs its own matrix load and multiply-add, so
+no schedule of this shape can use fewer than 512 issue slots, or 64 per lane;
+the remaining 14 per lane are the cheapest split found between vector loads and
+partial-sum exchange.
+
+```sh
+.lake/build/bin/optimal_computation simulate docs/candidates/matvec-grid-exchange-v1.json
+```
+
+`scripts/check-cli.py` checks the cycle count, instruction count and reference
+match on every fixture.

@@ -165,6 +165,19 @@ with tempfile.TemporaryDirectory(prefix="optimal-sim-") as temp:
         assert retimed["execution"]["cycles"] == cycles and retimed["referenceCheck"]["status"] == "match"
     assert "21504 cycles" in run("simulate", str(temp / "candidate.json"), as_json=False).stdout
 
+    # The hand-built parallel reference: far faster than the naive baseline,
+    # correct on every fixture, and still only an unverified simulation.
+    reference = ROOT / "docs/candidates/matvec-grid-exchange-v1.json"
+    for fixture in ["zeros", "identity", "mixed-signs", "negative-endpoints",
+                    "positive-endpoints", "opposite-endpoints", "generated-23"]:
+        hand_built = run("simulate", str(reference), "--fixture", fixture)
+        assert hand_built["verificationStatus"] == "unverified-simulation"
+        assert hand_built["referenceCheck"]["status"] == "match", fixture
+        assert hand_built["execution"]["cycles"] == 79 and hand_built["execution"]["scheduleSize"] == 624
+        assert hand_built["configuration"] == {"lanes": 8, "banks": 8}
+        assert hand_built["execution"]["counters"]["laneIssues"] == [78] * 8
+    error("unverified-candidate", "evaluate", "matvec-grid-exchange-v1")
+
     tiny = exported["tiny-multiply-v1"]
     square = copy.deepcopy(tiny)
     square["schedule"][2]["instruction"]["right"] = 1  # computes a*a instead of a*b
@@ -251,4 +264,4 @@ with tempfile.TemporaryDirectory(prefix="optimal-sim-") as temp:
         assert json.loads(result.stdout)["category"] == "invalid-candidate-file", result.stdout
 
 print("PASS: CLI process JSON/human output, exact saved baselines, objectives, inputs, exit codes, "
-      "trace export and unverified candidate files")
+      "trace export, structured failures, unverified candidate files and the 79-cycle hand-built reference")

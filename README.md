@@ -45,6 +45,11 @@ The `-v2` baselines run exactly the v1 instructions, but issue each on its
 predecessor's completion boundary instead of one idle cycle later. Use them as
 the naive comparison point; v1 stays frozen for reproducibility.
 
+A hand-built eight-lane schedule,
+[`docs/candidates/matvec-grid-exchange-v1.json`](docs/candidates/matvec-grid-exchange-v1.json),
+simulates the matrix-vector product in 79 cycles. It is unverified and unscored:
+certifying parallel candidates is the open problem in [questions.md](questions.md).
+
 These are model results. Energy coefficients are hypothetical; physical timing,
 routing and power are uncalibrated. Every accepted candidate has safety and
 correctness proofs for all allowed inputs. Saved JSON is a report, not a proof

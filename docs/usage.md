@@ -263,4 +263,6 @@ candidate with an all-input certificate; see [extensions](extensions.md). For
 example, retiming the exported `matvec-naive-v1` so that each instruction issues
 on its predecessor's completion boundary reproduces exactly the certified
 `matvec-naive-v2` schedule: 1,344 cycles instead of 2,143, with matching outputs.
-`scripts/check-cli.py` runs that example for both matrix workloads.
+`scripts/check-cli.py` runs that example for both matrix workloads. A hand-built
+eight-lane example, `docs/candidates/matvec-grid-exchange-v1.json`, simulates in
+79 cycles; see the [results guide](results/README.md#hand-built-unverified-reference).
