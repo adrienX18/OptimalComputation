@@ -18,6 +18,7 @@ import search
 from harness import evaluate as e, prompt
 from harness.archive import read_json, write_json, command, output
 from harness.model import ReplayModel, scrub
+from harness.randomness import attempt_seed
 
 
 class Engine:
@@ -32,7 +33,7 @@ class Engine:
         return dict(fixtures={}, scoreFixture='zeros', score=100, unit='cycles',
                     raw=dict(layout=dict(inputs=[0,1], outputs=[2], scratch=[]), schedule=[]))
     @staticmethod
-    def generate(code, baseline, directory, image, timeout):
+    def generate(code, baseline, directory, image, timeout, *, seed=0):
         directory.mkdir()
         (directory.parent / 'candidate.json').write_text('{}\n')
         return None
@@ -111,6 +112,28 @@ class SearchTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'Source changed'):
                 self.run_search(None, resume=True)
 
+    def test_seed_metadata_and_provider_request(self):
+        class SeededReplay(ReplayModel):
+            seed_supported = True
+        self.config['seed'] = 23
+        responses = [reply('80')] * 4
+        self.run_search(responses, model=SeededReplay(responses))
+        values = []
+        for index in range(1, 5):
+            where = self.root / 'attempts' / f'{index:04d}'
+            request = read_json(where / 'request.json')
+            metadata = read_json(where / 'randomness.json')
+            context = json.loads(request['messages'][1]['content'])
+            expected = attempt_seed(23, index)
+            self.assertEqual(request['seed'], expected)
+            self.assertEqual(metadata['apiSeed'], expected)
+            self.assertEqual(context['attemptSeed'], expected)
+            self.assertEqual(context['runSeed'], 23)
+            self.assertNotIn('seconds', json.loads(context['latest']['feedback']) if context['latest'] else {})
+            values.append(expected)
+        self.assertEqual(len(set(values)), 4)
+        self.assertNotEqual(values[0], attempt_seed(11, 1))
+
     def test_api_failures_are_bounded(self):
         self.config['attempts'] = 100
         class Failed:
@@ -129,7 +152,7 @@ class SearchTests(unittest.TestCase):
         self.assertFalse(any(row['improved'] for row in result['attempts']))
 
     def test_validation_duplicate_and_oversized(self):
-        for update in [dict(attempts=101), dict(temperature=float('nan')), dict(api_key='secret'), dict(configuration=[True,1])]:
+        for update in [dict(attempts=101), dict(temperature=float('nan')), dict(api_key='secret'), dict(configuration=[True,1]), dict(seed=True), dict(seed=-1)]:
             with self.assertRaises(ValueError):
                 search.settings(self.config | update)
         with self.assertRaises(ValueError):
@@ -178,6 +201,18 @@ def integration():
             with patch.dict('os.environ', {'OPENAI_API_KEY': 'host-secret-test-value'}):
                 failed = e.generate(attack+code, base['raw'], d/'generation', read_json(root/'run/manifest.json')['imageId'], 2)
             assert (failed is None) == (name == 'secret'), (name, failed)
+        random_code = ('import random\nfrom candidate_tools import baseline, seed\n'
+                       'def build():\n    c=baseline()\n'
+                       '    c["identifier"]=str((random.getrandbits(64), hash("reproducible"), seed()))\n'
+                       '    return c\n')
+        candidates = []
+        for index, value in enumerate((123, 123, 456)):
+            d = root / f'seed-check-{index}'
+            d.mkdir()
+            assert e.generate(random_code, base['raw'], d/'generation',
+                              read_json(root/'run/manifest.json')['imageId'], 5, seed=value) is None
+            candidates.append((d/'candidate.json').read_bytes())
+        assert candidates[0] == candidates[1] and candidates[0] != candidates[2]
         scored = certify.certify(root/'run/attempts/0001/candidate.json', objective='energy-proxy-v1', fixture='mixed-signs', archive=root/'energy')
         assert scored['accepted'] and scored['score']['objective']['score'] == 86, scored
         invalid = root/'invalid.json'

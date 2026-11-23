@@ -81,6 +81,12 @@ latest feedback, compact history and a short notebook. The complete records stay
 on disk. See [the search guide](docs/search.md) for configuration, provider selection,
 resume, archive contents and limitations.
 
+For a fixed five-model experiment, [configs/search.batch.json](configs/search.batch.json)
+defines five seeds and 50 attempts per model/seed, with at most five loops running
+at once. `scripts/search_batch.py --smoke` tests two attempts per model;
+`--prepare-only` saves the full plan without launching it. See the
+[batch commands and seed limitations](docs/search.md#five-model-batch).
+
 ## Earlier experiments
 
 [Section 9 usage, algorithms, proof status, and measurements](docs/experiments.md)

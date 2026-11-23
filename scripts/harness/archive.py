@@ -31,7 +31,7 @@ def event(root, kind, **values):
         os.fsync(stream.fileno())
 
 
-def command(args, directory, *, cwd, timeout=120, output_limit=64 * 1024 * 1024, env=None):
+def command(args, directory, *, cwd, timeout=120, output_limit=64 * 1024 * 1024, env=None, cancel=None):
     """Keep the complete output produced before completion or an explicit limit.
 
     Each invocation gets a new directory, including failed/interrupting invocations.
@@ -50,6 +50,13 @@ def command(args, directory, *, cwd, timeout=120, output_limit=64 * 1024 * 1024,
                                        stdout=stdout, stderr=stderr, start_new_session=True)
             deadline = time.monotonic() + timeout
             while process.poll() is None:
+                if cancel is not None and cancel.is_set():
+                    status = 'interrupted'
+                    with suppress(ProcessLookupError):
+                        os.killpg(process.pid, signal.SIGINT)
+                    with suppress(subprocess.TimeoutExpired):
+                        process.wait(timeout=5)
+                    break
                 if time.monotonic() >= deadline:
                     status = 'timeout'
                     break

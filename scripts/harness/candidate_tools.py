@@ -3,6 +3,11 @@ import json
 from pathlib import Path
 
 
+def seed():
+    """Seed assigned to this attempt; use it for any private random.Random instance."""
+    return json.loads(Path('/input/randomness.json').read_text())['attemptSeed']
+
+
 def baseline():
     """Return a fresh copy of this run's original certified candidate."""
     return json.loads(Path('/input/baseline.json').read_text())

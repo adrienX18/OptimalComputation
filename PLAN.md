@@ -464,3 +464,13 @@ next prompt bounded. See [the search guide](docs/search.md) and
 
 This harness finds the best certified design among its attempts. It does not
 claim a global optimum or add a new benchmark result to the historical ledger.
+
+### Independent batch repeats (2026-11-23)
+
+- [x] Fixed five-model matrix with five seeds and 50 attempts per loop.
+- [x] At most five independent processes; every loop keeps its own bounded memory.
+- [x] Record seeds and API support, all run archives, launch logs and a hash inventory.
+- [x] Prepare without launching; resume unfinished loops without repeating consumed slots.
+- [x] Offline tests for planning, concurrency, partial failure, cancellation and resume.
+- [x] Complete the ten-call smoke test (two attempts per model) and audit its records.
+- [ ] Launch the full 1,250-attempt experiment only after the user's next approval.

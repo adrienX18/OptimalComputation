@@ -220,3 +220,56 @@ including GPT-6.2 Astra and Opus 5.5 at medium reasoning. All three supplied
 configurations validated; explicit budget overrides still work. Hash checks
 confirmed that all 659 historical smoke-test files were unchanged. No additional
 live model calls were made for this update.
+
+## Five-model batch validation
+
+The full `python3 scripts/validate.py` run passed: 170 build jobs, fourteen
+Lean suites, CLI/experiment/certification/search checks, seven axiom audits,
+the 232-proposal historical ledger, ten byte-identical saved artifacts, and
+whitespace/source checks across 165 text files.
+
+On 2026-11-23, all nine loop tests and all six batch tests passed. Batch tests
+cover the exact 25-run/1,250-attempt matrix, the five-run/ten-attempt smoke mode,
+bounded concurrency, prepare without launching, cancellation, partial failures,
+resume without duplicate completed runs, source/config drift and source snapshots.
+
+All five provider tests passed using mocked HTTP through the installed SDK.
+They now exercise Fable 5.2, Opus 5.5, Sonnet 5.5, Astra 6.2, Sol 6.2 and the
+existing Gemini adapter. They check OpenAI's outgoing seed and its absence from
+Anthropic requests, along with the 32,768-token limit, 600-second timeout,
+credential redaction, callback records and absence of automatic retries.
+
+The real Docker/Lean integration passed, including three generator executions:
+the same seed reproduced identical random values, Python hash values and
+candidate bytes; another seed produced different bytes. Existing isolation,
+read-only inputs, timeout, six-cycle certification, rejected candidate, resume,
+86-unit energy scoring and 63-cycle polynomial improvement checks also passed.
+All 659 files in the earlier Opus/Astra pilot still match their saved hashes.
+
+The live smoke batch completed exactly ten calls, two for each selected model,
+with seed 11 and five overlapping processes. All requests used the intended
+model and budget; the second prompt contained the first attempt's feedback.
+No API call failed or retried. Six proposed designs received kernel certificates:
+
+| Model | Attempt 1 | Attempt 2 | Best certified cycles |
+| --- | --- | --- | --- |
+| Fable 5.2 | Provider refusal | 30 cycles | 30 |
+| Opus 5.5 | 38 cycles | 36 cycles | 36 |
+| Sonnet 5.5 | Simulation failed | Range not proved | 1520 (baseline) |
+| Astra 6.2 | 34 cycles | 31 cycles | 31 |
+| Sol 6.2 | 30 cycles | Simulation failed | 30 |
+
+Fable's first response has raw stop reason `refusal`, normalized as
+`content_filter`; it returned no design. This was retained as a proposal error,
+including usage and provider records. The next attempt succeeded. Sonnet's
+range result remains inconclusive, not a proved counterexample. Rejected or
+unproven candidates never displaced the certified incumbent.
+
+The archive audit checked all ten prompts, responses and feedback records,
+seed derivation and actual outgoing API fields, all source snapshots, full
+available fixture traces, candidate/certificate hashes, kernel exits and scores,
+parallel execution, inventory hashes and absence of credential values. The
+local archive is `runs/smoke-five-models-20261123/`, with `report.md`, `audit.json`,
+`inventory.json`, aggregate CSV and full validation logs. These are smoke-test
+observations, not a ranking from the planned experiment. The full matrix remains
+unlaunched pending the user's instruction.

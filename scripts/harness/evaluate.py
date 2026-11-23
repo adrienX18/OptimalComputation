@@ -93,13 +93,14 @@ def resolve_image(image, directory):
     return value
 
 
-def generate(code, baseline, directory, image, timeout=30):
+def generate(code, baseline, directory, image, timeout=30, *, seed=0):
     directory = Path(directory)
     inputs = directory / 'input'
     inputs.mkdir(parents=True)
     inputs.chmod(0o755)
     (inputs / 'generator.py').write_text(code)
     write_json(inputs / 'baseline.json', baseline)
+    write_json(inputs / 'randomness.json', dict(attemptSeed=seed))
     for name in ['candidate_tools.py', 'container_entry.py']:
         shutil.copyfile(TOOLS / name, inputs / name)
     for path in inputs.iterdir():
@@ -110,8 +111,9 @@ def generate(code, baseline, directory, image, timeout=30):
             '--network=none', '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges',
             '--pids-limit=64', '--memory=256m', '--cpus=1', '--user=65534:65534',
             '--tmpfs', '/tmp:rw,nosuid,nodev,size=16777216', '--workdir', '/tmp',
+            '--env', f'PYTHONHASHSEED={seed}',
             '--mount', f'type=bind,src={inputs.resolve()},dst=/input,readonly',
-            image, 'python', '-I', '-B', '/input/container_entry.py']
+            image, 'python', '-P', '-s', '-B', '/input/container_entry.py']
     try:
         result = command(args, directory / 'process', cwd=ROOT, timeout=timeout,
                          output_limit=certify.MAX_FILE_BYTES)

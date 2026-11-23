@@ -65,6 +65,12 @@ class Model:
         self.dependencies = {name: importlib.metadata.version(name) for name in ('litellm', 'openai', 'httpx', 'python-dotenv')}
         self.sdk.telemetry = False
         self.sdk.drop_params = False
+        provider, _, name = config['model'].partition('/')
+        # The installed adapter's capabilities are also saved in the run manifest.
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            params = self.sdk.get_supported_openai_params(model=name or provider,
+                        custom_llm_provider=provider if name else None) or []
+        self.seed_supported = 'seed' in params
 
     def __call__(self, request, directory):
         directory = Path(directory)

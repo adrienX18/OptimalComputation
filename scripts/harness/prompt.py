@@ -3,11 +3,14 @@ import json
 from pathlib import Path
 
 from .evaluate import TASKS, STARTER
+from .randomness import attempt_seed
 
 RULES = '''Optimize a finite candidate for the fixed arty-model-v1 machine.
 Return ONLY a JSON object with strings: idea, code, notes. code defines build()
 returning candidate-v1 JSON. notes replaces your short notebook for the next attempt.
 Use Python's standard library and candidate_tools. No external packages or tools.
+Python's global random module is seeded for each attempt. If you create a private
+PRNG, use random.Random(candidate_tools.seed()); avoid time or OS entropy.
 Generator loops expand a static schedule; the machine itself has no runtime branches.
 You may change algorithm, layout, registers, schedule, and (only for energy) configuration.
 Keep the workload and model fixed. Only a kernel-certified candidate can be best.
@@ -30,6 +33,15 @@ unless explicitly labeled seconds. Avoid repeating an unsuccessful idea unchange
 
 def clip(value, limit):
     return str(value).encode('utf-8')[:limit].decode('utf-8', errors='ignore')
+
+
+def stable_feedback(value):
+    if isinstance(value, dict):
+        return {key: stable_feedback(item) for key, item in value.items()
+                if key not in ('seconds', 'kernelSeconds', 'totalSeconds', 'started', 'ended', 'time')}
+    if isinstance(value, list):
+        return [stable_feedback(item) for item in value]
+    return value
 
 
 def build(config, baseline, rows, root):
@@ -55,13 +67,14 @@ def build(config, baseline, rows, root):
     raw = baseline['raw']
     context = dict(task=TASKS[config['task']][2], objective=config['objective'],
                    configuration=config['configuration'], attempt=len(rows)+1, limit=config['attempts'],
+                   runSeed=config['seed'], attemptSeed=attempt_seed(config['seed'], len(rows)+1),
                    codeByteLimit=config['code_bytes'], notebookByteLimit=config['notes_bytes'],
                    baseline=dict(score=baseline['score'], unit=baseline['unit'],
                                  layout=raw['layout'], scheduleSize=len(raw['schedule']),
                                  firstInstructions=raw['schedule'][:5], lastInstructions=raw['schedule'][-2:]),
                    best=dict(score=best_score, code=best_code),
                    latest=dict(code=last_code if last_code != best_code else '(same as best)',
-                               feedback=clip(json.dumps(latest, ensure_ascii=False), 3000)) if latest else None,
+                               feedback=clip(json.dumps(stable_feedback(latest), ensure_ascii=False), 3000)) if latest else None,
                    notebook=notes,
                    history=[dict(attempt=r['attempt'], idea=clip(r.get('idea', ''), 100),
                                  status=r['category'], score=r.get('score')) for r in rows])

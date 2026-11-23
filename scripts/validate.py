@@ -25,6 +25,7 @@ command("python3", "scripts/check-experiments.py")
 command("python3", "scripts/check-section9-results.py")
 command("python3", "scripts/check-certification.py")
 command("python3", "scripts/check-search.py")
+command("python3", "scripts/check-search-batch.py")
 command("lake", "env", "lean", "scripts/check-doc-examples.lean")
 
 for name, count in [("verification", 48), ("matvec", 65), ("objectives", 26), ("matmul", 34),

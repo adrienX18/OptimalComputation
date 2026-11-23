@@ -71,6 +71,7 @@ reject unknown fields, including API keys.
 | `objective` | `latency-v1` or `energy-proxy-v1`; lower is better |
 | `configuration` | Initial `[lanes, banks]`, each 1, 2, 4 or 8; toy tasks use `[1, 1]` |
 | `attempts` | 1–100 slots, including malformed replies, errors and interruptions; baseline is extra |
+| `seed` | Run seed, integer 0–2147483647; default 0; see reproducibility below |
 | `max_tokens` | Provider output-token limit, default 32768 |
 | `prompt_bytes` | Maximum UTF-8 bytes of serialized messages, default 32000 |
 | `code_bytes` / `notes_bytes` | Maximum accepted generator size / notebook shown next time, default 8000 / 2000 |
@@ -100,6 +101,91 @@ Ready-to-run configurations for the two selected models are
 [`search.astra.json`](../configs/search.astra.json). Each uses the polynomial
 task, medium reasoning, eight lanes/banks, and 100 attempts with these increased
 budgets. The earlier smoke-test files retain their original settings.
+
+## Five-model batch
+
+[`search.batch.json`](../configs/search.batch.json) specifies five models, seeds
+`11, 23, 37, 53, 71`, and 50 attempts per model/seed: **25 independent loops and
+1,250 total attempt slots**. At most five loops run concurrently in separate
+processes. Each starts from the original baseline with its own notebook and
+history; it cannot see another run's discoveries. The task stays polynomial,
+the objective latency, the hardware eight lanes/eight banks, and reasoning
+effort medium, with the common 32,768-token output budget.
+
+The model IDs were checked on 2026-11-23 and are fixed in the configuration:
+
+| Name | Provider/model ID |
+| --- | --- |
+| Fable 5.2 | `anthropic/claude-fable-5-2` |
+| Opus 5.5 | `anthropic/claude-opus-5-5` |
+| Sonnet 5.5 | `anthropic/claude-sonnet-5-5` |
+| Astra 6.2 | `openai/gpt-6.2-astra` |
+| Sol 6.2 | `openai/gpt-6.2-sol` |
+
+See Anthropic's [Fable overview](https://platform.claude.com/docs/en/models/fable-5-2/overview)
+and [model lifecycle](https://platform.claude.com/docs/en/about-claude/model-deprecations),
+and the [OpenAI model catalog](https://developers.openai.com/api/docs/models).
+No automatic substitution or upgrade takes place. The actual response model
+and any provider fingerprint are retained with the response.
+
+Test exactly two attempts per model, using only the first seed (ten calls total):
+
+```sh
+.venv/bin/python scripts/search_batch.py --config configs/search.batch.json --output runs/five-model-smoke --smoke
+```
+
+Prepare the full experiment without calling any model or launching generators:
+
+```sh
+.venv/bin/python scripts/search_batch.py --config configs/search.batch.json --output runs/five-model-night --prepare-only
+```
+
+**Only when ready to launch**, run the saved plan:
+
+```sh
+.venv/bin/python scripts/search_batch.py --output runs/five-model-night --resume
+```
+
+Keep this process and Docker running, and prevent the computer from sleeping.
+This is a local foreground runner, not a hosted scheduler. Repeating `--resume`
+continues unfinished loops and skips completed ones. A failed or interrupted
+attempt still consumes its slot. Three consecutive API errors stop that loop;
+other loops continue. The batch reports incomplete and exits nonzero if any
+loop stops early. It never silently adds paid retries to reach 50 successes.
+Providing `--config` without `--smoke` or `--prepare-only` starts a full batch
+immediately; use the prepare/resume pair when staging an experiment.
+
+Each batch saves a manifest with its exact matrix, configurations, source hashes,
+Python version and Git revision, plus a source snapshot and working-tree patch.
+`runs/<model>/seed-<seed>/` contains the complete individual run archive described
+below. `jobs/` preserves every launch's command, stdout, stderr and result, even
+after resuming. `events.jsonl`, `summary.json` and `attempts.csv` provide batch
+progress and comparisons; summaries refresh as loops finish. `inventory.json`
+records every artifact's size and SHA-256 at preparation and orderly shutdown,
+excluding locks and the inventory itself. Raw records are retained even for
+rejected designs. Batch resume refuses changed source, Python or saved configs;
+individual resume also checks the recorded SDK dependencies and Docker image.
+
+### What the seeds reproduce
+
+For attempt `i`, derive a 31-bit seed from the first four bytes of
+SHA-256(`naive-search-seed-v1:<run seed>:<i>`), in big-endian order, then mask with
+`0x7fffffff`. The derivation is independent of parallel execution order. Put both
+seeds in the prompt and save them in `attempts/NNNN/randomness.json`. Seed Python's
+global `random` generator and `PYTHONHASHSEED` in the container; generated code
+can use `candidate_tools.seed()` for its own PRNG. Wall-clock durations are kept
+in the archive but omitted from the feedback sent back to the model.
+
+Pass the attempt seed to the model API only if the installed adapter supports
+it. These OpenAI adapters support a best-effort seed; these Anthropic adapters
+have no sampling-seed parameter. Claude sees the seed in its prompt, but that
+does **not** make its sampling reproducible. Even OpenAI's seed cannot guarantee
+identical output; see its [reproducibility guidance](https://developers.openai.com/api/docs/guides/advanced-usage).
+Generated code could also override the seed or use another entropy source.
+Thus fixed seeds identify comparable repeats and stabilize ordinary local
+randomness; they do not guarantee byte-identical live reruns. Save the exact
+responses, code and candidates for inspection and offline replay. Public
+verification fixtures stay identical across repeats so scores remain comparable.
 
 ## What happens in an attempt
 
@@ -161,6 +247,7 @@ run/
   startup/...             Docker inspection commands and results
   attempts/0001/
     request.json          full prompt and model parameters, saved before calling
+    randomness.json       run/attempt seeds, API seed support and sent seed
     provider-*.json       provider request/response data exposed by SDK callbacks
     response.json         full normalized response, usage, metadata and cost estimate
     model-stdout.txt      SDK output (stderr saved separately)
@@ -223,6 +310,7 @@ actual Docker generator and Lean verifier. It does not require LiteLLM:
 ```sh
 python3 scripts/search.py --config /tmp/search.json --replay /tmp/replies.json --output runs/replay
 python3 scripts/check-search.py
+python3 scripts/check-search-batch.py
 python3 scripts/check-search.py --integration
 .venv/bin/python scripts/check-search-providers.py
 ```

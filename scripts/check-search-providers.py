@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Exercise real LiteLLM adapters with HTTP mocked: no network or paid calls."""
 import json
+from copy import deepcopy
 import os
 from pathlib import Path
 import tempfile
@@ -88,6 +89,12 @@ class ProviderTests(unittest.TestCase):
                 finishReason='STOP', index=0)], usageMetadata=dict(promptTokenCount=100,
                 candidatesTokenCount=20, totalTokenCount=120), modelVersion='gemini-2.0-flash')),
         ]
+        for name, template in [('anthropic/claude-fable-5-2', samples[1][1]),
+                               ('anthropic/claude-sonnet-5-5', samples[1][1]),
+                               ('openai/gpt-6.2-sol', samples[0][1])]:
+            body = deepcopy(template)
+            body['model'] = name.split('/', 1)[1]
+            samples.append((name, body))
         with tempfile.TemporaryDirectory() as tmp, patch.dict('os.environ', {
                 'OPENAI_API_KEY':KEY, 'ANTHROPIC_API_KEY':KEY, 'GEMINI_API_KEY':KEY}):
             previous = None
@@ -107,6 +114,8 @@ class ProviderTests(unittest.TestCase):
                                timeout=cfg['request_timeout'])
                 if 'reasoning_effort' in cfg:
                     request['reasoning_effort'] = cfg['reasoning_effort']
+                if adapter.seed_supported:
+                    request['seed'] = 12345
                 with patch.object(httpx.Client, 'send', send):
                     response = adapter(request, folder)
                 self.assertEqual(len(calls), 1)
@@ -114,9 +123,12 @@ class ProviderTests(unittest.TestCase):
                 if name.startswith('openai/'):
                     self.assertEqual(wire['max_completion_tokens'], 32768)
                     self.assertEqual(wire['reasoning_effort'], 'medium')
+                    self.assertEqual(wire['seed'], 12345)
                 elif name.startswith('anthropic/'):
                     self.assertEqual(wire['max_tokens'], 32768)
                     self.assertEqual(wire['output_config']['effort'], 'medium')
+                    self.assertFalse(adapter.seed_supported)
+                    self.assertNotIn('seed', wire)
                 else:
                     self.assertEqual(wire['generationConfig']['max_output_tokens'], 32768)
                 self.assertEqual(calls[0].extensions['timeout']['read'], 600)

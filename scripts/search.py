@@ -19,9 +19,10 @@ from harness import evaluate as evaluator
 from harness import prompt
 from harness.archive import event, read_json, write_json
 from harness.model import Model, ReplayModel, scrub
+from harness.randomness import attempt_seed
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULTS = dict(task='matvec', objective='latency-v1', configuration=[8, 8], attempts=100,
+DEFAULTS = dict(task='matvec', objective='latency-v1', configuration=[8, 8], attempts=100, seed=0,
                 max_tokens=32768, prompt_bytes=32000, code_bytes=8000, notes_bytes=2000,
                 request_timeout=600, generator_timeout=30, check_timeout=120,
                 boundaries=1000000, terms=4096, image='python:3.12-slim-bookworm')
@@ -46,6 +47,8 @@ def settings(given):
             raise ValueError(f'{key} must be a positive integer.')
     if config['attempts'] > 100:
         raise ValueError('At most 100 attempts per run.')
+    if type(config['seed']) is not int or not 0 <= config['seed'] <= 0x7fffffff:
+        raise ValueError('seed must be an integer between 0 and 2147483647.')
     for key in ('request_timeout', 'generator_timeout', 'check_timeout'):
         if type(config[key]) not in (int, float) or not math.isfinite(config[key]) or config[key] <= 0:
             raise ValueError(f'{key} must be finite and positive.')
@@ -154,6 +157,11 @@ def run(root, config=None, *, resume=False, replay=None, model=None, engine=eval
         if manifest.get('dependencies') not in (None, dependencies):
             raise ValueError('Model dependencies changed since this run.')
         manifest['dependencies'] = dependencies
+        seed_supported = getattr(model, 'seed_supported', False)
+        if manifest.get('apiSeedSupported') not in (None, seed_supported):
+            raise ValueError('API seed support changed since this run.')
+        manifest['apiSeedSupported'] = seed_supported
+        manifest['seedPolicy'] = 'naive-search-seed-v1; local PRNG/hash seed; API seed when supported; API output is not guaranteed deterministic'
         write_json(root / 'manifest.json', manifest)
         if (root / 'baseline.json').exists():
             baseline = read_json(root / 'baseline.json')
@@ -190,10 +198,16 @@ def run(root, config=None, *, resume=False, replay=None, model=None, engine=eval
             started = time.monotonic()
             request = dict(model=config['model'], messages=messages, max_tokens=config['max_tokens'],
                            timeout=config['request_timeout'], num_retries=0, stream=False)
+            seed = attempt_seed(config['seed'], index)
+            if seed_supported:
+                request['seed'] = seed
             for key in ('temperature', 'reasoning_effort', 'api_base'):
                 if key in config:
                     request[key] = config[key]
             write_json(directory / 'request.json', request)
+            write_json(directory / 'randomness.json', dict(version='naive-search-seed-v1',
+                       runSeed=config['seed'], attemptSeed=seed,
+                       apiSeed=seed if seed_supported else None, apiSeedSupported=seed_supported))
             event(root, 'attempt-started', attempt=index)
             idea = ''
             stage = 'api'
@@ -209,7 +223,7 @@ def run(root, config=None, *, resume=False, replay=None, model=None, engine=eval
                 (directory / 'generator.py').write_text(parsed['code'])
                 stage = 'generation'
                 feedback = engine.generate(parsed['code'], baseline['raw'], directory / 'generation', image,
-                                           config['generator_timeout'])
+                                           config['generator_timeout'], seed=seed)
                 if feedback is None:
                     stage = 'evaluation'
                     feedback = engine.evaluate(config, baseline, directory)

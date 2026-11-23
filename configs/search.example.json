@@ -4,6 +4,7 @@
   "objective": "latency-v1",
   "configuration": [8, 8],
   "attempts": 100,
+  "seed": 0,
   "max_tokens": 32768,
   "prompt_bytes": 32000,
   "code_bytes": 8000,

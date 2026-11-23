@@ -201,7 +201,7 @@ Python, recorded adapter dependencies and Docker image. This is conservative but
 keeps one run comparable. Provider inference itself need not be deterministic.
 
 Deferred alternatives include richer retrieval of old attempts, deduplication,
-parallel search, automatic repairs, a run database, full environment locking and
+parallel proposals within one loop, automatic repairs, a run database, full environment locking and
 measured hardware objectives. These can be evaluated against this simple loop.
 
 ## Response budget after the live pilot
@@ -215,3 +215,35 @@ Keep the prompt, notebook and generator size limits independent and unchanged.
 Explicit per-run settings still override these defaults. Preserve completed
 pilot configurations and records, and provide fresh Opus/Astra configurations
 for the next experiment.
+
+## Fixed independent repeats across five models
+
+On 2026-11-23, prepare five models times five fixed seeds times 50 attempts.
+The first run is a ten-attempt smoke test; the 1,250-attempt experiment remains
+pending explicit launch approval. Fable 5.2, Opus 5.5, Sonnet 5.5, Astra 6.2 and
+Sol 6.2 use one shared polynomial/latency configuration and medium reasoning.
+Fixed model IDs avoid silently selecting a newer version during the experiment.
+Equal token limits and reasoning labels do not imply equal compute or cost
+across providers; both usage and observed durations remain available for analysis.
+
+Use a small process pool, at most five independent sequential loops, over seeds
+11, 23, 37, 53 and 71. Each loop starts fresh. This adds throughput without
+introducing collaboration, cross-run memory, a search framework or a database.
+The shared machine may affect elapsed verification time and resource limits;
+modeled cycle scores do not measure host wall-clock time. API rate-limit errors
+remain visible attempt failures with no automatic retries, as before.
+
+Derive per-attempt seeds from a documented SHA-256 rule, seed the generator's
+ordinary Python randomness and hash order, and pass API seeds only where
+supported. Anthropic exposes no sampling seed, and OpenAI's seed is best effort.
+Do not promise identical live reruns: preserve exact responses, code, generated
+candidates and environment metadata instead. Strip wall-clock timings only from
+model feedback, never from saved records. Verification fixtures stay fixed.
+
+Use plain directories, a batch manifest, per-launch logs, aggregate JSON/CSV and
+a hash inventory. Record partial failures and resume only unfinished loops,
+preserving every earlier attempt and launch. Prepare-only mode makes the full
+matrix reviewable without spending on model calls. Large raw archives stay
+local under ignored `runs/`; Git contains code, configurations and documentation.
+Remote backups, hosted scheduling, automatic retry/backoff and guaranteed
+deterministic provider inference remain outside this minimal runner.
