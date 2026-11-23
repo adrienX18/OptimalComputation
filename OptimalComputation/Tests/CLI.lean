@@ -117,9 +117,24 @@ private def candidateFiles : IO Unit := do
           (e.category == "invalid-candidate-file" && (e.message.splitOn reason).length > 1)
   checkCLI "longest allowed identifier accepted" <|
     (parseCandidate (candidateText (identifier := String.ofList (List.replicate 64 'a')))).toOption.isSome
-  checkCLI "quoted text keeps printable ASCII and escapes the rest" <|
+  checkCLI "quoted text keeps printable ASCII, escapes the rest and is bounded" <|
     quoteText "plain-v1" == "\"plain-v1\"" &&
-    quoteText "a\nb\x1b\"c\\" == "\"a\\u{a}b\\u{1b}\\\"c\\\\\""
+    quoteText "a\nb\x1b\"c\\" == "\"a\\u{a}b\\u{1b}\\\"c\\\\\"" &&
+    quoteText "\u009b\u2028" == "\"\\u{9b}\\u{2028}\"" &&
+    quoteText (String.ofList (List.replicate 70 'a')) ==
+      "\"" ++ String.ofList (List.replicate 64 'a') ++ "...\""
+  -- Every string field of a candidate file is limited to the identifier alphabet,
+  -- including characters that Lean's own string quoting leaves unescaped.
+  let registered := Examples.TinyMultiply.candidate.toRaw
+  for (field, hostile) in [
+      ("identifier", {registered with identifier := "x\u009by"}),
+      ("workloadIdentifier", {registered with workloadIdentifier := "x\ny"}),
+      ("modelVersion", {registered with modelVersion := "x\u2028y"}),
+      ("formatVersion", {registered with formatVersion := String.ofList (List.replicate 65 'v')})] do
+    match parseCandidate hostile.toJson.compress with
+    | .ok _ => throw <| IO.userError s!"CLI check failed: hostile {field} accepted"
+    | .error e => checkCLI s!"hostile {field} rejected by name" <|
+        e.category == "invalid-candidate-file" && (e.message.splitOn s!"candidate.{field}").length > 1
   let tiny := Examples.TinyMultiply.candidate.toRaw
   checkCLI "default simulation budget covers the last completion" (sufficientSimulationBoundaries tiny == 9)
   checkCLI "empty schedule budget" (sufficientSimulationBoundaries {tiny with schedule := []} == 4)

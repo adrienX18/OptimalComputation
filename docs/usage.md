@@ -175,8 +175,10 @@ An early store in the tiny program, for example, returns:
 | `inadmissible-configuration` | | `unsupportedLanes`, `unsupportedBanks {actual, allowed}` |
 | `malformed-candidate` | | `emptyIdentifier`; `wrongModelVersion`, `wrongFormatVersion`, `wrongWorkloadIdentifier {expected, actual}` |
 
-`incomplete-output` lists the unwritten `addresses`; input failures report the
-scalar count, or the offending `index` and `value`.
+`incomplete-output` lists the unwritten `addresses`. Input failures report the
+expected and actual scalar counts, or the workload whose domain a value violated.
+`overdueCompletion {due}` exists for hand-built machine states and cannot arise
+from a candidate file.
 
 ## Export an observational trace
 
@@ -234,9 +236,11 @@ address}`, `add` and `multiply {destination, left, right}`, and `multiplyAdd
 must be plain nonnegative integers: no fractions or exponents, at most 4,096 digits,
 and nesting at most eight levels deep. Violations return `invalid-candidate-file`
 before JSON parsing, so a hostile file cannot trigger exponent expansion.
-`identifier` may use at most 64 characters from `A-Z`, `a-z`, `0-9`, `.`, `_` and
-`-`. It is echoed in plain-text output, and other file-supplied text is escaped
-there, so a file cannot print lines that imitate another command's result.
+The four string fields (`identifier`, `workloadIdentifier`, `modelVersion` and
+`formatVersion`) may each use at most 64 characters from `A-Z`, `a-z`, `0-9`, `.`,
+`_` and `-`. They are echoed in plain-text output; unknown field names and
+instruction kinds are escaped and shortened there. A file therefore cannot print
+lines that imitate another command's result.
 
 `simulate` takes the workload's scalar shape, input domain and reference from the
 compiled catalog, selected by `workloadIdentifier` (otherwise `unknown-workload`),

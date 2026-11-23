@@ -43,7 +43,7 @@ inductive CertifiedOutcome (artifact : VerifiedArtifact) (values : List Int) whe
   | failure (reason : Failure)
   | resourceExhausted (details : Exhaustion)
 
-/-- Run the same parser and machine as evaluate, retaining their exact evidence.
+/-- Run the workload's input parser and the shared machine, retaining their exact evidence.
 The supplied budget can cause exhaustion but cannot bypass the certificate. -/
 def executeCertified (artifact : VerifiedArtifact) (values : List Int) (maxBoundaries : Nat) :
     CertifiedOutcome artifact values :=

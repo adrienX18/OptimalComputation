@@ -340,6 +340,6 @@ def execution : IO Unit := do
   checkCapacity
   checkConfigurations
   checkPermutationsAndScale
-  IO.println "PASS: execution (complete tiny trace/counters, timing, pending/writeback/issue hazards on every lane, memory ports/order, initialization, arithmetic, completion, budgets)"
+  IO.println "PASS: execution (complete tiny trace/counters, timing, pending/writeback/issue hazards on and beyond lane zero, memory ports/order, initialization, arithmetic, completion, budgets)"
 
 end OptimalComputation.Tests

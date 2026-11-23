@@ -50,9 +50,9 @@ What each layer protects:
 
 - `lake build` checks every proof. The serial baselines only exercise one lane,
   so their proofs do not pin the rules that matter for parallel schedules.
-- `lake test` pins those rules with executable cases: register hazards on every
-  lane, bank ports for loads and stores, same-address conflicts, issue
-  collisions, order independence, counters and completion.
+- `lake test` pins those rules with executable cases: register hazards on lane
+  zero and on a second lane, bank ports for loads and stores, same-address
+  conflicts, issue collisions, order independence, counters and completion.
 - `scripts/check-cli.py` tests real process exits, JSON output, unchanged saved
   baseline results, both objectives, custom and malformed inputs, exhaustion,
   trace export, structured failure details, hostile candidate files and the

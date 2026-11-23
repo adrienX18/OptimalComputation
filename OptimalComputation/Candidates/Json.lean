@@ -41,14 +41,15 @@ def RawCandidate.toJson (candidate : RawCandidate) : Json := Json.mkObj [
     ("instruction", instructionToJson entry.instruction)]).toArray)]
 
 /-- Quote file-supplied text for a plain-text message. Only printable ASCII is
-kept; everything else is escaped, so the text cannot add lines or terminal
-control sequences to the output. -/
+kept and everything else is escaped, so the text cannot add lines or terminal
+control sequences to the output. At most 64 characters are shown. -/
 def quoteText (text : String) : String :=
   let escape := fun (c : Char) =>
     if c == '"' || c == '\\' then s!"\\{c}"
     else if 0x20 ≤ c.toNat && c.toNat < 0x7f then c.toString
     else "\\u{" ++ String.ofList (Nat.toDigits 16 c.toNat) ++ "}"
-  "\"" ++ String.join (text.toList.map escape) ++ "\""
+  let shown := text.toList.take 64
+  "\"" ++ String.join (shown.map escape) ++ (if text.length > 64 then "..." else "") ++ "\""
 
 /-- Require exactly the named keys, so typos and unexpected claims fail loudly. -/
 private def exactFields (context : String) (json : Json) (names : List String) : Except String Unit := do

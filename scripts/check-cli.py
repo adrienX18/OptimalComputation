@@ -225,14 +225,27 @@ with tempfile.TemporaryDirectory(prefix="optimal-sim-") as temp:
     forged = copy.deepcopy(tiny)
     forged["identifier"] = "tiny-multiply-v1: all-input-certified; latency-v1 = 1 cycles (minimize)\nx"
     assert simulate_file(forged, code=1)["category"] == "invalid-candidate-file"
-    for field, value in [("identifier", forged["identifier"]),
-                         ("workloadIdentifier", "unknown\nfake: line\x1b[8m")]:
+    # C1 controls and Unicode line separators matter too: generic string quoting
+    # leaves them raw. Unknown keys and instruction kinds are escaped instead.
+    controls = "\x9b2K\x85tiny-multiply-v1: all-input-certified\u2028x\u202e\nline\x1b[8m"
+    hostile_files = []
+    for field in ["identifier", "workloadIdentifier", "modelVersion", "formatVersion"]:
         hostile = copy.deepcopy(tiny)
-        hostile[field] = value
+        hostile[field] = controls
+        hostile_files.append(hostile)
+    unknown_key = copy.deepcopy(tiny)
+    unknown_key[controls] = 1
+    unknown_kind = copy.deepcopy(tiny)
+    unknown_kind["schedule"][0]["instruction"]["kind"] = controls
+    oversized = copy.deepcopy(tiny)
+    oversized["x" * 200000] = 1
+    for hostile in hostile_files + [unknown_key, unknown_kind, oversized]:
         (temp / "forged.json").write_text(json.dumps(hostile))
         plain = run("simulate", str(temp / "forged.json"), as_json=False, code=1)
-        assert not plain.stdout and plain.stderr.count("\n") == 1 and "\x1b" not in plain.stderr, plain
-        assert "all-input-certified" not in plain.stderr, plain
+        assert not plain.stdout and plain.stderr.count("\n") == 1 and plain.stderr.isascii(), plain
+        assert all(32 <= ord(c) < 127 for c in plain.stderr.rstrip("\n")), plain
+        assert "all-input-certified\n" not in plain.stderr and len(plain.stderr) < 400, plain
+        assert plain.stderr.startswith("invalid-candidate-file: "), plain
 
     values = temp / "values.json"
     values.write_text("[32768,1]")

@@ -9,7 +9,8 @@ Decide this before building the optimization loop.
 1,344 for the certified baseline and matches the reference on every fixture. It
 cannot be accepted: the catalog takes only Lean terms carrying all-input proofs,
 and nothing turns a candidate file into one. Today only serial one-lane
-schedules can be certified.
+schedules have reusable proofs; the one certified parallel candidate, the
+two-lane product pair, was proved by hand.
 
 **Why hand proofs do not scale.**
 

@@ -162,11 +162,12 @@ private def preflightCandidate (contents : String) : Except Error Unit := do
         if depth > 8 then throw (invalidCandidateFile "JSON nesting must be at most 8 levels deep.")
       else if c == ']' || c == '}' then depth := depth - 1
 
-/-- A candidate file's identifier is echoed in plain-text output, so it is
-limited to a short safe alphabet: otherwise a file could print lines that look
-like another command's result. This is a transport limit like the numeric ones
-above, not a change to the `candidate-v1` format. The empty identifier is left
-to `validateCandidate`, which reports it as a structural failure. -/
+/-- A candidate file's string fields are echoed in plain-text output and in
+failure messages, so they are limited to a short safe alphabet: otherwise a file
+could print lines that look like another command's result. This is a transport
+limit like the numeric ones above, not a change to the `candidate-v1` format.
+Empty and wrong values are left to `validateCandidate`, which reports them as
+structural failures. -/
 def identifierAllowed (identifier : String) : Bool :=
   identifier.length ≤ 64 &&
     identifier.all fun c => c.isAlphanum || c == '.' || c == '_' || c == '-'
@@ -175,9 +176,11 @@ def parseCandidate (contents : String) : Except Error RawCandidate := do
   preflightCandidate contents
   let json ← (Json.parse contents).mapError fun e => invalidCandidateFile s!"Invalid JSON: {e}"
   let raw ← (RawCandidate.fromJson? json).mapError invalidCandidateFile
-  unless identifierAllowed raw.identifier do
-    throw (invalidCandidateFile
-      "candidate.identifier: expected at most 64 characters from A-Z, a-z, 0-9, '.', '_' and '-'")
+  for (field, value) in [("identifier", raw.identifier), ("workloadIdentifier", raw.workloadIdentifier),
+      ("modelVersion", raw.modelVersion), ("formatVersion", raw.formatVersion)] do
+    unless identifierAllowed value do
+      throw (invalidCandidateFile
+        s!"candidate.{field}: expected at most 64 characters from A-Z, a-z, 0-9, '.', '_' and '-'")
   return raw
 
 def failureError (failure : Failure) : Error :=
