@@ -181,17 +181,45 @@ with tempfile.TemporaryDirectory(prefix="optimal-sim-") as temp:
     illegal = simulate_file(early_store, code=1)
     assert illegal["category"] == "illegal-schedule", illegal
     assert illegal["details"]["cycle"] == 4 and "pendingRead" in illegal["details"]["rule"]
+    assert illegal["details"]["lane"] == 0
+    assert illegal["details"]["violation"] == {"name": "pendingRead", "register": 3}
 
-    for change, category in [
-            (lambda c: c["schedule"][0].update(lane=9), "malformed-instruction"),
-            (lambda c: c["schedule"][3]["instruction"].update(address=0), "malformed-instruction"),
-            (lambda c: c.update(modelVersion="arty-model-v0"), "malformed-candidate"),
-            (lambda c: c["configuration"].update(lanes=3), "inadmissible-configuration"),
-            (lambda c: c.update(workloadIdentifier="unknown-v1"), "unknown-workload"),
-            (lambda c: c.update(verified=True), "invalid-candidate-file")]:
+    # Each rejection names its rule as a structured violation, where one applies.
+    for change, category, violation in [
+            (lambda c: c["schedule"][0].update(lane=9), "malformed-instruction",
+             {"name": "laneOutOfBounds", "lane": 9, "laneCount": 1}),
+            (lambda c: c["schedule"][3]["instruction"].update(address=0), "malformed-instruction",
+             {"name": "writeToInput", "address": 0}),
+            (lambda c: c.update(modelVersion="arty-model-v0"), "malformed-candidate",
+             {"name": "wrongModelVersion", "expected": "arty-model-v1", "actual": "arty-model-v0"}),
+            (lambda c: c["configuration"].update(lanes=3), "inadmissible-configuration",
+             {"name": "unsupportedLanes", "actual": 3, "allowed": [1, 2, 4, 8]}),
+            (lambda c: c["layout"].update(outputs=[1]), "malformed-layout", {"name": "aliasedStorage"}),
+            (lambda c: c.update(workloadIdentifier="unknown-v1"), "unknown-workload", None),
+            (lambda c: c.update(verified=True), "invalid-candidate-file", None)]:
         changed = copy.deepcopy(tiny)
         change(changed)
-        assert simulate_file(changed, code=1)["category"] == category, (category, changed)
+        rejected = simulate_file(changed, code=1)
+        assert rejected["category"] == category, (category, changed)
+        assert (rejected["details"] or {}).get("violation") == violation, (category, rejected)
+    wrong_store = copy.deepcopy(tiny)
+    wrong_store["schedule"][3]["instruction"]["address"] = 0
+    located = simulate_file(wrong_store, code=1)["details"]
+    assert (located["index"], located["cycle"], located["lane"]) == (3, 5, 0), located
+
+    # Text from a candidate file cannot add lines or terminal controls to
+    # plain-text output, so it cannot imitate another command's result.
+    forged = copy.deepcopy(tiny)
+    forged["identifier"] = "tiny-multiply-v1: all-input-certified; latency-v1 = 1 cycles (minimize)\nx"
+    assert simulate_file(forged, code=1)["category"] == "invalid-candidate-file"
+    for field, value in [("identifier", forged["identifier"]),
+                         ("workloadIdentifier", "unknown\nfake: line\x1b[8m")]:
+        hostile = copy.deepcopy(tiny)
+        hostile[field] = value
+        (temp / "forged.json").write_text(json.dumps(hostile))
+        plain = run("simulate", str(temp / "forged.json"), as_json=False, code=1)
+        assert not plain.stdout and plain.stderr.count("\n") == 1 and "\x1b" not in plain.stderr, plain
+        assert "all-input-certified" not in plain.stderr, plain
 
     values = temp / "values.json"
     values.write_text("[32768,1]")

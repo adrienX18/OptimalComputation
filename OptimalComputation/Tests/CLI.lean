@@ -1,7 +1,7 @@
 import OptimalComputation.CLI
 
 namespace OptimalComputation.Tests
-open Lean Evaluation CLI Candidates
+open Lean Evaluation CLI Candidates Hardware
 
 private def checkCLI (label : String) (ok : Bool) : IO Unit := do
   unless ok do throw <| IO.userError s!"CLI check failed: {label}"
@@ -17,6 +17,50 @@ private def rejects (args : List String) (category : String) : IO Unit := do
   | .error e =>
       checkCLI "failure category" (e.category == category)
       checkCLI "failure has no score" ((e.toJson.getObjVal? "objective").toOption.isNone)
+
+/-- Rule name and argument object reported for a failure, if any. -/
+private def violationOf (failure : Failure) : Option (String × Json) := do
+  let violation ← ((failureError failure).details.getObjVal? "violation").toOption
+  let name ← (violation.getObjValAs? String "name").toOption
+  return (name, violation)
+
+private def hasNat (json : Json) (field : String) (value : Nat) : Bool :=
+  (json.getObjValAs? Nat field).toOption == some value
+
+/-- Structural and machine failures name the violated rule with named arguments,
+so a tool never has to parse Lean debug text. -/
+private def failureReports : IO Unit := do
+  let some (name, v) := violationOf (.illegalSchedule ⟨0, none, .bankCapacity 3 5⟩)
+    | throw <| IO.userError "CLI check failed: machine failure has no violation"
+  checkCLI "bank capacity violation" (name == "bankCapacity" && hasNat v "bank" 3 && hasNat v "accesses" 5)
+  let machine := (failureError (.illegalSchedule ⟨4, some 1, .pendingRead 3⟩)).details
+  checkCLI "machine failure location and legacy rule text" <|
+    hasNat machine "cycle" 4 && hasNat machine "lane" 1 &&
+    (machine.getObjValAs? String "rule").toOption == some (reprStr (MachineRule.pendingRead 3))
+  let some (name, v) := violationOf
+      (.arithmeticFailure ⟨2, some 0, .arithmetic (.operandOutOfRange .left 16 32768)⟩)
+    | throw <| IO.userError "CLI check failed: arithmetic failure has no violation"
+  checkCLI "arithmetic violation" <|
+    name == "operandOutOfRange" && hasNat v "bits" 16 && hasNat v "value" 32768 &&
+    (v.getObjValAs? String "operand").toOption == some "left"
+  let instruction := (failureError (.malformedInstruction ⟨3, 5, 0, .undeclaredWrite 7⟩)).details
+  checkCLI "malformed instruction location" <|
+    hasNat instruction "index" 3 && hasNat instruction "cycle" 5 && hasNat instruction "lane" 0
+  let named := fun (failure : Failure) => (violationOf failure).map (·.1)
+  checkCLI "structural violation names" <|
+    named (.malformedInstruction ⟨3, 5, 0, .undeclaredWrite 7⟩) == some "undeclaredWrite" &&
+    named (.malformedInstruction ⟨0, 0, 0, .invalidInstruction .zeroRegisterDestination⟩) ==
+      some "zeroRegisterDestination" &&
+    named (.malformedLayout .aliasedStorage) == some "aliasedStorage" &&
+    named (.inadmissibleConfiguration (.unsupportedBanks 3)) == some "unsupportedBanks" &&
+    named (.malformedCandidate (.wrongFormatVersion "candidate-v1" "x")) == some "wrongFormatVersion"
+  let some (_, v) := violationOf (.malformedLayout (.addressOutOfBounds .scratch 2 5000))
+    | throw <| IO.userError "CLI check failed: layout failure has no violation"
+  checkCLI "layout violation arguments" <|
+    hasNat v "index" 2 && hasNat v "address" 5000 &&
+    (v.getObjValAs? String "region").toOption == some "scratch"
+  checkCLI "unverified candidate has no details" <|
+    (failureError (.unverifiedCandidate "x")).details == Json.null
 
 /-- A minimal well-formed candidate file; `entry` is its single schedule entry. -/
 private def candidateText (entry : String := "{\"cycle\":0,\"lane\":0,\"instruction\":{\"kind\":\"load\",\"destination\":1,\"address\":0}}")
@@ -60,12 +104,22 @@ private def candidateFiles : IO Unit := do
         String.ofList (List.replicate 20 ']')), "nesting"),
       (candidateText ("{\"cycle\":" ++ String.ofList (List.replicate 4097 '1') ++ ",\"lane\":0," ++ load ++ "}"),
         "4096 digits"),
+      -- File-supplied text is never echoed raw into plain-text output.
+      (candidateText (extra := ",\"a\\nb\":1"), "unknown field \"a\\u{a}b\""),
+      (candidateText (identifier := "certified\\nline"), "candidate.identifier"),
+      (candidateText (identifier := "two words"), "candidate.identifier"),
+      (candidateText (identifier := String.ofList (List.replicate 65 'a')), "candidate.identifier"),
       ("[1,2]", "expected an object"), ("{\"identifier\":", "Invalid JSON")] do
     match parseCandidate text with
     | .ok _ => throw <| IO.userError s!"CLI check failed: candidate file accepted ({reason})"
     | .error e =>
         checkCLI s!"candidate file rejected for: {reason}"
           (e.category == "invalid-candidate-file" && (e.message.splitOn reason).length > 1)
+  checkCLI "longest allowed identifier accepted" <|
+    (parseCandidate (candidateText (identifier := String.ofList (List.replicate 64 'a')))).toOption.isSome
+  checkCLI "quoted text keeps printable ASCII and escapes the rest" <|
+    quoteText "plain-v1" == "\"plain-v1\"" &&
+    quoteText "a\nb\x1b\"c\\" == "\"a\\u{a}b\\u{1b}\\\"c\\\\\""
   let tiny := Examples.TinyMultiply.candidate.toRaw
   checkCLI "default simulation budget covers the last completion" (sufficientSimulationBoundaries tiny == 9)
   checkCLI "empty schedule budget" (sufficientSimulationBoundaries {tiny with schedule := []} == 4)
@@ -138,6 +192,7 @@ def cli : IO Unit := do
     | throw <| IO.userError "Invalid workload input accepted"
   checkCLI "workload domain reported" ((failureError badInput).category == "invalid-input")
   candidateFiles
-  IO.println "PASS: CLI catalogs, parsing, failures, seven candidates, both objectives, complete trace binding and candidate files"
+  failureReports
+  IO.println "PASS: CLI catalogs, parsing, structured failures, seven candidates, both objectives, complete trace binding and candidate files"
 
 end OptimalComputation.Tests

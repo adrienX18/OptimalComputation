@@ -152,10 +152,31 @@ The Lean `Failure` type additionally distinguishes inadmissible configurations,
 malformed layouts/candidates/instructions, illegal schedules, arithmetic failures,
 incomplete outputs and unverified artifacts. `inspect` and `checkStatic` provide
 structural/static diagnostics, `simulate` provides runtime failures, and
-`evaluateObjective` accepts only exact catalog artifacts. Machine diagnostics
-retain cycle, optional lane, and a rule carrying the relevant register, address,
-bank or arithmetic value. An unverified proposal may pass inspection and concrete
-tests while still lacking all-input correctness; that is not a scored candidate.
+`evaluateObjective` accepts only exact catalog artifacts. An unverified proposal
+may pass inspection and concrete tests while still lacking all-input correctness;
+that is not a scored candidate.
+
+Structural and machine failures name the violated rule in `details.violation`,
+an object with a `name` and named arguments. Only the first violation is reported.
+An early store in the tiny program, for example, returns:
+
+```json
+"details": {"cycle": 4, "lane": 0,
+            "rule": "OptimalComputation.Hardware.MachineRule.pendingRead 3",
+            "violation": {"name": "pendingRead", "register": 3}}
+```
+
+| Category | Other `details` fields | `violation` names and arguments |
+| --- | --- | --- |
+| `illegal-schedule` | `cycle`, `lane` (null for batch-wide rules), `rule` (Lean text) | `issueCollision`; `bankCapacity {bank, accesses}`; `addressConflict {address}`; `pendingRead`, `pendingWrite`, `uninitializedRegister {register}`; `writebackCollision {due}`; `uninitializedMemory {address}`; `pendingCapacity {outstanding}` |
+| `arithmetic-failure` | `cycle`, `lane`, `rule` | `operandOutOfRange {operand, bits, value}`; `resultOutOfRange {bits, value}` |
+| `malformed-instruction` | `index`, `cycle`, `lane` | `laneOutOfBounds {lane, laneCount}`; `registerOutOfBounds {register}`; `zeroRegisterDestination`; `addressOutOfBounds`, `undeclaredRead`, `undeclaredWrite`, `writeToInput {address}` |
+| `malformed-layout` | | `wrongInputCount`, `wrongOutputCount {expected, actual}`; `addressOutOfBounds {region, index, address}`; `aliasedStorage` |
+| `inadmissible-configuration` | | `unsupportedLanes`, `unsupportedBanks {actual, allowed}` |
+| `malformed-candidate` | | `emptyIdentifier`; `wrongModelVersion`, `wrongFormatVersion`, `wrongWorkloadIdentifier {expected, actual}` |
+
+`incomplete-output` lists the unwritten `addresses`; input failures report the
+scalar count, or the offending `index` and `value`.
 
 ## Export an observational trace
 
@@ -213,6 +234,9 @@ address}`, `add` and `multiply {destination, left, right}`, and `multiplyAdd
 must be plain nonnegative integers: no fractions or exponents, at most 4,096 digits,
 and nesting at most eight levels deep. Violations return `invalid-candidate-file`
 before JSON parsing, so a hostile file cannot trigger exponent expansion.
+`identifier` may use at most 64 characters from `A-Z`, `a-z`, `0-9`, `.`, `_` and
+`-`. It is echoed in plain-text output, and other file-supplied text is escaped
+there, so a file cannot print lines that imitate another command's result.
 
 `simulate` takes the workload's scalar shape, input domain and reference from the
 compiled catalog, selected by `workloadIdentifier` (otherwise `unknown-workload`),
@@ -220,8 +244,8 @@ never from the file. `--fixture` and `--input` work exactly as for `evaluate`. T
 candidate then gets the same structural checks and cycle-accurate machine as every
 other program, with the same failure categories: `malformed-candidate`,
 `malformed-layout`, `malformed-instruction`, `inadmissible-configuration`,
-`illegal-schedule` and `arithmetic-failure` with cycle, lane and rule, or
-`incomplete-output`. The default budget is the last issue cycle plus four
+`illegal-schedule`, `arithmetic-failure` or `incomplete-output`, each with the
+[structured details](#inspect-failures-and-exhaustion) above. The default budget is the last issue cycle plus four
 boundaries, enough for any run that does not fail, capped at 1,000,000 boundaries
 so a huge cycle value cannot stall the evaluator. `--budget` overrides it, and
 exhaustion exits 3 as usual.

@@ -120,7 +120,9 @@ Validation preserves representation order. Cycles with no entry encode waiting;
 the simulator uses issue cycles and handles simultaneous instructions
 independently of their list order. Old-value source/destination aliasing and
 source reads of `r0` are representable. Structured failures identify the invalid
-header, configuration, layout region/index, or schedule index/cycle/lane and rule.
+header, configuration, out-of-range layout region/index, or schedule
+index/cycle/lane and rule; storage aliasing is reported without naming the slot.
+`Evaluation.failureDetails` renders every failure as JSON with a named rule.
 `toRaw` exports deterministic plain data; kernel-checked round-trip theorems cover
 layouts, instructions, schedules, and complete candidates.
 

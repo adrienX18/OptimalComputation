@@ -40,11 +40,21 @@ def RawCandidate.toJson (candidate : RawCandidate) : Json := Json.mkObj [
     ("cycle", Lean.toJson entry.cycle), ("lane", Lean.toJson entry.lane),
     ("instruction", instructionToJson entry.instruction)]).toArray)]
 
+/-- Quote file-supplied text for a plain-text message. Only printable ASCII is
+kept; everything else is escaped, so the text cannot add lines or terminal
+control sequences to the output. -/
+def quoteText (text : String) : String :=
+  let escape := fun (c : Char) =>
+    if c == '"' || c == '\\' then s!"\\{c}"
+    else if 0x20 ≤ c.toNat && c.toNat < 0x7f then c.toString
+    else "\\u{" ++ String.ofList (Nat.toDigits 16 c.toNat) ++ "}"
+  "\"" ++ String.join (text.toList.map escape) ++ "\""
+
 /-- Require exactly the named keys, so typos and unexpected claims fail loudly. -/
 private def exactFields (context : String) (json : Json) (names : List String) : Except String Unit := do
   let fields ← json.getObj?.mapError fun _ => s!"{context}: expected an object"
   for key in fields.keys do
-    unless names.contains key do throw s!"{context}: unknown field \"{key}\""
+    unless names.contains key do throw s!"{context}: unknown field {quoteText key}"
   for name in names do
     unless fields.contains name do throw s!"{context}: missing field \"{name}\""
 
@@ -85,7 +95,7 @@ def instructionFromJson? (context : String) (json : Json) : Except String RawIns
   | "multiplyAdd" =>
       operands ["destination", "left", "right", "accumulator"]
       return .multiplyAdd (← nat "destination") (← nat "left") (← nat "right") (← nat "accumulator")
-  | other => throw s!"{context}.kind: unknown instruction kind \"{other}\""
+  | other => throw s!"{context}.kind: unknown instruction kind {quoteText other}"
 
 /-- Decode the exact `RawCandidate` fields. Range, version and layout checks
 remain the job of `validateCandidate`, which reports structured failures. -/

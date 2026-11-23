@@ -162,10 +162,23 @@ private def preflightCandidate (contents : String) : Except Error Unit := do
         if depth > 8 then throw (invalidCandidateFile "JSON nesting must be at most 8 levels deep.")
       else if c == ']' || c == '}' then depth := depth - 1
 
+/-- A candidate file's identifier is echoed in plain-text output, so it is
+limited to a short safe alphabet: otherwise a file could print lines that look
+like another command's result. This is a transport limit like the numeric ones
+above, not a change to the `candidate-v1` format. The empty identifier is left
+to `validateCandidate`, which reports it as a structural failure. -/
+def identifierAllowed (identifier : String) : Bool :=
+  identifier.length ≤ 64 &&
+    identifier.all fun c => c.isAlphanum || c == '.' || c == '_' || c == '-'
+
 def parseCandidate (contents : String) : Except Error RawCandidate := do
   preflightCandidate contents
   let json ← (Json.parse contents).mapError fun e => invalidCandidateFile s!"Invalid JSON: {e}"
-  (RawCandidate.fromJson? json).mapError invalidCandidateFile
+  let raw ← (RawCandidate.fromJson? json).mapError invalidCandidateFile
+  unless identifierAllowed raw.identifier do
+    throw (invalidCandidateFile
+      "candidate.identifier: expected at most 64 characters from A-Z, a-z, 0-9, '.', '_' and '-'")
+  return raw
 
 def failureError (failure : Failure) : Error :=
   let category := match failure with
@@ -178,18 +191,7 @@ def failureError (failure : Failure) : Error :=
     | .arithmeticFailure _ => "arithmetic-failure"
     | .incompleteOutput _ _ => "incomplete-output"
     | .unverifiedCandidate _ => "unverified-candidate"
-  let details := match failure with
-    | .invalidInput (.transport (.wrongScalarCount expected actual)) =>
-        Json.mkObj [("expectedScalars", toJson expected), ("actualScalars", toJson actual)]
-    | .invalidInput (.transport (.scalarOutOfRange index value)) =>
-        Json.mkObj [("index", toJson index), ("value", toJson value)]
-    | .invalidInput (.outsideDomain workload) => Json.mkObj [("workloadIdentifier", toJson workload)]
-    | .illegalSchedule e | .arithmeticFailure e => Json.mkObj [
-        ("cycle", toJson e.cycle), ("lane", toJson e.lane), ("rule", toJson (reprStr e.rule))]
-    | .incompleteOutput boundary addresses =>
-        Json.mkObj [("boundary", toJson boundary), ("addresses", toJson addresses)]
-    | _ => Json.null
-  ⟨category, reprStr failure, details, 1⟩
+  ⟨category, reprStr failure, failureDetails failure, 1⟩
 
 def exhaustionError (e : Exhaustion) : Error :=
   ⟨"resource-exhausted", "Boundary budget exhausted; evaluation is inconclusive.",
@@ -357,7 +359,7 @@ private def simulateCommand (file : String) (options : Options) : IO (Except Err
     | .error e => return .error e
   let some artifact := objectiveCatalog.find? (·.specification.identifier == raw.workloadIdentifier)
     | return .error ⟨"unknown-workload",
-        s!"Unknown workload {raw.workloadIdentifier}; see list-workloads.", Json.null, 1⟩
+        s!"Unknown workload {quoteText raw.workloadIdentifier}; see list-workloads.", Json.null, 1⟩
   let (inputId, inputs) ← loadInputs artifact.specification.identifier options
   let values ← match inputs with
     | .ok values => pure values
