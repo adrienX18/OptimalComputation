@@ -1,0 +1,495 @@
+{
+  "version": "five-model-preliminary-analysis-v1",
+  "source": {
+    "archive": "nightly-five-models-20261123",
+    "revision": "185e5daf8574a2cb92dd9cf5eb8f22afda5e4012",
+    "manifestSha256": "33e375961d0cdc5f940873411b3501fed30480d805adbc80179ea0f01dcb5b29",
+    "inventorySha256": "00f2bfcff7093edae48df8463227764fcc02cc43ebfa858de602a6030b7695d4",
+    "inventoryFiles": 83816,
+    "inventoryBytes": 979484527,
+    "fullInventoryVerified": true,
+    "certificateBindingsVerified": 1033
+  },
+  "configuration": {
+    "models": {
+      "fable": "anthropic/claude-fable-5-2",
+      "opus": "anthropic/claude-opus-5-5",
+      "sonnet": "anthropic/claude-sonnet-5-5",
+      "astra": "openai/gpt-6.2-astra",
+      "sol": "openai/gpt-6.2-sol"
+    },
+    "seeds": [
+      11,
+      23,
+      37,
+      53,
+      71
+    ],
+    "concurrency": 5,
+    "run": {
+      "task": "polynomial",
+      "objective": "latency-v1",
+      "configuration": [
+        8,
+        8
+      ],
+      "attempts": 50,
+      "max_tokens": 32768,
+      "prompt_bytes": 32000,
+      "code_bytes": 8000,
+      "notes_bytes": 2000,
+      "request_timeout": 600,
+      "generator_timeout": 30,
+      "check_timeout": 120,
+      "boundaries": 1000000,
+      "terms": 4096,
+      "image": "python:3.12-slim-bookworm",
+      "reasoning_effort": "medium"
+    }
+  },
+  "startedUTC": "2026-11-23T08:25:10.753125+00:00",
+  "endedUTC": "2026-11-23T13:51:13.852188+00:00",
+  "elapsedSeconds": 19563.099,
+  "attempts": 1250,
+  "runs": 25,
+  "categories": {
+    "certified": 1033,
+    "proposal-error": 154,
+    "simulation-failed": 30,
+    "range-not-proved": 14,
+    "generator-failed": 16,
+    "api-error": 3
+  },
+  "rawFilteredStopReasons": {
+    "refusal": 109
+  },
+  "attemptsAfterEventualBest": 1119,
+  "runsBestBy10": 23,
+  "reference": {
+    "task": "polynomial",
+    "objective": "latency-v1",
+    "pinnedConfiguration": [
+      8,
+      8
+    ],
+    "lowerBound": {
+      "kind": "unconditional-compulsory-io-v1",
+      "cycles": 5,
+      "compulsoryLoads": 24,
+      "compulsoryStores": 16,
+      "issueBound": 5,
+      "portBound": 3,
+      "scope": "All candidates, including changed layouts and algebraic algorithms; deliberately conservative."
+    },
+    "naiveCycles": 1520,
+    "handReferenceCycles": 63,
+    "smokeTest": false,
+    "proposals": [
+      58,
+      59,
+      60,
+      61
+    ],
+    "counts": {
+      "proposals": 4,
+      "certified": 1,
+      "passedFixturesFailedCertification": 1,
+      "certificationDeferred": 2
+    }
+  },
+  "models": {
+    "fable": {
+      "modelId": "anthropic/claude-fable-5-2",
+      "finalBests": [
+        30,
+        30,
+        30,
+        30,
+        30
+      ],
+      "medianBest": 30,
+      "meanBest": 30,
+      "bestFirstAttempts": [
+        1,
+        2,
+        3,
+        2,
+        2
+      ],
+      "medianBestFirstAttempt": 2,
+      "medianSecondsToBest": 307.577,
+      "certified": 239,
+      "categories": {
+        "certified": 239,
+        "proposal-error": 8,
+        "api-error": 3
+      },
+      "finishReasons": {
+        "stop": 239,
+        "content_filter": 8
+      },
+      "details": {
+        "proposal-error": {
+          "Incomplete response: content_filter": 8
+        },
+        "api-error": {
+          "InternalServerError": 3
+        }
+      },
+      "medianBestByAttempt": {
+        "1": 33,
+        "2": 30,
+        "3": 30,
+        "5": 30,
+        "10": 30,
+        "20": 30,
+        "30": 30,
+        "50": 30
+      },
+      "count30ByAttempt": {
+        "1": 1,
+        "2": 4,
+        "3": 5,
+        "5": 5,
+        "10": 5,
+        "20": 5,
+        "30": 5,
+        "50": 5
+      },
+      "wallSeconds": 11528.848,
+      "apiSeconds": 9555.189,
+      "promptTokens": 1518101,
+      "outputTokens": 930180,
+      "reasoningTokens": 470375,
+      "medianApiSeconds": 28.122,
+      "costEstimateCount": 0,
+      "costEstimateSumUSD": null,
+      "maxPromptBytes": 19638,
+      "historyTruncatedAttempts": 0,
+      "uniqueGeneratorSources": 12,
+      "uniqueCertifiedCandidates": 8,
+      "repeatCertifiedCandidates": 231,
+      "attemptsAfterEventualBest": 240
+    },
+    "opus": {
+      "modelId": "anthropic/claude-opus-5-5",
+      "finalBests": [
+        30,
+        30,
+        30,
+        30,
+        30
+      ],
+      "medianBest": 30,
+      "meanBest": 30,
+      "bestFirstAttempts": [
+        10,
+        9,
+        20,
+        33,
+        10
+      ],
+      "medianBestFirstAttempt": 10,
+      "medianSecondsToBest": 1161.078,
+      "certified": 141,
+      "categories": {
+        "certified": 141,
+        "proposal-error": 106,
+        "range-not-proved": 2,
+        "generator-failed": 1
+      },
+      "finishReasons": {
+        "stop": 149,
+        "content_filter": 101
+      },
+      "details": {
+        "proposal-error": {
+          "Incomplete response: content_filter": 101,
+          "Expecting value: line 1 column 1 (char 0)": 5
+        },
+        "range-not-proved": {
+          "Cannot prove that the left fits signed 16 bits: derived range [-42596, 39319].": 2
+        },
+        "generator-failed": {
+          "completed": 1
+        }
+      },
+      "medianBestByAttempt": {
+        "1": 38,
+        "2": 36,
+        "3": 35,
+        "5": 34,
+        "10": 30,
+        "20": 30,
+        "30": 30,
+        "50": 30
+      },
+      "count30ByAttempt": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "5": 0,
+        "10": 3,
+        "20": 4,
+        "30": 4,
+        "50": 5
+      },
+      "wallSeconds": 19121.599,
+      "apiSeconds": 17939.223,
+      "promptTokens": 1406300,
+      "outputTokens": 1781239,
+      "reasoningTokens": 1499188,
+      "medianApiSeconds": 71.297,
+      "costEstimateCount": 250,
+      "costEstimateSumUSD": 41.24998,
+      "maxPromptBytes": 22022,
+      "historyTruncatedAttempts": 0,
+      "uniqueGeneratorSources": 45,
+      "uniqueCertifiedCandidates": 36,
+      "repeatCertifiedCandidates": 105,
+      "attemptsAfterEventualBest": 168
+    },
+    "sonnet": {
+      "modelId": "anthropic/claude-sonnet-5-5",
+      "finalBests": [
+        33,
+        35,
+        75,
+        67,
+        40
+      ],
+      "medianBest": 40,
+      "meanBest": 50,
+      "bestFirstAttempts": [
+        4,
+        3,
+        3,
+        8,
+        2
+      ],
+      "medianBestFirstAttempt": 3,
+      "medianSecondsToBest": 111.522,
+      "certified": 235,
+      "categories": {
+        "proposal-error": 6,
+        "simulation-failed": 4,
+        "range-not-proved": 5,
+        "certified": 235
+      },
+      "finishReasons": {
+        "stop": 250
+      },
+      "details": {
+        "proposal-error": {
+          "Expecting value: line 1 column 1 (char 0)": 4,
+          "Extra data: line 1 column 2710 (char 2709)": 1,
+          "Extra data: line 2 column 1 (char 2172)": 1
+        },
+        "simulation-failed": {
+          "bankCapacity": 3,
+          "operandOutOfRange": 1
+        },
+        "range-not-proved": {
+          "Cannot prove that the left fits signed 16 bits: derived range [-42596, 39319].": 5
+        }
+      },
+      "medianBestByAttempt": {
+        "1": 1520,
+        "2": 1520,
+        "3": 75,
+        "5": 40,
+        "10": 40,
+        "20": 40,
+        "30": 40,
+        "50": 40
+      },
+      "count30ByAttempt": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "5": 0,
+        "10": 0,
+        "20": 0,
+        "30": 0,
+        "50": 0
+      },
+      "wallSeconds": 4236.138,
+      "apiSeconds": 2187.972,
+      "promptTokens": 1339676,
+      "outputTokens": 326590,
+      "reasoningTokens": 49923,
+      "medianApiSeconds": 6.966,
+      "costEstimateCount": 250,
+      "costEstimateSumUSD": 5.945252,
+      "maxPromptBytes": 18616,
+      "historyTruncatedAttempts": 0,
+      "uniqueGeneratorSources": 19,
+      "uniqueCertifiedCandidates": 7,
+      "repeatCertifiedCandidates": 228,
+      "attemptsAfterEventualBest": 230
+    },
+    "astra": {
+      "modelId": "openai/gpt-6.2-astra",
+      "finalBests": [
+        30,
+        30,
+        30,
+        30,
+        30
+      ],
+      "medianBest": 30,
+      "meanBest": 30,
+      "bestFirstAttempts": [
+        2,
+        3,
+        2,
+        3,
+        2
+      ],
+      "medianBestFirstAttempt": 2,
+      "medianSecondsToBest": 101.654,
+      "certified": 230,
+      "categories": {
+        "certified": 230,
+        "simulation-failed": 14,
+        "range-not-proved": 4,
+        "generator-failed": 2
+      },
+      "finishReasons": {
+        "stop": 250
+      },
+      "details": {
+        "simulation-failed": {
+          "pendingRead": 9,
+          "operandOutOfRange": 5
+        },
+        "range-not-proved": {
+          "Cannot prove that the left fits signed 16 bits: derived range [-42596, 39319].": 3,
+          "Cannot prove that the left fits signed 16 bits: derived range [-42568, 39287].": 1
+        },
+        "generator-failed": {
+          "completed": 2
+        }
+      },
+      "medianBestByAttempt": {
+        "1": 34,
+        "2": 30,
+        "3": 30,
+        "5": 30,
+        "10": 30,
+        "20": 30,
+        "30": 30,
+        "50": 30
+      },
+      "count30ByAttempt": {
+        "1": 0,
+        "2": 3,
+        "3": 5,
+        "5": 5,
+        "10": 5,
+        "20": 5,
+        "30": 5,
+        "50": 5
+      },
+      "wallSeconds": 13830.089,
+      "apiSeconds": 11880.079,
+      "promptTokens": 1113059,
+      "outputTokens": 477888,
+      "reasoningTokens": 250512,
+      "medianApiSeconds": 46.314,
+      "costEstimateCount": 0,
+      "costEstimateSumUSD": null,
+      "maxPromptBytes": 21235,
+      "historyTruncatedAttempts": 0,
+      "uniqueGeneratorSources": 250,
+      "uniqueCertifiedCandidates": 210,
+      "repeatCertifiedCandidates": 20,
+      "attemptsAfterEventualBest": 238
+    },
+    "sol": {
+      "modelId": "openai/gpt-6.2-sol",
+      "finalBests": [
+        30,
+        30,
+        30,
+        30,
+        30
+      ],
+      "medianBest": 30,
+      "meanBest": 30,
+      "bestFirstAttempts": [
+        2,
+        2,
+        1,
+        1,
+        1
+      ],
+      "medianBestFirstAttempt": 1,
+      "medianSecondsToBest": 78.934,
+      "certified": 188,
+      "categories": {
+        "certified": 188,
+        "generator-failed": 13,
+        "proposal-error": 34,
+        "simulation-failed": 12,
+        "range-not-proved": 3
+      },
+      "finishReasons": {
+        "stop": 250
+      },
+      "details": {
+        "generator-failed": {
+          "completed": 12,
+          "timeout": 1
+        },
+        "proposal-error": {
+          "Generator exceeds code_bytes.": 34
+        },
+        "simulation-failed": {
+          "output-mismatch": 3,
+          "pendingRead": 3,
+          "operandOutOfRange": 2,
+          "writebackCollision": 1,
+          "bankCapacity": 3
+        },
+        "range-not-proved": {
+          "Cannot prove that the left fits signed 16 bits: derived range [-42596, 39319].": 3
+        }
+      },
+      "medianBestByAttempt": {
+        "1": 30,
+        "2": 30,
+        "3": 30,
+        "5": 30,
+        "10": 30,
+        "20": 30,
+        "30": 30,
+        "50": 30
+      },
+      "count30ByAttempt": {
+        "1": 3,
+        "2": 5,
+        "3": 5,
+        "5": 5,
+        "10": 5,
+        "20": 5,
+        "30": 5,
+        "50": 5
+      },
+      "wallSeconds": 32267.056,
+      "apiSeconds": 31096.977,
+      "promptTokens": 1356412,
+      "outputTokens": 1628357,
+      "reasoningTokens": 1071527,
+      "medianApiSeconds": 121.606,
+      "costEstimateCount": 0,
+      "costEstimateSumUSD": null,
+      "maxPromptBytes": 29861,
+      "historyTruncatedAttempts": 0,
+      "uniqueGeneratorSources": 216,
+      "uniqueCertifiedCandidates": 144,
+      "repeatCertifiedCandidates": 44,
+      "attemptsAfterEventualBest": 243
+    }
+  }
+}

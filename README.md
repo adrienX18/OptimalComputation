@@ -87,6 +87,9 @@ at once. `scripts/search_batch.py --smoke` tests two attempts per model;
 `--prepare-only` saves the full plan without launching it. See the
 [batch commands and seed limitations](docs/search.md#five-model-batch).
 
+The [first five-model experiment analysis](analysis/2026-11-23-five-model-search/report.md)
+reports convergence, certified results, failures and resource use across 1,250 attempts.
+
 ## Earlier experiments
 
 [Section 9 usage, algorithms, proof status, and measurements](docs/experiments.md)
