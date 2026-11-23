@@ -7,7 +7,7 @@ import OptimalComputation.Examples.PolynomialBaseline
 namespace OptimalComputation.Evaluation
 
 /-- The same serial algorithms are certified on all sixteen configurations.
-Parallel proposal schedules still require the deferred certification work. -/
+Other schedules can obtain reusable artifacts through Certification.Catalog. -/
 def configurationArtifacts (c : Hardware.ValidConfig) : List VerifiedArtifact := [
   ⟨Workloads.MatMul.specification, Workloads.MatMul.adapter,
     inferInstance, Examples.MatMulNaive.verifiedV2For c⟩,

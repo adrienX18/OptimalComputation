@@ -286,3 +286,15 @@ orders, their certified naive baselines, the scheduling heuristic and saved
 proposal records. `evaluate` and `export-candidate` accept
 `--configuration LANES,BANKS` to select a certified configuration variant.
 `simulate` always uses the configuration embedded in its candidate file.
+
+## Certify an arbitrary candidate
+
+```sh
+python3 scripts/certify.py /tmp/candidate.json --output /tmp/Certificate.lean --json
+```
+
+This runs the reusable symbolic checker and then checks a closed proof with
+Lean's kernel. Success prints `Correct`; rejection explains why no certificate
+was produced. The generated artifact uses the existing scoring API and does not
+modify the main CLI's compiled catalog. See [certification](certification.md)
+for budgets, error categories, supported workloads and proof reuse.

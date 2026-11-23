@@ -1,8 +1,8 @@
 # Recorded decisions
 
-These decisions were confirmed on 2026-11-22. The certification approach, range
-analysis, reference-polynomial proofs and experimental focus remain open in
-[questions.md](../questions.md).
+These decisions were confirmed on 2026-11-22. All seven questions from the
+Section 9 discussion are resolved. Implementation details and commands are in
+[certification.md](certification.md). The optimization loop comes later.
 
 ## Proof evaluation: preserve the current trust boundary
 
@@ -12,11 +12,11 @@ The current ban on `native_decide`, unfinished proofs and custom axioms remains.
 Compiled simulation and measurement remain useful evidence about concrete
 inputs; they do not provide all-input certificates.
 
-This decision does not choose an automatic checker or require its implementation.
-If one is chosen later, benchmark a kernel-friendly implementation on
-`matvec-grid-exchange-v1` before considering any change to the proof standard.
-The existing runner's list sorting and 4,096-slot vectors may be expensive to
-reduce in the kernel, so its compiled speed is not a prediction of proof speed.
+The automatic checker described below preserves this standard. Its sparse
+symbolic state and structurally recursive sorting avoid reducing the concrete
+runner's 4,096-slot vectors or general-purpose sorting proofs. The new sort is
+proved equal to the existing sort. The exact `matvec-grid-exchange-v1` candidate
+has now passed kernel checking; compiled speed is still not proof speed.
 
 Potential alternatives for later:
 
@@ -81,3 +81,72 @@ the strict text path as well.
 
 This tightens ambiguous file handling without changing the candidate schema,
 machine rules, scoring rules or any existing exported candidate.
+
+## Automatic certification: option A, a checker proved sound once
+
+Implement one reusable symbolic checker whose success implies execution safety
+and reference equality for every allowed input. It accepts arbitrary candidate
+identifiers, layouts, schedules and admissible configurations. Each candidate
+still needs a kernel-checked evaluation of that checker, but no new hand-written
+proof about its individual instructions.
+
+The result is binary for admission: accepted or rejected with a reason. Only an
+accepted kernel certificate prints `Correct`. Rejections print `Not certified`
+and explain the first failure. A range overestimate, unmatched polynomial or
+exhausted budget is not itself a counterexample; calling these programs
+mathematically incorrect would be misleading. Concrete simulation remains the
+way to exhibit a failing input. JSON separates the admission flag, category,
+message and relevant cycle/lane/range details.
+
+The benefit is reusable verification across scheduling and algebraic changes.
+The cost is the initial soundness proof and potentially expensive closed kernel
+evaluation. This checker is sound, not complete: some correct programs can be
+rejected. Tactic-generated boundary proofs and agent-written proofs remain
+possible future alternatives, not prerequisites for ordinary candidates.
+
+## Range analysis: start with intervals and small targeted improvements
+
+Use integer intervals, normalized sparse polynomials, cancellation of equal
+terms, and nonnegative bounds for squares. Check 16-bit multiplicands and
+48-bit results at every instruction. This handles the current input domains,
+the two-stage intermediate bound, and the polynomial power/Estrin schedules.
+The illegal Horner schedules fail the multiplicand check.
+
+This keeps the proof and failure messages small. It can lose dependencies
+between different terms, so an interval outside the legal range means the
+checker cannot establish safety. Cap polynomial terms, monomial degree,
+boundaries and process time; hitting a cap is an inconclusive rejection.
+
+Defer interval splitting, exhaustive reasoning over small domains, richer
+relational range analysis, and externally generated range certificates until a
+useful correct candidate requires them. No SMT solver or new trusted arithmetic
+oracle is needed now.
+
+## Workload references: prove the polynomial connection once
+
+Each workload supplies a `Problem`: an input box that contains its allowed
+domain, expected output polynomials, and proofs connecting both to its existing
+scalar adapter and mathematical reference. All seven current workloads have
+these proofs. The candidate file cannot replace the domain or the reference.
+
+Canonical algebra recognizes rearrangement, multiplication commutativity,
+factoring/expansion and Gram symmetry without special cases for candidate
+names. Adding a workload requires its one-time reference proof; changing a
+schedule does not. Equality is checked over integer polynomials, which can be
+stricter than equality only on a restricted finite domain.
+
+## Experiment focus: goal A, safe optimization
+
+Measure how much a candidate improves latency or abstract energy while
+remaining safe and correct. The optimizer will propose programs; the reusable
+checker will certify them. Agent proof-writing skill is not the target metric.
+
+Preserve the distinction between candidates refuted by an actual input and
+candidates left uncertified by analysis or resource limits. Record certification
+cost and failure categories separately from execution cost. A timeout must not
+be counted as a discovered correctness bug. Keep the original Section 9 run
+as historical evidence rather than relabeling its old deferred proposals.
+
+This change delivers modular certification, reference and reporting blocks.
+It does not add an optimization loop, alter objectives, rerun the historical
+experiment with new acceptance rules, or claim physical hardware performance.

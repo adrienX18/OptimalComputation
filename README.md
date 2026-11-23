@@ -15,7 +15,7 @@ a fixed hardware model, and independent latency and abstract-energy objectives.
 Section 9 adds certified polynomial, symmetric-product and two-stage baselines,
 a deterministic scheduling heuristic, and reproducible experiment records. There
 is no autonomous optimizer or AI loop. [PLAN.md](PLAN.md) defines the scope;
-[questions.md](questions.md) records the open design questions.
+[docs/decisions.md](docs/decisions.md) records the resolved design choices.
 
 Install [elan](https://github.com/leanprover/elan), then run from this directory:
 
@@ -31,7 +31,7 @@ lake exe optimal_computation simulate /tmp/candidate.json  # unverified and unsc
 
 [lean-toolchain](lean-toolchain) pins Lean 4.35.0 and its bundled Lake. There are no
 external Lean dependencies or FPGA tools. A fresh machine needs that toolchain;
-Python 3 is used only for the independent validation scripts.
+Python 3 supplies the certification driver and independent validation scripts.
 
 | Certified candidate | Latency (cycles) | Abstract energy units |
 | --- | ---: | ---: |
@@ -49,8 +49,16 @@ the naive comparison point; v1 stays frozen for reproducibility.
 
 A hand-built eight-lane schedule,
 [`docs/candidates/matvec-grid-exchange-v1.json`](docs/candidates/matvec-grid-exchange-v1.json),
-simulates the matrix-vector product in 79 cycles. It is unverified and unscored:
-certifying arbitrary parallel candidates remains the deferred problem in [questions.md](questions.md).
+now has an all-input kernel certificate for its 79-cycle execution. The reusable
+checker supports all seven workloads and arbitrary candidate identifiers:
+
+```sh
+python3 scripts/certify.py docs/candidates/matvec-grid-exchange-v1.json --output /tmp/GridCertificate.lean
+```
+
+It reports `Correct` after kernel verification or `Not certified` with a reason.
+See [automatic certification](docs/certification.md) for the proof artifact,
+error categories, resource limits and use with the existing scoring API.
 
 [Section 9 usage, algorithms, proof status, and measurements](docs/experiments.md)
 explain the new workloads and configuration-specific certificates. For example:

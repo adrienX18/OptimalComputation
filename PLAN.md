@@ -413,16 +413,19 @@ Do not add tasks that need a new primitive. Activations, normalization and softm
 - **Three reference points per instance.** Record the certified naive baseline, a hand-built reference schedule (it may be unverified if labeled so) and a counting lower bound. Report results as the share of the naive-to-floor gap closed. If the hand-built reference already sits at the floor, the instance is a smoke test and is reported as such.
 - **Pin the configuration for latency.** An instance is a workload, a configuration and an objective; a candidate using another configuration is rejected for that instance. Run each task on `(8, 8)`, on `(8, 1)` where memory binds (two accesses per cycle in total) and on `(2, 8)` where compute binds. Under `energy-proxy-v1` leave the configuration free, because provisioning is part of that trade-off.
 - **Extreme fixtures, and held-out inputs.** Fixtures include the endpoints of the allowed domain. For the polynomial task, give the optimizer only fixtures on which Horner stays legal, and keep inputs that break it for a held-out check.
-- **Record every proposal.** For each candidate, record whether it was structurally valid, whether it simulated correctly on the fixtures, and whether it was certified. Candidates that pass the fixtures and fail certification are the main measurement: they are the regressions that tests miss.
-- **Compare with a heuristic.** The brief requires a simple scheduling heuristic as a second baseline, for example a greedy list scheduler. It does not exist yet; build it before claiming an improvement.
+- **Record every proposal.** Record structural validity, fixture results, certification outcome and objective improvement for accepted candidates. Distinguish fixture-passing candidates refuted by a counterexample from candidates left uncertified by conservative analysis or resource limits. Only the former demonstrate bugs missed by the fixtures.
+- **Compare with a heuristic.** Use the existing greedy list scheduler as a second baseline before claiming an improvement.
 
 ### Prerequisite
 
-Only serial one-lane schedules have reusable proofs today; the one certified parallel candidate, the two-lane product pair, was proved by hand, boundary by boundary. Settle the certification question in [questions.md](questions.md) first. Its acceptance test is to certify `matvec-grid-exchange-v1`.
+The reusable symbolic checker is implemented and proved sound against the
+existing machine. It certifies `matvec-grid-exchange-v1` and rejects its tested
+mutants. The resolved choices are in [docs/decisions.md](docs/decisions.md);
+commands and limits are in [docs/certification.md](docs/certification.md).
 
 ### Checklist
 
-- [ ] Certification path chosen, implemented and able to certify `matvec-grid-exchange-v1`.
+- [x] Certification path chosen, implemented and able to certify `matvec-grid-exchange-v1`.
 - [x] Scheduling-heuristic baseline available for every instance.
 - [x] Matrix-matrix product: hand-built reference and lower bound recorded on the three pinned configurations.
 - [x] Polynomial evaluation: specification, certified naive baseline and a rejected Horner candidate.
@@ -430,14 +433,15 @@ Only serial one-lane schedules have reusable proofs today; the one certified par
 - [x] Two-stage linear map: specification, certified naive baseline and reference points.
 - [x] Every instance reports gap closed, proposals certified, and proposals that passed fixtures but failed certification.
 
-Implementation note (2026-11-22): the user explicitly deferred `questions.md`
-while requesting the remaining Section 9 work. The first checklist item therefore
-remains open. The existing serial proofs now cover all sixteen configurations;
-this does not choose or implement a general parallel-schedule certifier.
+Implementation note (2026-11-22): the initial Section 9 run preceded the
+certification decision. The subsequent implementation adds the general checker,
+one-time reference proofs for all seven workloads, bounded diagnostics and
+portable kernel-checked artifacts. The optimization loop remains subsequent work.
 
 See [the experiment guide](docs/experiments.md) and
 [the recorded results](docs/results/section9-v1/summary.md). The run records 232
 proposals across 16 instances, with 77 certified evaluations and three Horner
 proposals that pass public fixtures but are refuted on an allowed held-out input.
-The other 152 evaluations await general certification; that status is not counted
-as a failed proof. Counting floors use compulsory I/O and are conservative.
+The other 152 evaluations were deferred in that historical run; they have not
+been retroactively recertified or counted as failed proofs. Counting floors use
+compulsory I/O and are conservative.

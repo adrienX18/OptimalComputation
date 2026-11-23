@@ -11,6 +11,7 @@ import OptimalComputation.Tests.Objectives
 import OptimalComputation.Tests.MatMulBaseline
 import OptimalComputation.Tests.NaiveV2
 import OptimalComputation.CLI
+import OptimalComputation.Tests.Certification
 import OptimalComputation.Tests.CLI
 
 private def printVersions : IO Unit := do
@@ -35,6 +36,7 @@ def main (args : List String) : IO UInt32 := do
       OptimalComputation.Tests.objectives
       OptimalComputation.Tests.matmulBaseline
       OptimalComputation.Tests.naiveV2
+      OptimalComputation.Tests.certification
       OptimalComputation.Tests.cli
       return 0
   | ["--version"] =>

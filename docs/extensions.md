@@ -49,6 +49,11 @@ failure. `checkStatic candidate` checks static batch rules using `Hardware.check
 Neither step certifies numeric safety, readiness, termination or correctness.
 `simulate` can expose a concrete failure; successful simulations remain unverified.
 
+For the seven supported workloads, [automatic certification](certification.md)
+can now construct this proof from a candidate JSON file. A new workload can
+supply a one-time `Certification.Problem` and catalog entry to use the same
+checker. Hand-written proofs remain supported through the original interface.
+
 Construct a `VerifiedCandidate adapter` with these fields:
 
 ```text

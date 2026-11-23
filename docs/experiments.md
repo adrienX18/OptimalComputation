@@ -6,10 +6,12 @@ scheduler and hand-built schedules supply comparison points. The experiment
 runner records every proposal, including rejection and inconclusive outcomes.
 There is no LLM client or autonomous optimization loop.
 
-General certification of arbitrary parallel candidate files, including
-`matvec-grid-exchange-v1`, remains the deferred question in `../questions.md`.
-The serial proof library was generalized over the existing configuration family;
-this does not implement or select an arbitrary-schedule checker.
+[Automatic certification](certification.md) now handles arbitrary candidate files,
+including the 79-cycle `matvec-grid-exchange-v1`. The saved experiment and its
+runner retain their original catalog-based acceptance policy for reproducibility;
+its deferred entries describe that historical run. Use the standalone certifier
+to check an exported proposal. Connecting it to a future optimization loop is a
+separate task.
 
 ## Run
 

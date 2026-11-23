@@ -360,3 +360,13 @@ certifies the existing v2 matrix baseline for each configuration.
 `Evaluation.configurationArtifacts` registers these exact artifacts. See
 [experiments.md](experiments.md) for memory layouts, the separate scheduler,
 proposal records and the deferred parallel-certification boundary.
+
+## Automatic certification
+
+`OptimalComputation.Certification.Catalog` exports the separate symbolic
+certifier. `Problem` connects each reference to polynomial outputs;
+`check` returns diagnostics or cycles; `check_sound` proves the successful
+candidate safe and correct for every allowed input. `certificate` and
+`Entry.artifact` construct the existing proof-bearing types without changing
+execution or scoring. See [certification](certification.md#reusable-interfaces)
+for the complete entry points and generated-source workflow.

@@ -125,15 +125,16 @@ lake env lean scripts/reproduce-matvec-v2-objectives.lean
 lake env lean scripts/reproduce-matmul-v2-objectives.lean
 ```
 
-## Hand-built unverified reference
+## Hand-built parallel reference
 
 [`docs/candidates/matvec-grid-exchange-v1.json`](../candidates/matvec-grid-exchange-v1.json)
 is a manually designed eight-lane matrix-vector schedule that finishes in
-**79 cycles**, against 1,344 for `matvec-naive-v2`. It is **not certified and not
-scored**: `simulate` reports matching outputs on all seven fixtures, including
-the signed 16-bit endpoints, but no all-input proof exists for it. It shows how
-much headroom the naive baseline leaves and is the first target for certifying
-a parallel candidate ([questions](../../questions.md)).
+**79 cycles**, against 1,344 for `matvec-naive-v2`. It now has a
+[kernel-checked all-input certificate](../certificates/matvec-grid-exchange-v1.lean).
+`simulate` also reports matching outputs on all seven fixtures, including the
+signed 16-bit endpoints. The certificate is produced by the reusable
+[automatic checker](../certification.md); the historical Section 9 score ledger
+and the main CLI's registered candidate list are unchanged.
 
 Lanes work in pairs on four rows. One lane of a pair handles columns 0–7 and
 the other columns 8–15: each loads its eight vector entries once, then

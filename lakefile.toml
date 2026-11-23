@@ -1,6 +1,6 @@
 name = "optimal_computation"
 version = "0.1.0"
-defaultTargets = ["OptimalComputation", "optimal_computation"]
+defaultTargets = ["OptimalComputation", "optimal_computation", "certification_check"]
 testDriver = "optimal_computation"
 testDriverArgs = ["--check"]
 
@@ -10,3 +10,7 @@ name = "OptimalComputation"
 [[lean_exe]]
 name = "optimal_computation"
 root = "Main"
+
+[[lean_exe]]
+name = "certification_check"
+root = "CertificationMain"
