@@ -1,7 +1,7 @@
 import OptimalComputation.CLI
 
 namespace OptimalComputation.Tests
-open Lean Evaluation CLI
+open Lean Evaluation CLI Candidates
 
 private def checkCLI (label : String) (ok : Bool) : IO Unit := do
   unless ok do throw <| IO.userError s!"CLI check failed: {label}"
@@ -17,6 +17,65 @@ private def rejects (args : List String) (category : String) : IO Unit := do
   | .error e =>
       checkCLI "failure category" (e.category == category)
       checkCLI "failure has no score" ((e.toJson.getObjVal? "objective").toOption.isNone)
+
+/-- A minimal well-formed candidate file; `entry` is its single schedule entry. -/
+private def candidateText (entry : String := "{\"cycle\":0,\"lane\":0,\"instruction\":{\"kind\":\"load\",\"destination\":1,\"address\":0}}")
+    (extra : String := "") (identifier : String := "t") : String :=
+  "{\"identifier\":\"" ++ identifier ++ "\",\"workloadIdentifier\":\"w\",\"modelVersion\":\"m\"," ++
+  "\"formatVersion\":\"f\",\"configuration\":{\"lanes\":1,\"banks\":1}," ++
+  "\"layout\":{\"inputs\":[0],\"outputs\":[1],\"scratch\":[]},\"schedule\":[" ++ entry ++ "]" ++
+  extra ++ "}"
+
+/-- The JSON transport for unverified candidate files: exact round trips for
+every registered artifact, strict field sets, and bounded parsing. -/
+private def candidateFiles : IO Unit := do
+  for artifact in objectiveCatalog do
+    let raw := artifact.verified.candidate.toRaw
+    checkCLI "candidate JSON value round trip" ((RawCandidate.fromJson? raw.toJson).toOption == some raw)
+    checkCLI "candidate file round trip" ((parseCandidate raw.toJson.compress).toOption == some raw)
+    checkCLI "pretty candidate file round trip" ((parseCandidate raw.toJson.pretty).toOption == some raw)
+    let exported ← response ["export-candidate", raw.identifier]
+    checkCLI "export prints the registered candidate" ((RawCandidate.fromJson? exported).toOption == some raw)
+  checkCLI "minimal candidate file accepted" (parseCandidate candidateText).toOption.isSome
+  checkCLI "digits and exponent letters inside strings accepted"
+    ((parseCandidate (candidateText (identifier := "v1.2e5"))).toOption.map (·.identifier) == some "v1.2e5")
+  let load := "\"instruction\":{\"kind\":\"load\",\"destination\":1,\"address\":0}"
+  -- Each case names the message fragment it must produce, so a rejection for
+  -- an unrelated reason (for example an unknown field) cannot satisfy it.
+  for (text, reason) in [
+      (candidateText (extra := ",\"verified\":true"), "unknown field \"verified\""),
+      ("{\"identifier\":\"t\"}", "missing field"),
+      (candidateText "{\"cycle\":0,\"lane\":0,\"instruction\":{\"kind\":\"divide\",\"destination\":1,\"address\":0}}",
+        "unknown instruction kind \"divide\""),
+      (candidateText "{\"cycle\":0,\"lane\":0,\"instruction\":{\"kind\":\"load\",\"destination\":1,\"address\":0,\"left\":2}}",
+        "unknown field \"left\""),
+      (candidateText "{\"cycle\":0,\"lane\":0,\"instruction\":{\"kind\":\"store\",\"source\":1}}",
+        "missing field \"address\""),
+      (candidateText ("{\"cycle\":0,\"lane\":0,\"due\":3," ++ load ++ "}"), "unknown field \"due\""),
+      (candidateText ("{\"cycle\":-1,\"lane\":0," ++ load ++ "}"), "schedule[0].cycle: expected a nonnegative integer"),
+      (candidateText ("{\"cycle\":0,\"lane\":\"0\"," ++ load ++ "}"), "schedule[0].lane: expected a nonnegative integer"),
+      (candidateText ("{\"cycle\":1.0,\"lane\":0," ++ load ++ "}"), "plain integers"),
+      (candidateText ("{\"cycle\":1e3,\"lane\":0," ++ load ++ "}"), "plain integers"),
+      (candidateText (extra := ",\"x\":" ++ String.ofList (List.replicate 20 '[') ++
+        String.ofList (List.replicate 20 ']')), "nesting"),
+      (candidateText ("{\"cycle\":" ++ String.ofList (List.replicate 4097 '1') ++ ",\"lane\":0," ++ load ++ "}"),
+        "4096 digits"),
+      ("[1,2]", "expected an object"), ("{\"identifier\":", "Invalid JSON")] do
+    match parseCandidate text with
+    | .ok _ => throw <| IO.userError s!"CLI check failed: candidate file accepted ({reason})"
+    | .error e =>
+        checkCLI s!"candidate file rejected for: {reason}"
+          (e.category == "invalid-candidate-file" && (e.message.splitOn reason).length > 1)
+  let tiny := Examples.TinyMultiply.candidate.toRaw
+  checkCLI "default simulation budget covers the last completion" (sufficientSimulationBoundaries tiny == 9)
+  checkCLI "empty schedule budget" (sufficientSimulationBoundaries {tiny with schedule := []} == 4)
+  let late := {tiny with schedule := [⟨5000000, 0, .load 1 0⟩]}
+  checkCLI "default simulation budget is capped" (simulationBudget late {} == simulationBoundaryCap)
+  checkCLI "explicit budget overrides the cap" (simulationBudget late {budget := some 7} == 7)
+  rejects ["simulate", "--json"] "invalid-arguments"
+  rejects ["simulate", "candidate.json", "--objective", "latency-v1"] "invalid-arguments"
+  rejects ["export-candidate", "missing"] "unverified-candidate"
+  rejects ["export-candidate", "tiny-multiply-v1", "extra"] "invalid-arguments"
 
 def cli : IO Unit := do
   for input in ["not-json", "{}", "[true]", "[\"1\"]", "[1.5]", "[null]"] do
@@ -77,6 +136,7 @@ def cli : IO Unit := do
   let .failure badInput := evaluateObjective objectiveCatalog raw [32768, 1] 7 "bad" Evaluation.latency
     | throw <| IO.userError "Invalid workload input accepted"
   checkCLI "workload domain reported" ((failureError badInput).category == "invalid-input")
-  IO.println "PASS: CLI catalogs, parsing, failures, five candidates, both objectives and complete trace binding"
+  candidateFiles
+  IO.println "PASS: CLI catalogs, parsing, failures, five candidates, both objectives, complete trace binding and candidate files"
 
 end OptimalComputation.Tests

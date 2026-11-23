@@ -152,6 +152,9 @@ observational trace export cannot silently become a certified trace objective.
 
 A future strategy may construct finite raw candidates, call `inspect`, `checkStatic`
 and `simulate`, read structured failures and exhaustion, and retain its own history.
+A strategy outside Lean can do the same through the CLI: `export-candidate` provides
+a starting file and `simulate` returns cycles, counters, structured failures and a
+single-input reference check ([usage](usage.md#simulate-an-unverified-candidate-file)).
 To obtain an accepted score, it must supply a checked all-input certificate through
 the trusted artifact registration boundary and call `evaluateObjective`. It can
 read independent objective results or rescore an existing certified execution.

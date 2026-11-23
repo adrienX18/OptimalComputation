@@ -221,6 +221,12 @@ for its trace. The CLI compares every nontrace field of a second traced run with
 the accepted run before exporting it; this observed equality is not a generic proof.
 Accepted objective scoring uses a separate proof-carrying execution API described below.
 
+`Candidates.RawCandidate.toJson` and `RawCandidate.fromJson?` give `RawCandidate` a
+strict JSON transport: every field is required and unknown fields are rejected.
+The CLI's `simulate` command wraps `simulate` with that decoder, the catalog
+workload's domain check and a single-input reference comparison; `export-candidate`
+prints a registered candidate in the same format. See [usage](usage.md#simulate-an-unverified-candidate-file).
+
 `Hardware.Invariants` proves that every successful step from a state with at most
 three pending effects per lane preserves that bound. Initialization satisfies the
 bound, and `Reachable` follows the actual `Hardware.step`. `run_finished_reachable`

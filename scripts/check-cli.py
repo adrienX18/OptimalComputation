@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Process-level CLI regression. Run after lake build; Python standard library only."""
+import copy
 import json
 from pathlib import Path
 import subprocess
@@ -123,4 +124,97 @@ with tempfile.TemporaryDirectory(prefix="optimal-cli-") as temp:
     error("input-io", "evaluate", "tiny-multiply-v1", "--input", str(temp / "missing"))
     error("trace-io", "evaluate", "tiny-multiply-v1", "--trace", str(temp / "missing" / "trace.json"))
 
-print("PASS: CLI process JSON/human output, exact saved baselines, objectives, inputs, exit codes and trace export")
+# Unverified candidate files: export, edit, simulate. Never certified or scored.
+CANDIDATES = ["tiny-multiply-v1", "matvec-naive-v1", "matmul-naive-v1",
+              "product-pair-serial-v1", "product-pair-parallel-v1"]
+with tempfile.TemporaryDirectory(prefix="optimal-sim-") as temp:
+    temp = Path(temp)
+
+    def simulate_file(candidate, *args, code=0, name="candidate.json"):
+        path = temp / name
+        path.write_text(json.dumps(candidate))
+        return run("simulate", str(path), *args, code=code)
+
+    exported = {}
+    for identifier in CANDIDATES:
+        exported[identifier] = run("export-candidate", identifier)
+        assert json.loads(run("export-candidate", identifier, as_json=False).stdout) == exported[identifier]
+        simulated = simulate_file(exported[identifier])
+        evaluated = run("evaluate", identifier)
+        assert simulated["recordVersion"] == "simulation-result-v1"
+        assert simulated["verificationStatus"] == "unverified-simulation"
+        assert not ({"objective", "score", "acceptedResult"} & simulated.keys()), simulated.keys()
+        assert simulated["referenceCheck"]["status"] == "match"
+        for key in ["candidateIdentifier", "workloadIdentifier", "inputIdentifier", "inputScalars",
+                    "configuration", "execution"]:
+            assert simulated[key] == evaluated[key], (identifier, key)
+
+    # Retiming the matrix-vector baseline to issue at each completion boundary.
+    tight = copy.deepcopy(exported["matvec-naive-v1"])
+    cycle = 0
+    for entry in tight["schedule"]:
+        entry["cycle"] = cycle
+        cycle += 1 if entry["instruction"]["kind"] in ("load", "store") else 3
+    retimed = simulate_file(tight)
+    assert retimed["execution"]["cycles"] == 1344 and retimed["referenceCheck"]["status"] == "match"
+    assert "1344 cycles" in run("simulate", str(temp / "candidate.json"), as_json=False).stdout
+
+    tiny = exported["tiny-multiply-v1"]
+    square = copy.deepcopy(tiny)
+    square["schedule"][2]["instruction"]["right"] = 1  # computes a*a instead of a*b
+    trace_path = temp / "mismatch-trace.json"
+    mismatch = simulate_file(square, "--trace", str(trace_path), code=1)
+    assert mismatch["category"] == "output-mismatch", mismatch
+    assert mismatch["details"]["expectedOutputs"] == [-42] and mismatch["details"]["actualOutputs"] == [49]
+    assert mismatch["details"]["mismatchedIndices"] == [0]
+    mismatch_trace = json.loads(trace_path.read_text())
+    assert mismatch_trace["simulationResult"]["referenceCheck"]["status"] == "mismatch"
+
+    early_store = copy.deepcopy(tiny)
+    early_store["schedule"][3]["cycle"] = 4  # the product is still pending until boundary 5
+    illegal = simulate_file(early_store, code=1)
+    assert illegal["category"] == "illegal-schedule", illegal
+    assert illegal["details"]["cycle"] == 4 and "pendingRead" in illegal["details"]["rule"]
+
+    for change, category in [
+            (lambda c: c["schedule"][0].update(lane=9), "malformed-instruction"),
+            (lambda c: c["schedule"][3]["instruction"].update(address=0), "malformed-instruction"),
+            (lambda c: c.update(modelVersion="arty-model-v0"), "malformed-candidate"),
+            (lambda c: c["configuration"].update(lanes=3), "inadmissible-configuration"),
+            (lambda c: c.update(workloadIdentifier="unknown-v1"), "unknown-workload"),
+            (lambda c: c.update(verified=True), "invalid-candidate-file")]:
+        changed = copy.deepcopy(tiny)
+        change(changed)
+        assert simulate_file(changed, code=1)["category"] == category, (category, changed)
+
+    values = temp / "values.json"
+    values.write_text("[32768,1]")
+    assert simulate_file(tiny, "--input", str(values), code=1)["category"] == "invalid-input"
+    assert simulate_file(tiny, "--objective", "latency-v1", code=2)["category"] == "invalid-arguments"
+    exhausted = simulate_file(tiny, "--budget", "3", code=3)
+    assert exhausted["category"] == "resource-exhausted"
+    error("candidate-io", "simulate", str(temp / "missing.json"))
+    error("invalid-arguments", "simulate", code=2)
+    error("unverified-candidate", "export-candidate", "unregistered-v1")
+
+    trace_path = temp / "trace.json"
+    traced = simulate_file(tiny, "--trace", str(trace_path))
+    assert traced["execution"]["traceCaptured"] is True
+    trace = json.loads(trace_path.read_text())
+    assert trace["recordVersion"] == "simulation-trace-v1"
+    assert trace["verificationStatus"] == "unverified-simulation"
+    assert trace["simulationResult"] == traced
+    assert [b["cycle"] for b in trace["boundaries"]] == list(range(7))
+
+    # Hostile files are rejected before parsing, under a strict timeout.
+    for contents in ["not json", "{}", "[" * 20000 + "]" * 20000, '{"cycle": 1e1000000000}',
+                     '{"cycle": ' + "1" * 5000 + "}", json.dumps(tiny).replace('"cycle": 5', '"cycle": 5.0')]:
+        path = temp / "hostile.json"
+        path.write_text(contents)
+        result = subprocess.run([str(EXE), "simulate", str(path), "--json"],
+                                cwd=ROOT, capture_output=True, text=True, check=False, timeout=5)
+        assert result.returncode == 1 and not result.stderr, result
+        assert json.loads(result.stdout)["category"] == "invalid-candidate-file", result.stdout
+
+print("PASS: CLI process JSON/human output, exact saved baselines, objectives, inputs, exit codes, "
+      "trace export and unverified candidate files")

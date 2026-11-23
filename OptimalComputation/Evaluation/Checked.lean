@@ -122,6 +122,13 @@ def simulate (shape : Shape) (raw : RawCandidate) (inputs : List Int)
     | .failure reason => .failure (executionFailure reason)
     | .resourceExhausted details => .resourceExhausted details
 
+/-- Every completion is due at most three boundaries after issue
+(`Hardware.latency_le_three`), so boundaries `0 … lastIssueCycle + 3` let any
+run that does not fail finish. Idle boundaries still cost evaluation time, so
+callers facing untrusted cycle values should cap this budget. -/
+def sufficientSimulationBoundaries (raw : RawCandidate) : Nat :=
+  raw.schedule.foldl (fun last entry => max last entry.cycle) 0 + 4
+
 /-- The caller may impose a smaller budget. Executing the minimum retains true
 resource-exhaustion details and the certificate's sufficient bound. -/
 def evaluate {spec : Specification} {adapter : ScalarAdapter spec} (verified : VerifiedCandidate adapter) [∀ x, Decidable (spec.AllowedInput x)]

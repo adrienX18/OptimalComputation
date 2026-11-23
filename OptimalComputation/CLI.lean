@@ -13,8 +13,12 @@ Usage: optimal_computation [--help | --version | --check]\n\
        optimal_computation list-objectives [--json]\n\
        optimal_computation evaluate ID [--objective ID] [--fixture NAME | --input FILE]\n\
          [--budget BOUNDARIES] [--trace FILE] [--json]\n\
+       optimal_computation simulate CANDIDATE_FILE [--fixture NAME | --input FILE]\n\
+         [--budget BOUNDARIES] [--trace FILE] [--json]\n\
+       optimal_computation export-candidate ID [--json]\n\
 Defaults: latency-v1; generated-23 for matrices, mixed-signs for tiny/pair; certified budget.\n\
 Input files contain a JSON array of integers. --trace exports an observational simulation.\n\
+simulate runs a JSON candidate file unverified and unscored; export-candidate prints one.\n\
 See docs/usage.md for scalar order, failure codes, and the proof boundary."
 
 structure Error where
@@ -32,7 +36,8 @@ private def invalidArguments (message : String) : Error :=
   ⟨"invalid-arguments", message, Json.null, 2⟩
 
 structure Options where
-  objective : String := Versions.latency
+  /-- `none` means the default for `evaluate`; `simulate` rejects any objective. -/
+  objective : Option String := none
   fixture : Option String := none
   input : Option String := none
   budget : Option Nat := none
@@ -53,7 +58,7 @@ def parseOptions (args : List String) (options : Options := {})
       if seen.contains flag then throw (invalidArguments s!"Duplicate option {flag}.")
       if value.startsWith "--" then throw (invalidArguments s!"Missing value for {flag}.")
       let options ← match flag with
-        | "--objective" => pure {options with objective := value}
+        | "--objective" => pure {options with objective := some value}
         | "--fixture" => pure {options with fixture := some value}
         | "--input" => pure {options with input := some value}
         | "--trace" => pure {options with trace := some value}
@@ -126,6 +131,42 @@ def parseInputs (contents : String) : Except Error (List Int) := do
   (fromJson? json : Except String (List Int)).mapError fun e =>
     invalidInputFile s!"Expected a JSON array of integers: {e}"
 
+private def invalidCandidateFile (message : String) : Error :=
+  ⟨"invalid-candidate-file", message, Json.null, 1⟩
+
+/-- A candidate file needs only strings, objects, arrays and plain integers, and
+four levels of nesting. Rejecting fractions, exponents, long numerals and
+nesting beyond eight levels before parsing keeps untrusted files away from
+exponent expansion and deep recursion in Lean's general JSON parser. -/
+private def preflightCandidate (contents : String) : Except Error Unit := do
+  let mut inString := false
+  let mut escaped := false
+  let mut depth := 0
+  let mut digits := 0
+  for c in contents.toList do
+    if inString then
+      if escaped then escaped := false
+      else if c == '\\' then escaped := true
+      else if c == '"' then inString := false
+    else if c.isDigit then
+      digits := digits + 1
+      if digits > 4096 then
+        throw (invalidCandidateFile "Numbers must contain at most 4096 digits.")
+    else
+      if digits > 0 && (c == '.' || c == 'e' || c == 'E') then
+        throw (invalidCandidateFile "Numbers must be plain integers, without fractions or exponents.")
+      digits := 0
+      if c == '"' then inString := true
+      else if c == '[' || c == '{' then
+        depth := depth + 1
+        if depth > 8 then throw (invalidCandidateFile "JSON nesting must be at most 8 levels deep.")
+      else if c == ']' || c == '}' then depth := depth - 1
+
+def parseCandidate (contents : String) : Except Error RawCandidate := do
+  preflightCandidate contents
+  let json ← (Json.parse contents).mapError fun e => invalidCandidateFile s!"Invalid JSON: {e}"
+  (RawCandidate.fromJson? json).mapError invalidCandidateFile
+
 def failureError (failure : Failure) : Error :=
   let category := match failure with
     | .invalidInput _ => "invalid-input"
@@ -157,20 +198,10 @@ def exhaustionError (e : Exhaustion) : Error :=
       ("remainingInstructions", toJson e.remainingInstructions),
       ("pendingEffects", toJson e.pendingEffects)], 3⟩
 
-private def instructionJson (i : RawInstruction) : Json :=
-  let (kind, operands) := match i with
-    | .load dst address => ("load", [("destination", dst), ("address", address)])
-    | .store src address => ("store", [("source", src), ("address", address)])
-    | .add dst a b => ("add", [("destination", dst), ("left", a), ("right", b)])
-    | .multiply dst a b => ("multiply", [("destination", dst), ("left", a), ("right", b)])
-    | .multiplyAdd dst a b acc =>
-        ("multiplyAdd", [("destination", dst), ("left", a), ("right", b), ("accumulator", acc)])
-  Json.mkObj (("kind", toJson kind) :: operands.map fun (k, v) => (k, toJson v))
-
 private def eventJson : Event → Json
   | .issued cycle lane instruction due => Json.mkObj [
       ("kind", toJson "issued"), ("cycle", toJson cycle), ("lane", toJson lane),
-      ("instruction", instructionJson instruction), ("due", toJson due)]
+      ("instruction", instructionToJson instruction), ("due", toJson due)]
   | .active cycle lane => Json.mkObj [
       ("kind", toJson "active"), ("cycle", toJson cycle), ("lane", toJson lane)]
   | .committed cycle lane effect =>
@@ -181,6 +212,10 @@ private def eventJson : Event → Json
             ("address", toJson address.val), ("value", toJson (decodeSlot value).val)]
       Json.mkObj [("kind", toJson "committed"), ("cycle", toJson cycle),
         ("lane", toJson lane), ("effect", target)]
+
+private def boundariesJson (trace : List BoundaryTrace) : Json :=
+  toJson (trace.map fun b => Json.mkObj [
+    ("cycle", toJson b.cycle), ("events", toJson (b.events.map eventJson))])
 
 /-- Compare the complete record, removing only trace fields on both sides. -/
 def sameNontraceRecord (a b : ExecutionRecord) : Bool :=
@@ -202,8 +237,7 @@ def observationalTrace (accepted : AcceptedScore raw values) : Except Error Json
         ("binding", toJson "same candidate, input and effective budget; all nontrace record fields compared equal"),
         ("effectiveBoundaries", toJson e.boundaries),
         ("acceptedResult", accepted.toJson),
-        ("boundaries", toJson (traced.trace.map fun b => Json.mkObj [
-          ("cycle", toJson b.cycle), ("events", toJson (b.events.map eventJson))]))]
+        ("boundaries", boundariesJson traced.trace)]
 
 structure Response where
   json : Json
@@ -237,22 +271,29 @@ private def catalogResponse (kind : String) : Response := Id.run do
   return ⟨Json.mkObj [("recordVersion", toJson "cli-catalog-v1"), (kind, toJson (rows.map Prod.fst))],
     String.intercalate "\n" (rows.map Prod.snd)⟩
 
+/-- Shared by evaluate and simulate: an explicit input file, else a named or
+default fixture. The returned label identifies the input in results. -/
+private def loadInputs (workload : String) (options : Options) :
+    IO (String × Except Error (List Int)) := do
+  match options.input with
+  | some file =>
+      try
+        let contents ← IO.FS.readFile file
+        pure (file, parseInputs contents)
+      catch e => pure (file, .error ⟨"input-io", s!"Cannot read {file}: {e}", Json.null, 1⟩)
+  | none =>
+      let name := options.fixture.getD (defaultFixture workload)
+      pure (name, fixtureValues workload name)
+
 private def evaluateCommand (identifier : String) (options : Options) : IO (Except Error Response) := do
   let some raw := selectArtifact objectiveCatalog identifier
     | return .error (failureError (.unverifiedCandidate identifier))
   let some artifact := lookupArtifact objectiveCatalog raw
     | return .error (failureError (.unverifiedCandidate identifier))
-  let some objective := objectives.find? (fun o => o.identifier == options.objective)
-    | return .error ⟨"unknown-objective", s!"Unknown objective {options.objective}.", Json.null, 1⟩
-  let (inputId, inputs) ← match options.input with
-    | some file =>
-        try
-          let contents ← IO.FS.readFile file
-          pure (file, parseInputs contents)
-        catch e => pure (file, .error ⟨"input-io", s!"Cannot read {file}: {e}", Json.null, 1⟩)
-    | none =>
-        let name := options.fixture.getD (defaultFixture artifact.val.specification.identifier)
-        pure (name, fixtureValues artifact.val.specification.identifier name)
+  let objectiveId := options.objective.getD Versions.latency
+  let some objective := objectives.find? (fun o => o.identifier == objectiveId)
+    | return .error ⟨"unknown-objective", s!"Unknown objective {objectiveId}.", Json.null, 1⟩
+  let (inputId, inputs) ← loadInputs artifact.val.specification.identifier options
   let .ok values := inputs | return inputs.map fun _ => ⟨Json.null, ""⟩
   let budget := options.budget.getD artifact.val.verified.sufficientBoundaries
   match evaluateObjective objectiveCatalog raw values budget inputId objective with
@@ -272,6 +313,102 @@ private def evaluateCommand (identifier : String) (options : Options) : IO (Exce
         s!"{identifier}: all-input-certified; {score.objectiveIdentifier} = {score.value} {score.unit} (minimize)\n\
         {record.cycles} cycles; {record.scheduleSize} instructions; {record.outputs.length} outputs; {record.storage.declaredBytes} declared bytes{traceNote}"⟩
 
+/-- Default cap on simulation boundaries (under a second of evaluation), so a huge
+`cycle` in an untrusted file cannot stall the evaluator. `--budget` overrides it. -/
+def simulationBoundaryCap : Nat := 1000000
+
+def simulationBudget (raw : RawCandidate) (options : Options) : Nat :=
+  options.budget.getD (min (sufficientSimulationBoundaries raw) simulationBoundaryCap)
+
+/-- Result of an unverified run. It carries no objective or score, and its
+reference check covers only the one input that was executed. -/
+private def simulationJson (record : ExecutionRecord) (inputId : String) (values : List Int)
+    (budget : Nat) (traceCaptured : Bool) (referenceCheck : Json) : Json := Json.mkObj [
+  ("recordVersion", toJson "simulation-result-v1"),
+  ("verificationStatus", toJson "unverified-simulation"),
+  ("modelVersion", toJson record.modelVersion),
+  ("candidateFormatVersion", toJson record.candidateFormatVersion),
+  ("workloadIdentifier", toJson record.workloadIdentifier),
+  ("candidateIdentifier", toJson record.candidateIdentifier),
+  ("inputIdentifier", toJson inputId), ("inputScalars", toJson values),
+  ("boundaryBudget", toJson budget),
+  ("configuration", configurationJson record.resources),
+  ("execution", executionJson record traceCaptured),
+  ("referenceCheck", referenceCheck)]
+
+/-- The workload's own codec and domain check, as used by certified evaluation. -/
+private def parseArtifactInput (artifact : VerifiedArtifact) (values : List Int) :
+    Except Failure {x : artifact.specification.Input // artifact.specification.AllowedInput x} :=
+  letI := artifact.domainDecidable
+  parseInput artifact.adapter values
+
+private def readCandidate (file : String) : IO (Except Error RawCandidate) := do
+  try return parseCandidate (← IO.FS.readFile file)
+  catch e => return .error ⟨"candidate-io", s!"Cannot read {file}: {e}", Json.null, 1⟩
+
+/-- Run a candidate file on the fixed machine. The workload's shape, input
+domain and reference come from the trusted catalog, never from the file. The
+outcome is never certified and never scored, whatever the file contains. -/
+private def simulateCommand (file : String) (options : Options) : IO (Except Error Response) := do
+  if options.objective.isSome then
+    return .error (invalidArguments "simulate takes no --objective: unverified candidates are never scored.")
+  let raw ← match ← readCandidate file with
+    | .ok raw => pure raw
+    | .error e => return .error e
+  let some artifact := objectiveCatalog.find? (·.specification.identifier == raw.workloadIdentifier)
+    | return .error ⟨"unknown-workload",
+        s!"Unknown workload {raw.workloadIdentifier}; see list-workloads.", Json.null, 1⟩
+  let (inputId, inputs) ← loadInputs artifact.specification.identifier options
+  let values ← match inputs with
+    | .ok values => pure values
+    | .error e => return .error e
+  let input ← match parseArtifactInput artifact values with
+    | .ok input => pure input
+    | .error reason => return .error (failureError reason)
+  let budget := simulationBudget raw options
+  match simulate artifact.adapter.shape raw values budget options.trace.isSome with
+  | .failure reason => return .error (failureError reason)
+  | .resourceExhausted details => return .error (exhaustionError details)
+  | .verified _ =>
+      return .error ⟨"internal-error", "simulate returned a verified outcome; refusing to report it.",
+        Json.null, 1⟩
+  | .simulated record =>
+      let expected := (artifact.adapter.outputScalars (artifact.specification.reference input.val)).toList
+      let outputsMatch := record.outputs == expected
+      let scope := toJson "this input only; not an all-input proof"
+      let referenceCheck := if outputsMatch
+        then Json.mkObj [("status", toJson "match"), ("scope", scope)]
+        else Json.mkObj [("status", toJson "mismatch"), ("scope", scope),
+          ("expectedOutputs", toJson expected)]
+      let result := simulationJson record inputId values budget options.trace.isSome referenceCheck
+      -- A trace is most useful when outputs are wrong, so write it either way.
+      if let some path := options.trace then
+        let trace := Json.mkObj [
+          ("recordVersion", toJson "simulation-trace-v1"),
+          ("verificationStatus", toJson "unverified-simulation"),
+          ("effectiveBoundaries", toJson budget),
+          ("simulationResult", result),
+          ("boundaries", boundariesJson record.trace)]
+        try IO.FS.writeFile path (trace.pretty ++ "\n")
+        catch e => return .error ⟨"trace-io", s!"Cannot write {path}: {e}", Json.null, 1⟩
+      if !outputsMatch then
+        let wrong := ((record.outputs.zip expected).zipIdx.filter fun ((a, b), _) => a != b).map (·.2)
+        return .error ⟨"output-mismatch",
+          s!"Outputs differ from the reference for input {inputId} at {wrong.length} of {expected.length} positions (first: index {wrong.headD 0}).",
+          Json.mkObj [("inputIdentifier", toJson inputId), ("cycles", toJson record.cycles),
+            ("mismatchedIndices", toJson wrong), ("expectedOutputs", toJson expected),
+            ("actualOutputs", toJson record.outputs)], 1⟩
+      let traceNote := options.trace.map (fun path => s!"\nUnverified trace: {path}") |>.getD ""
+      return .ok ⟨result,
+        s!"{raw.identifier}: unverified simulation (not certified, not scored)\n\
+        {record.cycles} cycles; {record.scheduleSize} instructions; outputs match the reference for input {inputId} (this input only){traceNote}"⟩
+
+/-- A registered candidate in the `simulate` file format: a valid starting point. -/
+private def exportCommand (identifier : String) : Except Error Response :=
+  match selectArtifact objectiveCatalog identifier with
+  | none => .error (failureError (.unverifiedCandidate identifier))
+  | some raw => .ok ⟨raw.toJson, raw.toJson.pretty⟩
+
 /-- IO boundary with no printing; tests exercise the same dispatch as main. -/
 def dispatch (args : List String) : IO (Except Error Response) := do
   match args with
@@ -282,6 +419,18 @@ def dispatch (args : List String) : IO (Except Error Response) := do
       match parseOptions rest with
       | .error e => return .error e
       | .ok options => evaluateCommand identifier options
+  | "simulate" :: file :: rest =>
+      if file.startsWith "--" then
+        return .error (invalidArguments "Missing candidate file. Use --help.")
+      match parseOptions rest with
+      | .error e => return .error e
+      | .ok options => simulateCommand file options
+  | "export-candidate" :: identifier :: rest =>
+      if identifier.startsWith "--" then
+        return .error (invalidArguments "Missing candidate identifier. Use --help.")
+      if rest != [] && rest != ["--json"] then
+        return .error (invalidArguments "Unexpected arguments. Use --help.")
+      return exportCommand identifier
   | command :: rest =>
       if rest != [] && rest != ["--json"] then
         return .error (invalidArguments "Unexpected arguments. Use --help.")

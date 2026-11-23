@@ -13,9 +13,10 @@ lake exe optimal_computation list-objectives
 
 The lists describe the compiled certificate catalog: four workloads, five
 candidates and two independent minimizing objectives. Candidate listings include
-configuration and the certificate's sufficient boundary budget. The CLI selects
-registered Lean artifacts by identifier; it does not import serialized programs
-or proof claims. See [the API](api.md) to inspect or simulate an unverified proposal.
+configuration and the certificate's sufficient boundary budget. `evaluate` selects
+registered Lean artifacts by identifier; it never imports serialized programs or
+proof claims. To run a program written outside Lean, see
+[Simulate an unverified candidate file](#simulate-an-unverified-candidate-file).
 
 ## Reproduce and score both baselines
 
@@ -132,17 +133,18 @@ never returns an accepted score.
 
 | Exit | Meaning |
 | ---: | --- |
-| 0 | Successful command; evaluation emitted an accepted result |
-| 1 | Invalid input/file, unknown artifact/objective/fixture, execution or trace/export failure |
+| 0 | Successful command; evaluation emitted an accepted result, or a simulation matched the reference for its input |
+| 1 | Invalid input/file, unknown artifact/objective/fixture/workload, execution or trace/export failure, simulation output mismatch |
 | 2 | Invalid command syntax, unknown/duplicate option, missing value or invalid budget |
 | 3 | Evaluator boundary budget exhausted |
 
 With `--json`, stdout contains exactly one JSON value and no human summary.
 Without it, failures go to stderr; successful summaries go to stdout. Syntax
 errors detected in an invocation containing `--json` are also JSON. Success uses
-the existing `accepted-objective-result-v1` schema unchanged; catalogs use
-`cli-catalog-v1`; errors use `cli-error-v1`. JSON is an exported report, not a
-portable proof certificate or an input accepted by the scoring API.
+the existing `accepted-objective-result-v1` schema unchanged; simulations use
+`simulation-result-v1`; catalogs use `cli-catalog-v1`; errors use `cli-error-v1`.
+JSON is an exported report, not a portable proof certificate or an input accepted
+by the scoring API.
 
 The Lean `Failure` type additionally distinguishes inadmissible configurations,
 malformed layouts/candidates/instructions, illegal schedules, arithmetic failures,
@@ -174,3 +176,64 @@ arrays. Matrix traces are much larger. The path is written as requested and an
 existing file at that path is replaced. If simulation comparison or file export
 fails, the command exits nonzero and emits only a score-free error, even if the
 earlier certified execution succeeded.
+
+## Simulate an unverified candidate file
+
+Use `simulate` to run a program written outside Lean, for example by an optimizer.
+Start from a registered candidate, edit the file, then simulate it:
+
+```sh
+.lake/build/bin/optimal_computation export-candidate matvec-naive-v1 > /tmp/candidate.json
+.lake/build/bin/optimal_computation simulate /tmp/candidate.json --json
+```
+
+A candidate file is one JSON object with exactly the fields below. Every field is
+required, and unknown fields are rejected, so a claim such as `"verified": true`
+is an error rather than silently ignored. This is the complete `tiny-multiply-v1`
+program:
+
+```json
+{"identifier": "my-tiny", "workloadIdentifier": "scalar-multiply-signed16-v1",
+ "modelVersion": "arty-model-v1", "formatVersion": "candidate-v1",
+ "configuration": {"lanes": 1, "banks": 1},
+ "layout": {"inputs": [0, 1], "outputs": [2], "scratch": []},
+ "schedule": [
+  {"cycle": 0, "lane": 0, "instruction": {"kind": "load", "destination": 1, "address": 0}},
+  {"cycle": 1, "lane": 0, "instruction": {"kind": "load", "destination": 2, "address": 1}},
+  {"cycle": 2, "lane": 0, "instruction": {"kind": "multiply", "destination": 3, "left": 1, "right": 2}},
+  {"cycle": 5, "lane": 0, "instruction": {"kind": "store", "source": 3, "address": 2}}]}
+```
+
+Layout lists give one address per logical scalar, in the scalar order of the table
+above. Instruction operands are `load {destination, address}`, `store {source,
+address}`, `add` and `multiply {destination, left, right}`, and `multiplyAdd
+{destination, left, right, accumulator}`, the same names trace events use. Numbers
+must be plain nonnegative integers: no fractions or exponents, at most 4,096 digits,
+and nesting at most eight levels deep. Violations return `invalid-candidate-file`
+before JSON parsing, so a hostile file cannot trigger exponent expansion.
+
+`simulate` takes the workload's scalar shape, input domain and reference from the
+compiled catalog, selected by `workloadIdentifier` (otherwise `unknown-workload`),
+never from the file. `--fixture` and `--input` work exactly as for `evaluate`. The
+candidate then gets the same structural checks and cycle-accurate machine as every
+other program, with the same failure categories: `malformed-candidate`,
+`malformed-layout`, `malformed-instruction`, `inadmissible-configuration`,
+`illegal-schedule` and `arithmetic-failure` with cycle, lane and rule, or
+`incomplete-output`. The default budget is the last issue cycle plus four
+boundaries, enough for any run that does not fail, capped at 1,000,000 boundaries
+so a huge cycle value cannot stall the evaluator. `--budget` overrides it, and
+exhaustion exits 3 as usual.
+
+A completed run is compared with the reference **for that one input only**. A match
+prints `simulation-result-v1`, labeled `unverified-simulation`, with the same
+`execution` object as accepted results and a `referenceCheck`. A mismatch exits 1
+with `output-mismatch` and the expected outputs, actual outputs and mismatched
+indices. `--trace FILE` writes a `simulation-trace-v1` file whenever the run
+completes, including on a mismatch, when it is most useful.
+
+Simulations are never certified and never scored: `--objective` is rejected, and
+nothing in a file can change that. An accepted score still requires a Lean
+candidate with an all-input certificate; see [extensions](extensions.md). For
+example, retiming the exported `matvec-naive-v1` so that each instruction issues
+on its predecessor's completion boundary gives 1,344 cycles instead of 2,143, with
+matching outputs. `scripts/check-cli.py` runs that example.

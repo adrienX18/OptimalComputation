@@ -8,6 +8,7 @@ import OptimalComputation.Hardware.Instruction
 import OptimalComputation.Workloads.MatVec
 import OptimalComputation.Workloads.MatMul
 import OptimalComputation.Candidates.Program
+import OptimalComputation.Candidates.Json
 import OptimalComputation.Hardware.Machine
 import OptimalComputation.Evaluation.Execution
 import OptimalComputation.Hardware.Invariants

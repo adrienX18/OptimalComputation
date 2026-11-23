@@ -23,6 +23,8 @@ lake test
 lake exe optimal_computation list-candidates
 lake exe optimal_computation evaluate matvec-naive-v1 --fixture generated-23 --objective latency-v1
 lake exe optimal_computation evaluate matmul-naive-v1 --fixture generated-23 --objective energy-proxy-v1 --json
+.lake/build/bin/optimal_computation export-candidate matvec-naive-v1 > /tmp/candidate.json
+lake exe optimal_computation simulate /tmp/candidate.json  # unverified and unscored
 ```
 
 [lean-toolchain](lean-toolchain) pins Lean 4.35.0 and its bundled Lake. There are no
@@ -42,7 +44,7 @@ routing and power are uncalibrated. Every accepted candidate has safety and
 correctness proofs for all allowed inputs. Saved JSON is a report, not a proof
 certificate. Optional exported traces are explicitly observational simulations.
 
-- [CLI usage, custom inputs, failures and traces](docs/usage.md)
+- [CLI usage, custom inputs, failures, traces and candidate files](docs/usage.md)
 - [API and proof boundary](docs/api.md) · [Adding workloads, candidates and objectives](docs/extensions.md)
 - [Machine contract](docs/machine-contract.md) · [Assumptions](docs/assumptions.md)
 - [Objectives](docs/objectives.md) · [Saved results](docs/results/README.md)

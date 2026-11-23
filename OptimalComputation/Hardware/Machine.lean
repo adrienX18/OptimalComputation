@@ -159,6 +159,11 @@ def latency : BoundedInstruction → Nat
   | .load _ _ | .store _ _ => 1
   | .add _ _ _ | .multiply _ _ _ | .multiplyAdd _ _ _ _ => 3
 
+/-- The longest latency. The default simulation budget
+(`Evaluation.sufficientSimulationBoundaries`) relies on this bound. -/
+theorem latency_le_three (i : BoundedInstruction) : latency i ≤ 3 := by
+  cases i <;> simp [latency]
+
 def registerPending (s : State c) (lane : Lane c) (r : Register) : Bool :=
   (s.pending[lane.val]).any fun p => p.effect.destination.any (fun d => d.val == r)
 
