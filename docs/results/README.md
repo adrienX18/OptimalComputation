@@ -107,3 +107,21 @@ The [matrix-matrix baseline record guide](matmul-naive-v1.md) documents
 and saved results: **34,303 cycles / 954,087 abstract energy units** at `(8, 8)`.
 Its configuration records are conformance simulations. The matrix-vector and
 product-pair results above remain unchanged.
+
+## Naive v2 baselines
+
+[Matrix-vector v2](matvec-naive-v2-objectives.json) and
+[matrix-matrix v2](matmul-naive-v2-objectives.json) record certified `generated-23`
+executions under both objectives: **1,344 cycles / 39,632** and **21,504 cycles /
+634,112** abstract energy units. They retime the v1 instructions to issue on each
+completion boundary, so one dot product takes reset 3 + 16 × (1 + 1 + 3) + store 1
+= 84 cycles: `16*84 = 1344` and `256*84 = 21504`, equal to v1's lane-0 active
+cycles. Every other execution field equals v1's. `scripts/check-objective-results.py`
+and `scripts/check-matmul-results.py` verify this independently, and
+`scripts/check-cli.py` checks that retiming the exported v1 schedules in Python
+yields exactly the certified v2 schedules. All v1 records above stay frozen.
+
+```sh
+lake env lean scripts/reproduce-matvec-v2-objectives.lean
+lake env lean scripts/reproduce-matmul-v2-objectives.lean
+```

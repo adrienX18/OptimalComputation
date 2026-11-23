@@ -53,7 +53,7 @@ def matmulBaseline : IO Unit := do
   let some raw := selectCandidate "matmul-naive-v1" | throw <| IO.userError "Missing matmul registration"
   checkMatMul "selection binds complete artifact in both registries" <|
     raw == candidate.toRaw && selectArtifact objectiveCatalog "matmul-naive-v1" == some raw
-  checkMatMul "unknown identifier is not selectable" ((selectCandidate "matmul-naive-v2").isNone)
+  checkMatMul "unknown identifier is not selectable" ((selectCandidate "matmul-naive-v0").isNone)
   checkMatMul "independent entire i,j,k schedule" (raw.schedule == expectedSchedule)
   checkMatMul "row-major complete layout" <|
     raw.layout == ⟨List.range 512, (List.range 256).map (512 + ·), []⟩

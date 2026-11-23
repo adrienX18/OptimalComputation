@@ -330,4 +330,192 @@ theorem duration_append (xs ys : List BoundedInstruction) :
   | nil => simp [duration]
   | cons i is ih => simp [duration, ih, Nat.add_assoc]
 
+/-! ### Tight serial timing (`*-naive-v2` baselines)
+
+Each instruction issues on its predecessor's completion boundary: that boundary
+first commits the old effect, then issues the next instruction, exactly as the
+machine's timing convention allows. Only one instruction is ever in flight, so
+the timing-independent `Executes` relation is reused unchanged. -/
+
+/-- Lane-zero schedule for any layout: issue at the previous completion boundary. -/
+def tightSchedule {shape : Shape} (c : ValidConfig) (layout : Layout shape) (t : Nat)
+    (is : List BoundedInstruction) (allowed : ∀ i ∈ is, MemoryAllowed layout i) :
+    List (ScheduledInstruction c layout) :=
+  match is with
+  | [] => []
+  | i :: is =>
+      ⟨t, ⟨0, allowedCount_positive c.property.1⟩, i, allowed i (by simp)⟩ ::
+        tightSchedule c layout (t + latency i) is (fun j hj => allowed j (by simp [hj]))
+
+def tightTimed (t : Nat) : List BoundedInstruction → List (TimedAction C)
+  | [] => []
+  | i :: is => ⟨t, ⟨lane, i⟩⟩ :: tightTimed (t + latency i) is
+
+def tightDuration : List BoundedInstruction → Nat
+  | [] => 0
+  | i :: is => latency i + tightDuration is
+
+theorem latency_pos (i : BoundedInstruction) : 0 < latency i := by
+  cases i <;> simp [latency]
+
+theorem tightSchedule_timed {shape : Shape} (layout : Layout shape) (t : Nat)
+    (is : List BoundedInstruction) (h : ∀ i ∈ is, MemoryAllowed layout i) :
+    (tightSchedule C layout t is h).map
+      (fun i => (⟨i.cycle, ⟨i.lane, i.instruction⟩⟩ : TimedAction C)) = tightTimed t is := by
+  induction is generalizing t with
+  | nil => rfl
+  | cons i is ih => simp [tightSchedule, tightTimed, ih, lane]
+
+theorem tightTimed_after (t : Nat) (is : List BoundedInstruction) : After t (tightTimed t is) := by
+  induction is generalizing t with
+  | nil => simp [After, tightTimed]
+  | cons i is ih =>
+    intro a ha
+    simp only [tightTimed, List.mem_cons] at ha
+    rcases ha with rfl | ha
+    · exact Nat.le_refl _
+    · have := ih (t + latency i) a ha; omega
+
+theorem tightTimed_sorted (t : Nat) (is : List BoundedInstruction) :
+    (tightTimed t is).Pairwise (fun a b => decide (a.cycle ≤ b.cycle) = true) := by
+  induction is generalizing t with
+  | nil => simp [tightTimed]
+  | cons i is ih =>
+    apply List.pairwise_cons.mpr
+    constructor
+    · intro b hb
+      have := tightTimed_after (t + latency i) is b hb
+      simp only [decide_eq_true_eq]
+      omega
+    · exact ih _
+
+theorem tightDuration_append (xs ys : List BoundedInstruction) :
+    tightDuration (xs ++ ys) = tightDuration xs + tightDuration ys := by
+  induction xs with
+  | nil => simp [tightDuration]
+  | cons i is ih => simp [tightDuration, ih, Nat.add_assoc]
+
+theorem enqueue_quiet (s : State C) (h : Quiet s) (i : BoundedInstruction) (due : Nat) (e : Effect) :
+    enqueue s [(⟨lane, i⟩, ⟨due, e⟩)] = waitState s due e := by
+  change s.pending = _ at h
+  simp +instances [C, defaultConfig, enqueue, List.foldl_cons, List.foldl_nil, waitState, h, lane]
+
+/-- One boundary that commits the previous effect and then issues the next
+instruction against the post-commit state. -/
+theorem step_commit_issue (p : State C) (hp : Quiet p) (t : Nat) (e : Effect)
+    (i : BoundedInstruction) (e' : Effect)
+    (hprep : prepare t (applyEffect p lane e) ⟨lane, i⟩ = .ok ⟨t + latency i, e'⟩) :
+    step t [⟨lane, i⟩] (waitState p t e) =
+      .ok (waitState (applyEffect p lane e) (t + latency i) e',
+        [.committed t 0 e, .issued t 0 i.toRaw (t + latency i), .active t 0]) := by
+  have hs : Quiet (applyEffect p lane e) := (quiet_effect p e).mpr hp
+  have he := enqueue_quiet (applyEffect p lane e) hs i (t + latency i) e'
+  simp only [step, commit_wait_due t p hp e, canonicalActions, List.mergeSort_singleton,
+    checkBatch_single, hprep, List.mapM_cons, List.mapM_nil, bind, pure, Except.bind, Except.pure,
+    he, List.map_cons, List.map_nil, List.nil_append, List.cons_append,
+    activity_wait (applyEffect p lane e) hs]
+  rfl
+
+/-- The idle boundaries strictly between an issue and its completion. -/
+theorem run_wait (t fuel : Nat) (q : List (TimedAction C)) (s : State C) (h : Quiet s)
+    (i : BoundedInstruction) (e : Effect) (counts : Counters) (hq : After (t + latency i) q) :
+    ∃ counts', run false (latency i - 1 + fuel) (t + 1) q (waitState s (t + latency i) e) counts [] =
+      run false fuel (t + latency i) q (waitState s (t + latency i) e) counts' [] := by
+  have hl : latency i = 1 ∨ latency i = 3 := by cases i <;> simp [latency]
+  rcases hl with hl | hl
+  · exact ⟨counts, by simp only [hl, Nat.sub_self, Nat.zero_add]⟩
+  · have hw : (q.isEmpty && (waitState s (t + latency i) e).drained) = false := by
+      rw [wait_not_drained s h]; simp
+    have hsp1 := span_after hq (by omega : t + 1 < t + latency i)
+    have hsp2 := span_after hq (by omega : t + 1 + 1 < t + latency i)
+    rw [show latency i - 1 + fuel = (fuel + 1) + 1 by omega,
+      run_step false (fuel + 1) (t + 1) q [] q _ _ _ [] _ hw hsp1
+        (step_wait_before s h _ _ e (by omega))]
+    simp only [Bool.false_eq_true, ↓reduceIte]
+    rw [run_step false fuel (t + 1 + 1) q [] q _ _ _ [] _ hw hsp2
+      (step_wait_before s h _ _ e (by omega))]
+    simp only [Bool.false_eq_true, ↓reduceIte]
+    rw [hl]
+    exact ⟨_, rfl⟩
+
+/-- From a boundary where the previous instruction's effect `e` is due, run the
+rest of a tight serial program through its final commit. -/
+theorem run_tight_pending {is : List BoundedInstruction} {s final : State C}
+    (hex : Executes is s final) (p : State C) (hp : Quiet p) (e : Effect)
+    (he : applyEffect p lane e = s) (t fuel : Nat) (counts : Counters) :
+    ∃ counts', run false (tightDuration is + 1 + fuel) t (tightTimed t is) (waitState p t e) counts [] =
+      run false fuel (t + tightDuration is + 1) [] final counts' [] := by
+  induction hex generalizing p e t counts with
+  | nil s quiet =>
+    have hn : (([] : List (TimedAction C)).isEmpty && (waitState p t e).drained) = false := by
+      rw [wait_not_drained p hp]; simp
+    refine ⟨[Event.committed t 0 e].foldl (Counters.record C) counts, ?_⟩
+    rw [show tightDuration ([] : List BoundedInstruction) + 1 + fuel = fuel + 1 by
+      simp only [tightDuration]; omega]
+    simp only [tightTimed]
+    rw [run_step false fuel t [] [] [] _ _ counts [] _ hn rfl (step_wait_due p hp t e)]
+    simp only [Bool.false_eq_true, ↓reduceIte, he, tightDuration, Nat.add_zero]
+  | cons i is s final e' quiet hprep tail ih =>
+    have hrest := tightTimed_after (t + latency i) is
+    have hi : After (t + 1) (tightTimed (t + latency i) is) := by
+      intro a ha; have := hrest a ha; have := latency_pos i; omega
+    have hstep := step_commit_issue p hp t e i e' (by rw [he]; exact hprep t)
+    rw [he] at hstep
+    have hn : ((⟨t, ⟨lane, i⟩⟩ :: tightTimed (t + latency i) is : List (TimedAction C)).isEmpty &&
+        (waitState p t e).drained) = false := rfl
+    obtain ⟨c1, hw⟩ := run_wait t (tightDuration is + 1 + fuel) (tightTimed (t + latency i) is) s quiet i e'
+      ([Event.committed t 0 e, .issued t 0 i.toRaw (t + latency i), .active t 0].foldl
+        (Counters.record C) counts) hrest
+    obtain ⟨c2, hih⟩ := ih s quiet e' rfl (t + latency i) c1
+    refine ⟨c2, ?_⟩
+    rw [show tightDuration (i :: is) + 1 + fuel = (latency i - 1 + (tightDuration is + 1 + fuel)) + 1 by
+      simp only [tightDuration]; have := latency_pos i; omega]
+    simp only [tightTimed]
+    rw [run_step false _ t _ [⟨t, ⟨lane, i⟩⟩] _ _ _ counts [] _ hn (span_head _ hi) hstep]
+    simp only [Bool.false_eq_true, ↓reduceIte]
+    rw [hw, hih]
+    simp only [tightDuration, Nat.add_assoc]
+
+/-- A nonempty tight serial program, from a quiet state through its final commit. -/
+theorem run_tight {is : List BoundedInstruction} {s final : State C}
+    (hex : Executes is s final) (hne : is ≠ []) (t fuel : Nat) (counts : Counters) :
+    ∃ counts', run false (tightDuration is + 1 + fuel) t (tightTimed t is) s counts [] =
+      run false fuel (t + tightDuration is + 1) [] final counts' [] := by
+  cases hex with
+  | nil _ _ => exact absurd rfl hne
+  | cons i is s final e quiet hprep tail =>
+    have hrest := tightTimed_after (t + latency i) is
+    have hi : After (t + 1) (tightTimed (t + latency i) is) := by
+      intro a ha; have := hrest a ha; have := latency_pos i; omega
+    have hn : ((⟨t, ⟨lane, i⟩⟩ :: tightTimed (t + latency i) is : List (TimedAction C)).isEmpty &&
+        s.drained) = false := rfl
+    obtain ⟨c1, hw⟩ := run_wait t (tightDuration is + 1 + fuel) (tightTimed (t + latency i) is) s quiet i e
+      ([Event.issued t 0 i.toRaw (t + latency i), .active t 0].foldl (Counters.record C) counts) hrest
+    obtain ⟨c2, hp⟩ := run_tight_pending tail s quiet e rfl (t + latency i) fuel c1
+    refine ⟨c2, ?_⟩
+    rw [show tightDuration (i :: is) + 1 + fuel = (latency i - 1 + (tightDuration is + 1 + fuel)) + 1 by
+      simp only [tightDuration]; have := latency_pos i; omega]
+    simp only [tightTimed]
+    rw [run_step false _ t _ [⟨t, ⟨lane, i⟩⟩] _ _ _ counts [] _ hn (span_head _ hi)
+      (step_issue s quiet t i e (hprep t))]
+    simp only [Bool.false_eq_true, ↓reduceIte]
+    rw [hw, hp]
+    simp only [tightDuration, Nat.add_assoc]
+
+/-- A whole tight program from boundary zero. The final effect commits at
+boundary `ticks`, which is therefore the elapsed cycle count. -/
+theorem run_tight_complete {instructions : List BoundedInstruction} {s final : State C}
+    (hex : Executes instructions s final) (ticks : Nat) (ht : tightDuration instructions = ticks)
+    (hpos : 0 < ticks) :
+    ∃ counts, run false (ticks + 1) 0 (tightTimed 0 instructions) s (Counters.empty C) [] =
+      .finished ⟨ticks, final, counts, []⟩ := by
+  have hne : instructions ≠ [] := by
+    intro h; subst h; simp [tightDuration] at ht; omega
+  obtain ⟨counts, hr⟩ := run_tight hex hne 0 0 (Counters.empty C)
+  refine ⟨counts, ?_⟩
+  rw [ht] at hr
+  simp only [Nat.add_zero, Nat.zero_add] at hr
+  rw [hr, run_finished false 0 (ticks + 1) final counts [] (quiet_drained (executes_quiet hex))]
+  rfl
+
 end OptimalComputation.Evaluation.Serial

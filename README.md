@@ -38,6 +38,12 @@ Python 3 is used only for the independent validation scripts.
 | `matmul-naive-v1` | 34,303 | 954,087 |
 | `product-pair-serial-v1` | 12 | 172 |
 | `product-pair-parallel-v1` | 6 | 202 |
+| `matvec-naive-v2` | 1,344 | 39,632 |
+| `matmul-naive-v2` | 21,504 | 634,112 |
+
+The `-v2` baselines run exactly the v1 instructions, but issue each on its
+predecessor's completion boundary instead of one idle cycle later. Use them as
+the naive comparison point; v1 stays frozen for reproducibility.
 
 These are model results. Energy coefficients are hypothetical; physical timing,
 routing and power are uncalibrated. Every accepted candidate has safety and

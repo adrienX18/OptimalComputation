@@ -23,7 +23,8 @@ command("lake", "test")
 command("python3", "scripts/check-cli.py")
 command("lake", "env", "lean", "scripts/check-doc-examples.lean")
 
-for name, count in [("verification", 53), ("matvec", 72), ("objectives", 26), ("matmul", 40)]:
+for name, count in [("verification", 53), ("matvec", 72), ("objectives", 26), ("matmul", 40),
+                    ("naive-v2", 32)]:
     output = command("lake", "env", "lean", f"scripts/audit-{name}.lean", capture=True).decode()
     declarations = re.findall(r"'[^']+' (?:does not depend on any axioms|depends on axioms:)", output)
     assert len(declarations) == count, (name, len(declarations), output)
@@ -42,6 +43,8 @@ for script, result in [
     ("matmul", "matmul-naive-v1.json"),
     ("matmul-configurations", "matmul-naive-v1-configurations.json"),
     ("matmul-objectives", "matmul-naive-v1-objectives.json"),
+    ("matvec-v2-objectives", "matvec-naive-v2-objectives.json"),
+    ("matmul-v2-objectives", "matmul-naive-v2-objectives.json"),
 ]:
     output = command("lake", "env", "lean", f"scripts/reproduce-{script}.lean", capture=True)
     assert output == (ROOT / "docs/results" / result).read_bytes(), result

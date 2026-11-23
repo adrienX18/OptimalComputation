@@ -78,4 +78,13 @@ theorem code_duration {n : Nat} (a b : Fin n → Address) (k : Nat) (hk : k ≤ 
     simp [code, duration_append, block, duration, latency, ih]
     omega
 
+/-- Tight timing: load (1) + load (1) + MAC (3) cycles per term. -/
+theorem code_tightDuration {n : Nat} (a b : Fin n → Address) (k : Nat) (hk : k ≤ n) :
+    tightDuration (code a b k hk) = 5 * k := by
+  induction k with
+  | zero => rfl
+  | succ k ih =>
+    simp [code, tightDuration_append, block, tightDuration, latency, ih]
+    omega
+
 end OptimalComputation.Examples.SerialDot

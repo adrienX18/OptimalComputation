@@ -18,6 +18,11 @@ def reproduceMatVec : IO Unit := do
     (Workloads.MatVec.scalarInput (MatVecNaive.generated 23)).toList 2144
   IO.println (Lean.toJson results).pretty
 
+def reproduceMatVecV2 : IO Unit := do
+  let results ← both "matvec-naive-v2" "generated-23"
+    (Workloads.MatVec.scalarInput (MatVecNaive.generated 23)).toList 1345
+  IO.println (Lean.toJson results).pretty
+
 def reproduceProductPair : IO Unit := do
   let serial ← both "product-pair-serial-v1" "mixed-signs-four-operands" [-7, 6, 5, -3] 13
   let parallel ← both "product-pair-parallel-v1" "mixed-signs-four-operands" [-7, 6, 5, -3] 7

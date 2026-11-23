@@ -132,4 +132,37 @@ theorem structural_validity (c : ValidConfig) :
     validateCandidate MatVec.shape (candidateFor c).toRaw = .ok (candidateFor c) :=
   validateCandidate_roundtrip _
 
+/-! ### `matvec-naive-v2`
+
+The same instructions, layout and order as `matvec-naive-v1`, but each issues on
+its predecessor's completion boundary rather than one boundary later. The v1 idle
+boundary was a proof convenience, not a machine rule; v1 stays frozen. -/
+
+def candidateV2For (c : ValidConfig) : Candidate MatVec.shape := {
+  identifier := "matvec-naive-v2"
+  identifier_nonempty := by decide
+  configuration := c
+  layout := layout
+  schedule := tightSchedule c layout 0 (rowsCode 16 (by omega)) (rows_allowed 16 (by omega))
+}
+
+def candidateV2 : Candidate MatVec.shape := candidateV2For defaultConfig
+
+theorem candidateV2_program : program candidateV2 = tightTimed 0 (rowsCode 16 (by omega)) := by
+  unfold program candidateV2 candidateV2For
+  rw [tightSchedule_timed]
+  exact List.mergeSort_of_pairwise (tightTimed_sorted _ _)
+
+theorem row_tightDuration (i : Index16) : tightDuration (rowCode i) = 84 := by
+  simp [rowCode, tightDuration_append, SerialDot.code_tightDuration, tightDuration, latency]
+
+theorem rows_tightDuration (n : Nat) (hn : n ≤ 16) : tightDuration (rowsCode n hn) = 84 * n := by
+  induction n with
+  | zero => rfl
+  | succ n ih => simp [rowsCode, tightDuration_append, row_tightDuration, ih]; omega
+
+theorem structural_validity_v2 (c : ValidConfig) :
+    validateCandidate MatVec.shape (candidateV2For c).toRaw = .ok (candidateV2For c) :=
+  validateCandidate_roundtrip _
+
 end OptimalComputation.Examples.MatVecNaive

@@ -69,7 +69,7 @@ private def checkSmallTrace : IO Unit := do
 def matvecBaseline : IO Unit := do
   let some raw := selectCandidate "matvec-naive-v1" | throw <| IO.userError "Missing baseline registration"
   checkBaseline "selection binds exact primary artifact" (raw == candidate.toRaw)
-  checkBaseline "unknown identifier is not selectable" ((selectCandidate "matvec-naive-v2").isNone)
+  checkBaseline "unknown identifier is not selectable" ((selectCandidate "matvec-naive-v0").isNone)
   checkBaseline "independent complete schedule" (raw.schedule == expectedSchedule)
   checkBaseline "row-major complete layout" <|
     raw.layout == ⟨List.range 272, (List.range 16).map (272 + ·), []⟩

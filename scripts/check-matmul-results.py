@@ -125,4 +125,39 @@ assert [term["quantity"] for term in objective["breakdown"]] == quantities
 assert [term["coefficient"] for term in objective["breakdown"]] == list(COEFFICIENTS.values())
 expected_score = sum(q * c for q, c in zip(quantities, COEFFICIENTS.values()))
 assert objective["score"] == expected_score == 954087
-print("PASS: 19 matmul reports, independent runtime inputs/products, all counters/configurations, and 34303/954087 scores")
+
+# matmul-naive-v2 retimes the same instructions to issue on each completion
+# boundary: every count matches v1 and the lane is busy at every cycle.
+CYCLES_V2 = 256 * (3 + 16 * (1 + 1 + 3) + 1)
+latency2, energy2 = json.loads((RESULTS / "matmul-naive-v2-objectives.json").read_text())
+assert {k: v for k, v in latency2.items() if k != "objective"} == {
+    k: v for k, v in energy2.items() if k != "objective"
+}
+for record in (latency2, energy2):
+    assert record["candidateIdentifier"] == "matmul-naive-v2"
+    assert record["modelVersion"] == "arty-model-v1"
+    assert record["candidateFormatVersion"] == "candidate-v1"
+    assert record["workloadIdentifier"] == "matmul-16x16-signed16-v1"
+    assert record["recordVersion"] == "accepted-objective-result-v1"
+    assert record["verificationStatus"] == "all-input-certified"
+    assert record["inputIdentifier"] == "generated-23"
+    assert record["inputScalars"] == INPUTS
+    assert record["configuration"] == {"lanes": 8, "banks": 8}
+    execution = record["execution"]
+    assert execution["outputs"] == OUTPUTS
+    assert execution["cycles"] == CYCLES_V2 == 21504
+    assert execution["scheduleSize"] == SCHEDULE_SIZE
+    assert execution["counters"] == counters(8, 8)
+    assert {k: v for k, v in execution.items() if k != "cycles"} == {
+        k: v for k, v in latency["execution"].items() if k != "cycles"
+    }
+    breakdown = record["objective"]["breakdown"]
+    assert all(term["cost"] == term["quantity"] * term["coefficient"] for term in breakdown)
+    assert sum(term["cost"] for term in breakdown) == record["objective"]["score"]
+assert latency2["objective"]["score"] == CYCLES_V2
+quantities = [CYCLES_V2, CYCLES_V2 * 8, CYCLES_V2 * 16] + quantities[3:]
+assert [term["quantity"] for term in energy2["objective"]["breakdown"]] == quantities
+assert energy2["objective"]["coefficients"] == {"identifier": "energy-coefficients-v1", "values": COEFFICIENTS}
+assert energy2["objective"]["score"] == sum(q * c for q, c in zip(quantities, COEFFICIENTS.values())) == 634112
+print("PASS: 21 matmul reports, independent runtime inputs/products, all counters/configurations, "
+      "34303/954087 v1 and 21504/634112 v2 scores")

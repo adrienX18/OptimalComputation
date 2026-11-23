@@ -220,4 +220,65 @@ def verified : VerifiedCandidate MatVec.adapter where
     subst record
     exact ho
 
+/-! ### `matvec-naive-v2` certificate
+
+The row and initialization proofs above are timing-independent (`Executes`);
+only the runner composition changes, to `Serial.run_tight_complete`. -/
+
+theorem finish_correct_v2 (x : MatVec.Input) (hx : MatVec.AllowedInput x) (s : State C)
+    (counts : Counters) (cycles : Nat)
+    (ho : ∀ i, s.readMemory (outputAddress i) = some (encodeSlot (resultValue x hx i))) :
+    ∃ record, finish candidateV2 ⟨cycles, s, counts, []⟩ = .success record ∧
+      record.outputs = (MatVec.adapter.outputScalars (MatVec.reference x)).toList ∧
+      record.cycles = cycles := by
+  have hl : candidateV2.layout = layout := rfl
+  have hm : (layout.outputs.filter (fun a => (s.readMemory a).isNone)) = [] := by
+    apply List.filter_eq_nil_iff.mpr
+    intro a ha
+    obtain ⟨i, rfl⟩ := List.mem_ofFn.mp ha
+    simp only [ho, Option.isNone_some, Bool.false_eq_true, not_false_eq_true]
+  have hout : collectOutputs layout.outputs s =
+      (MatVec.adapter.outputScalars (MatVec.reference x)).toList := by
+    change (List.ofFn outputAddress).filterMap (fun a => (s.readMemory a).map (fun v => (decodeSlot v).val)) =
+      (vectorScalars (MatVec.reference x)).toList
+    rw [filterMap_ofFn outputAddress _ (MatVec.reference x)]
+    · simp only [vectorScalars, Vector.toList_ofFn]
+    · intro i
+      simp only [ho, Option.map_some, decode_encode_slot, resultValue]
+  unfold finish
+  simp only [hl, hm, List.isEmpty_nil, ↓reduceIte]
+  exact ⟨_, rfl, hout, rfl⟩
+
+/-- All-input execution of the exact v2 artifact: 1,344 elapsed cycles. -/
+theorem execution_correct_v2 (x : MatVec.Input) (hx : MatVec.AllowedInput x) :
+    ∃ record, executeValues candidateV2 (MatVec.adapter.encode x hx) 1345 false = .success record ∧
+      record.outputs = (MatVec.adapter.outputScalars (MatVec.reference x)).toList ∧
+      record.cycles = 1344 := by
+  let initial := initialState C layout (MatVec.adapter.encode x hx)
+  obtain ⟨final, hex, _, ho⟩ := rows_executes x hx initial (initial_quiet _) (initial_inputs x hx) 16 (by omega)
+  obtain ⟨counts, hr⟩ := run_tight_complete hex 1344 (rows_tightDuration 16 (by omega)) (by decide)
+  have hrun : run false 1345 0 (program candidateV2) initial (Counters.empty C) [] =
+      .finished ⟨1344, final, counts, []⟩ := by
+    rw [candidateV2_program]
+    exact hr
+  obtain ⟨record, hf, hout, ht⟩ := finish_correct_v2 x hx final counts 1344 (fun i => ho i i.isLt)
+  refine ⟨record, ?_, hout, ht⟩
+  unfold executeValues
+  erw [hrun]
+  exact hf
+
+def verifiedV2 : VerifiedCandidate MatVec.adapter where
+  candidate := candidateV2
+  sufficientBoundaries := 1345
+  safety := by
+    intro x hx
+    obtain ⟨record, he, _, _⟩ := execution_correct_v2 x hx
+    exact ⟨record, he⟩
+  correctness := by
+    intro x hx record he
+    obtain ⟨expected, hh, ho, _⟩ := execution_correct_v2 x hx
+    have hr : expected = record := ExecutionOutcome.success.inj (hh.symm.trans he)
+    subst record
+    exact ho
+
 end OptimalComputation.Examples.MatVecNaive

@@ -242,4 +242,63 @@ def verified : VerifiedCandidate MatMul.adapter where
     subst record
     exact ho
 
+/-! ### `matmul-naive-v2` certificate
+
+The entry and initialization proofs above are timing-independent (`Executes`);
+only the runner composition changes, to `Serial.run_tight_complete`. -/
+
+theorem finish_correct_v2 (x : MatMul.Input) (hx : MatMul.AllowedInput x) (s : State C)
+    (counts : Counters) (cycles : Nat)
+    (ho : ∀ i, s.readMemory (outputAddress i) = some (encodeSlot (resultValue x hx i))) :
+    ∃ record, finish candidateV2 ⟨cycles, s, counts, []⟩ = .success record ∧
+      record.outputs = (MatMul.adapter.outputScalars (MatMul.reference x)).toList ∧
+      record.cycles = cycles := by
+  have hl : candidateV2.layout = layout := rfl
+  have hm : (layout.outputs.filter (fun a => (s.readMemory a).isNone)) = [] := by
+    apply List.filter_eq_nil_iff.mpr
+    intro a ha
+    obtain ⟨i, rfl⟩ := List.mem_ofFn.mp ha
+    simp only [ho, Option.isNone_some, Bool.false_eq_true, not_false_eq_true]
+  have hout : collectOutputs layout.outputs s =
+      (MatMul.adapter.outputScalars (MatMul.reference x)).toList := by
+    change (List.ofFn outputAddress).filterMap (fun a => (s.readMemory a).map (fun v => (decodeSlot v).val)) =
+      (matrixScalars (MatMul.reference x)).toList
+    rw [filterMap_ofFn outputAddress _ (fun i => MatMul.reference x (entryRow i) (entryColumn i))]
+    · simp only [matrixScalars, Vector.toList_ofFn, entryRow, entryColumn]
+    · intro i
+      simp only [ho, Option.map_some, decode_encode_slot, resultValue]
+  unfold finish
+  simp only [hl, hm, List.isEmpty_nil, ↓reduceIte]
+  exact ⟨_, rfl, hout, rfl⟩
+
+/-- All-input execution of the exact v2 artifact: 21,504 elapsed cycles. -/
+theorem execution_correct_v2 (x : MatMul.Input) (hx : MatMul.AllowedInput x) :
+    ∃ record, executeValues candidateV2 (MatMul.adapter.encode x hx) 21505 false = .success record ∧
+      record.outputs = (MatMul.adapter.outputScalars (MatMul.reference x)).toList ∧
+      record.cycles = 21504 := by
+  let initial := initialState C layout (MatMul.adapter.encode x hx)
+  obtain ⟨final, hex, _, ho⟩ := entries_executes x hx initial (initial_quiet _) (initial_inputs x hx) 256 (by omega)
+  obtain ⟨counts, hr⟩ := run_tight_complete hex 21504 (entries_tightDuration 256 (by omega)) (by decide)
+  have hrun : run false 21505 0 (program candidateV2) initial (Counters.empty C) [] =
+      .finished ⟨21504, final, counts, []⟩ := by
+    rw [candidateV2_program]
+    exact hr
+  obtain ⟨record, hf, hout, ht⟩ := finish_correct_v2 x hx final counts 21504 (fun i => ho i i.isLt)
+  refine ⟨record, ?_, hout, ht⟩
+  exact execute_of_finished candidateV2 _ _ _ _ hrun hf
+
+def verifiedV2 : VerifiedCandidate MatMul.adapter where
+  candidate := candidateV2
+  sufficientBoundaries := 21505
+  safety := by
+    intro x hx
+    obtain ⟨record, he, _, _⟩ := execution_correct_v2 x hx
+    exact ⟨record, he⟩
+  correctness := by
+    intro x hx record he
+    obtain ⟨expected, hh, ho, _⟩ := execution_correct_v2 x hx
+    have hr : expected = record := ExecutionOutcome.success.inj (hh.symm.trans he)
+    subst record
+    exact ho
+
 end OptimalComputation.Examples.MatMulNaive

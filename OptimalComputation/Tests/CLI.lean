@@ -105,12 +105,13 @@ def cli : IO Unit := do
   let workloads ← response ["list-workloads", "--json"]
   checkCLI "four workloads" (((workloads.getObjValAs? (Array Json) "workloads").toOption.map Array.size) == some 4)
   let candidates ← response ["list-candidates", "--json"]
-  checkCLI "five candidates" (((candidates.getObjValAs? (Array Json) "candidates").toOption.map Array.size) == some 5)
+  checkCLI "seven candidates" (((candidates.getObjValAs? (Array Json) "candidates").toOption.map Array.size) == some 7)
   let objectives ← response ["list-objectives", "--json"]
   checkCLI "two objectives" (((objectives.getObjValAs? (Array Json) "objectives").toOption.map Array.size) == some 2)
   for (id, cycles, energyCost) in [("tiny-multiply-v1", 6, 86), ("matvec-naive-v1", 2143, 59607),
       ("matmul-naive-v1", 34303, 954087), ("product-pair-serial-v1", 12, 172),
-      ("product-pair-parallel-v1", 6, 202)] do
+      ("product-pair-parallel-v1", 6, 202), ("matvec-naive-v2", 1344, 39632),
+      ("matmul-naive-v2", 21504, 634112)] do
     let lat ← response ["evaluate", id]
     let eng ← response ["evaluate", id, "--objective", "energy-proxy-v1"]
     checkCLI "independent objective execution" ((lat.getObjVal? "execution").toOption == (eng.getObjVal? "execution").toOption)
@@ -137,6 +138,6 @@ def cli : IO Unit := do
     | throw <| IO.userError "Invalid workload input accepted"
   checkCLI "workload domain reported" ((failureError badInput).category == "invalid-input")
   candidateFiles
-  IO.println "PASS: CLI catalogs, parsing, failures, five candidates, both objectives, complete trace binding and candidate files"
+  IO.println "PASS: CLI catalogs, parsing, failures, seven candidates, both objectives, complete trace binding and candidate files"
 
 end OptimalComputation.Tests

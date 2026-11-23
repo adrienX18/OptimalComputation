@@ -245,7 +245,10 @@ simulations; the certificate covers the default `(8, 8)` artifact. The default
 `matmul-naive-v1` artifact has an all-input certificate for conventional `i,j,k`
 execution with fresh operand loads for every output, 34,304 processed boundaries,
 and final store completion at cycle 34,303. Its 16 configuration variants are
-also conformance simulations. The fixed
+also conformance simulations. `matvec-naive-v2` and `matmul-naive-v2` execute the
+same instructions, issuing each on its predecessor's completion boundary; their
+all-input certificates cover 1,345 and 21,505 processed boundaries, with final
+store completion at cycles 1,344 and 21,504. The fixed
 model rules above are unchanged; [baseline records](results/README.md) document
 the schedule and independently checked counters.
 

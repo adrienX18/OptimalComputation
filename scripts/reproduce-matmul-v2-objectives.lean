@@ -1,0 +1,2 @@
+import OptimalComputation.Examples.MatMulResults
+#eval OptimalComputation.Examples.MatMulNaive.reproduceObjectivesV2

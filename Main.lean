@@ -9,6 +9,7 @@ import OptimalComputation.Tests.Verification
 import OptimalComputation.Tests.MatVecBaseline
 import OptimalComputation.Tests.Objectives
 import OptimalComputation.Tests.MatMulBaseline
+import OptimalComputation.Tests.NaiveV2
 import OptimalComputation.CLI
 import OptimalComputation.Tests.CLI
 
@@ -33,6 +34,7 @@ def main (args : List String) : IO UInt32 := do
       OptimalComputation.Tests.matvecBaseline
       OptimalComputation.Tests.objectives
       OptimalComputation.Tests.matmulBaseline
+      OptimalComputation.Tests.naiveV2
       OptimalComputation.Tests.cli
       return 0
   | ["--version"] =>

@@ -293,6 +293,25 @@ gives exact counts, proof roots and reproduction commands. Its 16 configuration
 variants are conformance simulations, while the default artifact has an all-input
 certificate. No search strategy is implemented.
 
+## Naive v2 baselines
+
+`Examples.MatVecNaive.candidateV2` (`matvec-naive-v2`) and
+`Examples.MatMulNaive.candidateV2` (`matmul-naive-v2`) keep v1's instructions,
+layout, order and default `(8, 8)` configuration, but issue each instruction on
+its predecessor's completion boundary instead of one boundary later. The v1 idle
+boundary was a convenience of `Serial.run_serial`, not a machine rule. Lane zero
+is now never idle: matrix-vector takes 1,344 cycles (39,632 abstract energy units)
+and matrix-matrix 21,504 (634,112), with every event count equal to v1's.
+`Serial.run_tight_complete` composes the same timing-independent `Executes`
+proofs under tight timing, and each `verifiedV2` carries the all-input
+certificate. The v1 artifacts, certificates and saved results are unchanged.
+
+```sh
+lake env lean scripts/audit-naive-v2.lean
+lake env lean scripts/reproduce-matvec-v2-objectives.lean
+lake env lean scripts/reproduce-matmul-v2-objectives.lean
+```
+
 ## Interchangeable objectives
 
 `Evaluation.Objectives` supplies `latency` and `energy`, both minimizing a pure

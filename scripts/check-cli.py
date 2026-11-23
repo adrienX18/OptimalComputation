@@ -36,7 +36,7 @@ def error(category, *args, code=1):
 assert "arty-model-v1" in run("--version", as_json=False).stdout
 assert "--trace" in run("--help", as_json=False).stdout
 assert len(run("list-workloads")["workloads"]) == 4
-assert len(run("list-candidates")["candidates"]) == 5
+assert len(run("list-candidates")["candidates"]) == 7
 assert len(run("list-objectives")["objectives"]) == 2
 assert "matvec-naive-v1" in run("list-candidates", as_json=False).stdout
 
@@ -49,7 +49,9 @@ for family in ["matvec", "matmul"]:
 
 for candidate, cycles, energy in [("tiny-multiply-v1", 6, 86),
                                   ("product-pair-serial-v1", 12, 172),
-                                  ("product-pair-parallel-v1", 6, 202)]:
+                                  ("product-pair-parallel-v1", 6, 202),
+                                  ("matvec-naive-v2", 1344, 39632),
+                                  ("matmul-naive-v2", 21504, 634112)]:
     latency = run("evaluate", candidate)
     power = run("evaluate", candidate, "--objective", "energy-proxy-v1")
     assert latency["objective"]["score"] == cycles
@@ -126,7 +128,8 @@ with tempfile.TemporaryDirectory(prefix="optimal-cli-") as temp:
 
 # Unverified candidate files: export, edit, simulate. Never certified or scored.
 CANDIDATES = ["tiny-multiply-v1", "matvec-naive-v1", "matmul-naive-v1",
-              "product-pair-serial-v1", "product-pair-parallel-v1"]
+              "product-pair-serial-v1", "product-pair-parallel-v1",
+              "matvec-naive-v2", "matmul-naive-v2"]
 with tempfile.TemporaryDirectory(prefix="optimal-sim-") as temp:
     temp = Path(temp)
 
@@ -149,15 +152,18 @@ with tempfile.TemporaryDirectory(prefix="optimal-sim-") as temp:
                     "configuration", "execution"]:
             assert simulated[key] == evaluated[key], (identifier, key)
 
-    # Retiming the matrix-vector baseline to issue at each completion boundary.
-    tight = copy.deepcopy(exported["matvec-naive-v1"])
-    cycle = 0
-    for entry in tight["schedule"]:
-        entry["cycle"] = cycle
-        cycle += 1 if entry["instruction"]["kind"] in ("load", "store") else 3
-    retimed = simulate_file(tight)
-    assert retimed["execution"]["cycles"] == 1344 and retimed["referenceCheck"]["status"] == "match"
-    assert "1344 cycles" in run("simulate", str(temp / "candidate.json"), as_json=False).stdout
+    # Retiming each v1 baseline to issue at every completion boundary yields
+    # exactly the certified v2 schedule, computed here independently in Python.
+    for family, cycles in [("matvec", 1344), ("matmul", 21504)]:
+        tight = copy.deepcopy(exported[f"{family}-naive-v1"])
+        cycle = 0
+        for entry in tight["schedule"]:
+            entry["cycle"] = cycle
+            cycle += 1 if entry["instruction"]["kind"] in ("load", "store") else 3
+        assert tight["schedule"] == exported[f"{family}-naive-v2"]["schedule"], family
+        retimed = simulate_file(tight)
+        assert retimed["execution"]["cycles"] == cycles and retimed["referenceCheck"]["status"] == "match"
+    assert "21504 cycles" in run("simulate", str(temp / "candidate.json"), as_json=False).stdout
 
     tiny = exported["tiny-multiply-v1"]
     square = copy.deepcopy(tiny)

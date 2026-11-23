@@ -11,7 +11,7 @@ lake exe optimal_computation list-candidates --json
 lake exe optimal_computation list-objectives
 ```
 
-The lists describe the compiled certificate catalog: four workloads, five
+The lists describe the compiled certificate catalog: four workloads, seven
 candidates and two independent minimizing objectives. Candidate listings include
 configuration and the certificate's sufficient boundary budget. `evaluate` selects
 registered Lean artifacts by identifier; it never imports serialized programs or
@@ -34,6 +34,8 @@ lake exe optimal_computation evaluate matmul-naive-v1 --fixture generated-23 --o
 | `matmul-naive-v1` | 8 lanes, 8 banks | 34,303 | 954,087 | 12,800 | 6,144 | 34,304 |
 | `product-pair-serial-v1` | 1 lane, 1 bank | 12 | 172 | 8 | 48 | 13 |
 | `product-pair-parallel-v1` | 8 lanes, 8 banks | 6 | 202 | 8 | 48 | 7 |
+| `matvec-naive-v2` | 8 lanes, 8 banks | 1,344 | 39,632 | 800 | 2,304 | 1,345 |
+| `matmul-naive-v2` | 8 lanes, 8 banks | 21,504 | 634,112 | 12,800 | 6,144 | 21,505 |
 
 These schedules and event counts do not depend on input values within the allowed
 domain. Matrix baselines use only lane zero. Saved [results](results/README.md)
@@ -235,5 +237,6 @@ Simulations are never certified and never scored: `--objective` is rejected, and
 nothing in a file can change that. An accepted score still requires a Lean
 candidate with an all-input certificate; see [extensions](extensions.md). For
 example, retiming the exported `matvec-naive-v1` so that each instruction issues
-on its predecessor's completion boundary gives 1,344 cycles instead of 2,143, with
-matching outputs. `scripts/check-cli.py` runs that example.
+on its predecessor's completion boundary reproduces exactly the certified
+`matvec-naive-v2` schedule: 1,344 cycles instead of 2,143, with matching outputs.
+`scripts/check-cli.py` runs that example for both matrix workloads.

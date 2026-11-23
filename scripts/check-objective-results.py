@@ -69,4 +69,39 @@ for candidate, (cycles, energy, lanes, banks, bram) in EXPECTED.items():
             assert value == original[key]
         assert len(power["inputScalars"]) == 272
 assert 6 < 12 and 172 < 202
-print("PASS: six objective reports, exact costs/coefficients, identical execution under rescoring, and frozen baseline summary")
+
+# matvec-naive-v2 retimes v1's instructions to issue on each completion boundary.
+# Everything except elapsed cycles matches v1. Lane zero is never idle, so the
+# cycles equal v1's lane active cycles: reset 3 + 16 * (load 1 + load 1 + MAC 3) + store 1 per row.
+original = json.loads((RESULTS / "matvec-naive-v1.json").read_text())
+v1_latency = json.loads((RESULTS / "matvec-naive-v1-objectives.json").read_text())[0]
+latency, power = json.loads((RESULTS / "matvec-naive-v2-objectives.json").read_text())
+CYCLES_V2 = 16 * (3 + 16 * (1 + 1 + 3) + 1)
+assert CYCLES_V2 == 1344 == original["laneActiveCycles"][0]
+assert {k: v for k, v in latency.items() if k != "objective"} == {
+    k: v for k, v in power.items() if k != "objective"
+}
+for record in (latency, power):
+    assert record["candidateIdentifier"] == "matvec-naive-v2"
+    assert record["recordVersion"] == "accepted-objective-result-v1"
+    assert record["verificationStatus"] == "all-input-certified"
+    for key in ("modelVersion", "candidateFormatVersion", "workloadIdentifier",
+                "inputIdentifier", "inputScalars", "configuration"):
+        assert record[key] == v1_latency[key], key
+    execution = record["execution"]
+    assert execution["cycles"] == CYCLES_V2
+    assert execution["outputs"] == original["outputs"]
+    assert {k: v for k, v in execution.items() if k != "cycles"} == {
+        k: v for k, v in v1_latency["execution"].items() if k != "cycles"
+    }
+    assert all(t["cost"] == t["quantity"] * t["coefficient"] for t in record["objective"]["breakdown"])
+    assert sum(t["cost"] for t in record["objective"]["breakdown"]) == record["objective"]["score"]
+assert latency["objective"]["score"] == CYCLES_V2
+assert power["objective"]["coefficients"] == {"identifier": "energy-coefficients-v1", "values": COEFFICIENTS}
+counts = power["execution"]["counters"]
+formula = CYCLES_V2 * (1 + 8 + 16) + 4 * counts["loads"] + 4 * counts["stores"]
+formula += counts["additions"] + 8 * counts["multiplications"] + 9 * counts["multiplyAdds"]
+formula += counts["registerReads"] + counts["registerWrites"]
+assert power["objective"]["score"] == formula == 39632
+print("PASS: eight objective reports, exact costs/coefficients, identical execution under rescoring, "
+      "frozen baseline summary and 1344-cycle matvec-naive-v2")

@@ -17,6 +17,10 @@ def objectiveCatalog : List VerifiedArtifact := [
   ⟨Examples.ProductPair.specification, Examples.ProductPair.adapter,
     inferInstance, Examples.ProductPair.verified false⟩,
   ⟨Examples.ProductPair.specification, Examples.ProductPair.adapter,
-    inferInstance, Examples.ProductPair.verified true⟩]
+    inferInstance, Examples.ProductPair.verified true⟩,
+  ⟨Workloads.MatVec.specification, Workloads.MatVec.adapter,
+    inferInstance, Examples.MatVecNaive.verifiedV2⟩,
+  ⟨Workloads.MatMul.specification, Workloads.MatMul.adapter,
+    inferInstance, Examples.MatMulNaive.verifiedV2⟩]
 
 end OptimalComputation.Evaluation

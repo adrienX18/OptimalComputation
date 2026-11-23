@@ -63,6 +63,11 @@ The certified default `(8,8)` matrix-vector baseline costs:
 The matrix-matrix baseline costs 34,303 cycles and 954,087 abstract energy units:
 `34303*(1+8+16) + 4*8192 + 4*256 + 256 + 9*4096 + 13056 + 12544`.
 
+The `-v2` baselines execute the same events in fewer cycles, so only the duration
+terms change: `1344*(1+8+16) + 6032 = 39632` for matrix-vector and
+`21504*(1+8+16) + 96512 = 634112` for matrix-matrix, where 6,032 and 96,512 are
+the unchanged activity terms above.
+
 The manual workload computes `(a*b, c*d)` for four arbitrary signed16 inputs.
 Both candidates execute four loads, two multiplies, two stores, six register
 reads, and six register writes. Inputs occupy slots 0–3 and outputs slots 4–5.

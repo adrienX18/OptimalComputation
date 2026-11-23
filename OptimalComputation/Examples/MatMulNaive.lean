@@ -153,4 +153,38 @@ theorem structural_validity (c : ValidConfig) :
     validateCandidate MatMul.shape (candidateFor c).toRaw = .ok (candidateFor c) :=
   validateCandidate_roundtrip _
 
+/-! ### `matmul-naive-v2`
+
+The same instructions, layout and i,j,k order as `matmul-naive-v1`, but each
+issues on its predecessor's completion boundary rather than one boundary later.
+The v1 idle boundary was a proof convenience, not a machine rule; v1 stays frozen. -/
+
+def candidateV2For (c : ValidConfig) : Candidate MatMul.shape := {
+  identifier := "matmul-naive-v2"
+  identifier_nonempty := by decide
+  configuration := c
+  layout := layout
+  schedule := tightSchedule c layout 0 (entriesCode 256 (by omega)) (entries_allowed 256 (by omega))
+}
+
+def candidateV2 : Candidate MatMul.shape := candidateV2For defaultConfig
+
+theorem candidateV2_program : program candidateV2 = tightTimed 0 (entriesCode 256 (by omega)) := by
+  unfold program candidateV2 candidateV2For
+  rw [tightSchedule_timed]
+  exact List.mergeSort_of_pairwise (tightTimed_sorted _ _)
+
+theorem entry_tightDuration (i : Fin 256) : tightDuration (entryCode i) = 84 := by
+  simp [entryCode, tightDuration_append, SerialDot.code_tightDuration, tightDuration, latency]
+
+theorem entries_tightDuration (n : Nat) (hn : n ≤ 256) :
+    tightDuration (entriesCode n hn) = 84 * n := by
+  induction n with
+  | zero => rfl
+  | succ n ih => simp [entriesCode, tightDuration_append, entry_tightDuration, ih]; omega
+
+theorem structural_validity_v2 (c : ValidConfig) :
+    validateCandidate MatMul.shape (candidateV2For c).toRaw = .ok (candidateV2For c) :=
+  validateCandidate_roundtrip _
+
 end OptimalComputation.Examples.MatMulNaive
