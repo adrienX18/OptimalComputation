@@ -178,7 +178,8 @@ The archive includes provider-exposed reasoning or other response fields when
 returned, but cannot include private model reasoning the provider withholds.
 Keys, authorization headers and known environment secret values are redacted.
 Token usage and cost estimates are retained when available; cost estimates are
-not billing receipts. Archives stay local; prompts go to the chosen model
+not billing receipts. Models absent from the installed SDK's rate table get a
+null estimate, rather than a misleading zero. Archives stay local; prompts go to the chosen model
 provider. Keep the run
 directory if you want to retain the records; traces and proofs can use substantial
 disk space. Provider inference and cost estimates may change over time despite

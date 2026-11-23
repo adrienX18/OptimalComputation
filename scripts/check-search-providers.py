@@ -4,14 +4,15 @@ import json
 import os
 from pathlib import Path
 import tempfile
+from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import httpx
 
 from harness.archive import read_json
 from harness import model as model_module
-from harness.model import Model, load_environment, scrub
+from harness.model import Model, estimate_cost, load_environment, scrub
 from search import proposal, settings
 
 PAYLOAD = json.dumps(dict(idea='baseline', code='def build(): return {}', notes='remember'))
@@ -29,6 +30,17 @@ class ProviderTests(unittest.TestCase):
     def tearDown(self):
         self.env_patch.stop()
         self.temp.cleanup()
+
+    def test_unknown_model_price_is_unavailable_instead_of_free(self):
+        sdk = SimpleNamespace(model_cost={}, completion_cost=Mock(return_value=0.0))
+        response = SimpleNamespace(model='gpt-6.2-astra')
+        self.assertIsNone(estimate_cost(sdk, response, 'openai/gpt-6.2-astra'))
+        sdk.completion_cost.assert_not_called()
+        sdk.model_cost['gpt-6.2-astra'] = {'input_cost_per_token': 8e-6, 'output_cost_per_token': 40e-6}
+        sdk.completion_cost.return_value = .25
+        self.assertEqual(estimate_cost(sdk, response, 'openai/gpt-6.2-astra'), .25)
+        sdk.completion_cost.return_value = 0.0  # a known free rate is still allowed
+        self.assertEqual(estimate_cost(sdk, response, 'openai/gpt-6.2-astra'), 0.0)
 
     def test_local_env_is_optional_literal_and_does_not_override_shell(self):
         with patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'shell-value'}):

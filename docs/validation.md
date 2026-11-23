@@ -187,3 +187,27 @@ values, existing environment precedence, automatic use of a file-loaded key by
 the API adapter, and redaction of that key from saved logs. Git ignore checks
 confirmed that `.env` and `.env.local` are excluded while `.env.example` remains
 trackable. These checks use temporary dummy credentials, never the user's `.env`.
+
+## First live model smoke test
+
+The Opus 5.5 and GPT-6.2 Astra pilot ran three attempts per model in parallel on
+the polynomial task with eight lanes, eight banks, medium reasoning and a
+16,384-token output cap. Astra certified designs at 34, 30 and 30 cycles.
+Opus certified 42 and 35 cycles; its second response exhausted its output budget
+in reasoning before returning a design. The original baseline was 1,520 cycles.
+All five returned designs passed the public fixtures and kernel certification.
+
+The archive audit verified all six requests/responses, preceding feedback in
+later prompts, source and certificate hashes, scores, complete available
+simulation traces, overlapping processes and absence of API key values.
+All prompts stayed below 11 KB. The two run directories contain 659 files;
+the local report and inventory are in `runs/smoke-opus55-astra62-20261122/`.
+These are smoke-test observations, not a complete optimization benchmark.
+
+The pilot exposed a misleading SDK zero-cost fallback for Astra, which was
+absent from its installed price table. A follow-up correction now returns an
+unavailable/null estimate for unknown model prices. The original responses are
+preserved, and the pilot audit flags their estimates. All eight loop tests and
+five provider tests passed after the correction; those follow-up tests made
+no live model calls. A larger Opus output budget should be considered before a
+full experiment.

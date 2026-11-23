@@ -20,6 +20,14 @@ def load_environment():
     load_dotenv(ENV_FILE, override=False, interpolate=False)
 
 
+def estimate_cost(sdk, response, requested_model):
+    """An SDK fallback zero is not a price for a model absent from its rate table."""
+    names = {requested_model, requested_model.split('/', 1)[-1], getattr(response, 'model', None)}
+    if not any(name in sdk.model_cost for name in names):
+        return None
+    return sdk.completion_cost(completion_response=response)
+
+
 def scrub(value):
     """Retain provider data while removing credentials, including echoed values."""
     secrets = [v for k, v in os.environ.items() if v and len(v) >= 8 and
@@ -97,7 +105,7 @@ class Model:
             data['providerMetadata'] = scrub(getattr(response, '_hidden_params', {}))
             with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
                 try:
-                    cost = sdk.completion_cost(completion_response=response)
+                    cost = estimate_cost(sdk, response, request['model'])
                 except Exception:
                     cost = None
             data['estimatedCostUSD'] = cost
