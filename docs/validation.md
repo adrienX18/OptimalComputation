@@ -211,3 +211,12 @@ preserved, and the pilot audit flags their estimates. All eight loop tests and
 five provider tests passed after the correction; those follow-up tests made
 no live model calls. A larger Opus output budget should be considered before a
 full experiment.
+
+The following budget update sets 32,768 output tokens and a 600-second request
+timeout for all new runs, with matching Opus/Astra configuration files. All
+eight loop tests and five provider tests passed. The provider tests inspect
+mocked outbound requests to confirm the actual output-limit and timeout fields,
+including GPT-6.2 Astra and Opus 5.5 at medium reasoning. All three supplied
+configurations validated; explicit budget overrides still work. Hash checks
+confirmed that all 659 historical smoke-test files were unchanged. No additional
+live model calls were made for this update.

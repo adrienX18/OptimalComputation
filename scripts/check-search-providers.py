@@ -78,11 +78,11 @@ class ProviderTests(unittest.TestCase):
 
     def test_adapters_archive_and_isolate_calls(self):
         samples = [
-            ('openai/gpt-4o-mini', dict(id='chatcmpl-test', object='chat.completion', created=1,
-                model='gpt-4o-mini', choices=[dict(index=0, message=dict(role='assistant', content=PAYLOAD),
+            ('openai/gpt-6.2-astra', dict(id='chatcmpl-test', object='chat.completion', created=1,
+                model='gpt-6.2-astra', choices=[dict(index=0, message=dict(role='assistant', content=PAYLOAD),
                 finish_reason='stop')], usage=dict(prompt_tokens=100, completion_tokens=20, total_tokens=120))),
-            ('anthropic/claude-3-5-haiku-20241022', dict(id='msg_test', type='message', role='assistant',
-                model='claude-3-5-haiku-20241022', content=[dict(type='text', text=PAYLOAD)],
+            ('anthropic/claude-opus-5-5', dict(id='msg_test', type='message', role='assistant',
+                model='claude-opus-5-5', content=[dict(type='text', text=PAYLOAD)],
                 stop_reason='end_turn', stop_sequence=None, usage=dict(input_tokens=100, output_tokens=20))),
             ('gemini/gemini-2.0-flash', dict(candidates=[dict(content=dict(role='model', parts=[dict(text=PAYLOAD)]),
                 finishReason='STOP', index=0)], usageMetadata=dict(promptTokenCount=100,
@@ -97,14 +97,29 @@ class ProviderTests(unittest.TestCase):
                     calls.append(request)
                     return httpx.Response(200, json=body, request=request, headers={'x-request-id':'request-test'})
                 cfg = settings(dict(model=name))
+                if not name.startswith('gemini/'):
+                    cfg['reasoning_effort'] = 'medium'
                 adapter = Model(cfg)
                 folder = Path(tmp) / str(index)
                 folder.mkdir()
                 request = dict(model=name, messages=[dict(role='system', content='Return JSON.'),
-                               dict(role='user', content='Try a design.')], max_tokens=100, timeout=5)
+                               dict(role='user', content='Try a design.')], max_tokens=cfg['max_tokens'],
+                               timeout=cfg['request_timeout'])
+                if 'reasoning_effort' in cfg:
+                    request['reasoning_effort'] = cfg['reasoning_effort']
                 with patch.object(httpx.Client, 'send', send):
                     response = adapter(request, folder)
                 self.assertEqual(len(calls), 1)
+                wire = json.loads(calls[0].content)
+                if name.startswith('openai/'):
+                    self.assertEqual(wire['max_completion_tokens'], 32768)
+                    self.assertEqual(wire['reasoning_effort'], 'medium')
+                elif name.startswith('anthropic/'):
+                    self.assertEqual(wire['max_tokens'], 32768)
+                    self.assertEqual(wire['output_config']['effort'], 'medium')
+                else:
+                    self.assertEqual(wire['generationConfig']['max_output_tokens'], 32768)
+                self.assertEqual(calls[0].extensions['timeout']['read'], 600)
                 self.assertEqual(proposal(response, cfg)['idea'], 'baseline')
                 self.assertEqual(response['usage']['total_tokens'], 120)
                 self.assertTrue(list(folder.glob('provider-*-request.json')))

@@ -22,8 +22,8 @@ from harness.model import Model, ReplayModel, scrub
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULTS = dict(task='matvec', objective='latency-v1', configuration=[8, 8], attempts=100,
-                max_tokens=4096, prompt_bytes=32000, code_bytes=8000, notes_bytes=2000,
-                request_timeout=120, generator_timeout=30, check_timeout=120,
+                max_tokens=32768, prompt_bytes=32000, code_bytes=8000, notes_bytes=2000,
+                request_timeout=600, generator_timeout=30, check_timeout=120,
                 boundaries=1000000, terms=4096, image='python:3.12-slim-bookworm')
 
 

@@ -1,0 +1,10 @@
+{
+  "model": "openai/gpt-6.2-astra",
+  "task": "polynomial",
+  "objective": "latency-v1",
+  "configuration": [8, 8],
+  "attempts": 100,
+  "reasoning_effort": "medium",
+  "max_tokens": 32768,
+  "request_timeout": 600
+}

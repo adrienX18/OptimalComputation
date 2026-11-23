@@ -68,6 +68,8 @@ class SearchTests(unittest.TestCase):
         self.assertEqual(len(result['attempts']), 4)
         self.assertEqual(result['attempts'][1]['category'], 'pending-read')
         request = read_json(self.root / 'attempts/0004/request.json')
+        self.assertEqual(request['max_tokens'], 32768)
+        self.assertEqual(request['timeout'], 600)
         context = json.loads(request['messages'][1]['content'])
         self.assertEqual(context['best']['code'], '80')
         self.assertEqual(len(context['history']), 3)

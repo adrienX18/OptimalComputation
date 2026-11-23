@@ -71,10 +71,10 @@ reject unknown fields, including API keys.
 | `objective` | `latency-v1` or `energy-proxy-v1`; lower is better |
 | `configuration` | Initial `[lanes, banks]`, each 1, 2, 4 or 8; toy tasks use `[1, 1]` |
 | `attempts` | 1–100 slots, including malformed replies, errors and interruptions; baseline is extra |
-| `max_tokens` | Provider output-token limit, default 4096 |
+| `max_tokens` | Provider output-token limit, default 32768 |
 | `prompt_bytes` | Maximum UTF-8 bytes of serialized messages, default 32000 |
 | `code_bytes` / `notes_bytes` | Maximum accepted generator size / notebook shown next time, default 8000 / 2000 |
-| `request_timeout` | Provider request timeout in seconds, default 120 |
+| `request_timeout` | Provider request timeout in seconds, default 600 |
 | `generator_timeout` | Docker generation wall-time limit in seconds, default 30 |
 | `check_timeout` | Wall-time limit per simulation and per certification phase, default 120 |
 | `boundaries` / `terms` | Existing checker limits, default 1000000 / 4096 |
@@ -88,6 +88,18 @@ Large candidates may require longer proof time. A limit is recorded as an
 inconclusive failure; it does not establish that the candidate is incorrect.
 The prompt byte limit is deliberately simple and is not an exact token count.
 Leave space within the chosen model's context window for its output as well.
+
+The shared output budget is 32,768 tokens for all providers. For reasoning
+models it may include thinking as well as the returned text; the pilot's
+16,384-token budget was exhausted by one Opus response before it produced code.
+The ten-minute request timeout allows longer answers to finish. Both settings
+can still be overridden per run. Prompt and generator byte limits stay the same.
+
+Ready-to-run configurations for the two selected models are
+[`search.opus.json`](../configs/search.opus.json) and
+[`search.astra.json`](../configs/search.astra.json). Each uses the polynomial
+task, medium reasoning, eight lanes/banks, and 100 attempts with these increased
+budgets. The earlier smoke-test files retain their original settings.
 
 ## What happens in an attempt
 

@@ -203,3 +203,15 @@ keeps one run comparable. Provider inference itself need not be deterministic.
 Deferred alternatives include richer retrieval of old attempts, deduplication,
 parallel search, automatic repairs, a run database, full environment locking and
 measured hardware objectives. These can be evaluated against this simple loop.
+
+## Response budget after the live pilot
+
+On 2026-11-23, increase the common output limit to 32,768 tokens and the request
+timeout to 600 seconds for new runs. Opus used its entire 16,384-token pilot
+budget for reasoning in one attempt, leaving no returned design. The larger
+budget gives reasoning and the final answer more room; it permits higher cost
+and longer calls, and does not guarantee that every response will finish.
+Keep the prompt, notebook and generator size limits independent and unchanged.
+Explicit per-run settings still override these defaults. Preserve completed
+pilot configurations and records, and provide fresh Opus/Astra configurations
+for the next experiment.
