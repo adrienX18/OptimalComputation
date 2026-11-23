@@ -1,0 +1,32 @@
+serial-dot-two-term-v1; simulation; inputs [-7, 6, 5, -3]; output [-57]
+0: lane 0 issue OptimalComputation.Hardware.Instruction.add 3 0 0, due 3
+0: lane 0 active
+1: lane 0 active
+2: lane 0 active
+3: lane 0 write r3 = 0
+4: lane 0 issue OptimalComputation.Hardware.Instruction.load 1 0, due 5
+4: lane 0 active
+5: lane 0 write r1 = -7
+6: lane 0 issue OptimalComputation.Hardware.Instruction.load 2 1, due 7
+6: lane 0 active
+7: lane 0 write r2 = 6
+8: lane 0 issue OptimalComputation.Hardware.Instruction.multiplyAdd 3 1 2 3, due 11
+8: lane 0 active
+9: lane 0 active
+10: lane 0 active
+11: lane 0 write r3 = -42
+12: lane 0 issue OptimalComputation.Hardware.Instruction.load 1 2, due 13
+12: lane 0 active
+13: lane 0 write r1 = 5
+14: lane 0 issue OptimalComputation.Hardware.Instruction.load 2 3, due 15
+14: lane 0 active
+15: lane 0 write r2 = -3
+16: lane 0 issue OptimalComputation.Hardware.Instruction.multiplyAdd 3 1 2 3, due 19
+16: lane 0 active
+17: lane 0 active
+18: lane 0 active
+19: lane 0 write r3 = -57
+20: lane 0 issue OptimalComputation.Hardware.Instruction.store 3 4, due 21
+20: lane 0 active
+21: lane 0 store [4] = -57
+cycles=21; instructions=8; active=[14, 0, 0, 0, 0, 0, 0, 0]

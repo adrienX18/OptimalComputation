@@ -1,0 +1,43 @@
+import OptimalComputation
+
+-- All M9 public theorems and exact candidate/certificate/registration roots.
+#print axioms OptimalComputation.Examples.MatMulNaive.input_declared
+#print axioms OptimalComputation.Examples.MatMulNaive.output_writable
+#print axioms OptimalComputation.Examples.MatMulNaive.dot_allowed
+#print axioms OptimalComputation.Examples.MatMulNaive.entry_allowed
+#print axioms OptimalComputation.Examples.MatMulNaive.entries_allowed
+#print axioms OptimalComputation.Examples.MatMulNaive.schedule_timed
+#print axioms OptimalComputation.Examples.MatMulNaive.timed_sorted
+#print axioms OptimalComputation.Examples.MatMulNaive.candidate_program
+#print axioms OptimalComputation.Examples.MatMulNaive.entry_duration
+#print axioms OptimalComputation.Examples.MatMulNaive.entries_duration
+#print axioms OptimalComputation.Examples.MatMulNaive.structural_validity
+#print axioms OptimalComputation.Examples.MatMulNaive.entry_executes
+#print axioms OptimalComputation.Examples.MatMulNaive.output_ne_input
+#print axioms OptimalComputation.Examples.MatMulNaive.output_injective
+#print axioms OptimalComputation.Examples.MatMulNaive.entry_inputs
+#print axioms OptimalComputation.Examples.MatMulNaive.entries_executes
+#print axioms OptimalComputation.Examples.MatMulNaive.initialization_pairs
+#print axioms OptimalComputation.Examples.MatMulNaive.initial_read
+#print axioms OptimalComputation.Examples.MatMulNaive.initial_quiet
+#print axioms OptimalComputation.Examples.MatMulNaive.encode_left
+#print axioms OptimalComputation.Examples.MatMulNaive.encode_right
+#print axioms OptimalComputation.Examples.MatMulNaive.initial_inputs
+#print axioms OptimalComputation.Examples.MatMulNaive.filterMap_ofFn
+#print axioms OptimalComputation.Examples.MatMulNaive.finish_correct
+#print axioms OptimalComputation.Examples.MatMulNaive.run_complete
+#print axioms OptimalComputation.Examples.MatMulNaive.execute_of_finished
+#print axioms OptimalComputation.Examples.MatMulNaive.execution_correct
+#print axioms OptimalComputation.Examples.MatMulNaive.layout
+#print axioms OptimalComputation.Examples.MatMulNaive.candidateFor
+#print axioms OptimalComputation.Examples.MatMulNaive.candidate
+#print axioms OptimalComputation.Examples.MatMulNaive.verified
+#print axioms OptimalComputation.Evaluation.lookupMatMul_exact
+#print axioms OptimalComputation.Evaluation.matmul_registered_sound
+#print axioms OptimalComputation.Evaluation.registered_sound
+#print axioms OptimalComputation.Evaluation.evaluateMatMulRegistered
+#print axioms OptimalComputation.Evaluation.evaluateRegistered
+#print axioms OptimalComputation.Evaluation.selectCandidate
+#print axioms OptimalComputation.Evaluation.objectiveCatalog
+#print axioms OptimalComputation.Evaluation.executeCertified
+#print axioms OptimalComputation.Evaluation.evaluateObjective_registered

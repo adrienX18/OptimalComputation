@@ -1,13 +1,15 @@
 # Initial machine contract
 
 This is the concise contract for **`arty-model-v1`**, derived from [PLAN.md](../PLAN.md).
-It specifies the full first release. Through Milestone 5, code implements the
+It specifies the full first release. The code implements the
 package, identifiers, board profile, admissibility, resource accounting, and bounded
 bank mapping, checked arithmetic, canonical storage, and pure matrix references
 with all-input output/prefix bounds, bounded layouts, finite candidate programs,
 structural validation, pure cycle execution, objective-free records, and executable
-checks. The tiny multiply candidate has an all-input execution/correctness
-certificate; matrix baselines and scoring remain for later milestones.
+checks. The tiny multiply candidate, naive matrix-vector and matrix-matrix baselines, and two manual
+product-pair candidates have all-input execution/correctness certificates. Pure
+latency and abstract-energy objectives score verified executions. The small
+[CLI](usage.md) exposes these artifacts and optional observational traces.
 [STATUS.md](../STATUS.md) records progress. The [assumptions table](assumptions.md)
 classifies the hardware facts, project choices, and deferred physical details.
 
@@ -233,9 +235,19 @@ boundary budget. Registry lookup compares the complete artifact; an identifier
 or serialized correctness assertion cannot confer verified status.
 
 The tiny multiply certificate covers every pair in `[-32768, 32767]`, with result
-`a*b`, store completion at boundary 6, and seven processed boundaries. This is the
-only registered candidate in Milestone 6. Matrix row-major codecs and their
-roundtrip/width proofs are present; neither matrix workload has a baseline yet.
+`a*b`, store completion at boundary 6, and seven processed boundaries. The default
+`matvec-naive-v1` artifact also has an all-input certificate, with store completion
+at boundary 2143 and 2,144 processed boundaries. It uses only lane zero, resets
+each row, reloads vector operands for every row, and waits through each primitive
+completion. The certificate uses the shared initializer/runner/step and a reusable
+dot-product proof composed across rows. All 16 configurations have conformance
+simulations; the certificate covers the default `(8, 8)` artifact. The default
+`matmul-naive-v1` artifact has an all-input certificate for conventional `i,j,k`
+execution with fresh operand loads for every output, 34,304 processed boundaries,
+and final store completion at cycle 34,303. Its 16 configuration variants are
+also conformance simulations. The fixed
+model rules above are unchanged; [baseline records](results/README.md) document
+the schedule and independently checked counters.
 
 Generic invariant proofs establish the three-pending-effects-per-lane bound for
 states reachable from initialization through successful machine steps. A finished
@@ -251,3 +263,19 @@ output and unverified candidate. Resource exhaustion is a separate inconclusive
 outcome with real runner progress details. The reproducible axiom audit is
 `scripts/audit-verification.lean`; accepted declarations use only Lean's standard
 `propext`, `Quot.sound` and `Classical.choice` axioms.
+
+
+## Implemented objective scope
+
+The pure latency and abstract-energy objectives share the unchanged execution
+record. `CertifiedExecution` binds an actual trace-disabled `executeValues` success
+to an allowed runtime input and complete proof-bearing candidate. Accepted scoring
+requires this evidence and exact raw-artifact equality, not an `Outcome.verified`
+tag or JSON status. Failures, simulations and exhaustion are never promoted into
+accepted optimization scores. Rescoring preserves the original execution.
+
+The frozen energy formula and coefficient profile, default matrix-vector costs,
+and all-input-certified serial/parallel product-pair fixtures are documented in
+[objectives](objectives.md). Both objectives minimize; cycle counts have no assumed
+physical clock and energy units are hypothetical. Hardware semantics, numeric
+rules, versions and original objective-free results are unchanged.

@@ -16,3 +16,7 @@ import OptimalComputation.Workloads.MatrixAdapters
 import OptimalComputation.Evaluation.Verification
 import OptimalComputation.Evaluation.Checked
 import OptimalComputation.Evaluation.Registry
+import OptimalComputation.Examples.MatVecBaseline
+import OptimalComputation.Evaluation.ObjectiveRegistry
+import OptimalComputation.Evaluation.Results
+import OptimalComputation.Examples.MatMulBaseline

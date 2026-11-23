@@ -6,6 +6,11 @@ import OptimalComputation.Tests.Workloads
 import OptimalComputation.Tests.Candidates
 import OptimalComputation.Tests.Execution
 import OptimalComputation.Tests.Verification
+import OptimalComputation.Tests.MatVecBaseline
+import OptimalComputation.Tests.Objectives
+import OptimalComputation.Tests.MatMulBaseline
+import OptimalComputation.CLI
+import OptimalComputation.Tests.CLI
 
 private def printVersions : IO Unit := do
   IO.println s!"model: {OptimalComputation.Versions.model}"
@@ -25,15 +30,12 @@ def main (args : List String) : IO UInt32 := do
       OptimalComputation.Tests.candidates
       OptimalComputation.Tests.execution
       OptimalComputation.Tests.verification
+      OptimalComputation.Tests.matvecBaseline
+      OptimalComputation.Tests.objectives
+      OptimalComputation.Tests.matmulBaseline
+      OptimalComputation.Tests.cli
       return 0
   | ["--version"] =>
       printVersions
       return 0
-  | [] | ["--help"] =>
-      IO.println "Optimal Computation: Lean hardware model foundation"
-      IO.println "Usage: lake exe optimal_computation [--help | --version | --check]"
-      return 0
-  | _ =>
-      let stderr ← IO.getStderr
-      stderr.putStrLn "Unknown arguments. Use --help, --version, or --check."
-      return 1
+  | _ => OptimalComputation.CLI.run args

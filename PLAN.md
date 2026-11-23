@@ -354,20 +354,20 @@ Test failure behavior as carefully as successful execution. Prefer a small test 
 
 ## 7. Completion checklist
 
-- [ ] The pinned Lean project builds from a clean checkout.
-- [ ] The Arty A7-100T reference and every modeling assumption are documented.
-- [ ] The allowed configuration family and resource accounting are executable and checked.
-- [ ] Arithmetic, storage, scheduling, initialization, and completion have unambiguous semantics.
-- [ ] Simulation and proof obligations share the same transition rules.
-- [ ] Accepted matrix-vector and matrix-matrix examples are proved safe and correct for all allowed inputs.
-- [ ] Both computations include a naive executable baseline, its correctness and safety proofs, and versioned results for latency and energy.
-- [ ] Invalid and unverified candidates cannot receive accepted scores.
-- [ ] Latency and energy are separate interchangeable objectives over shared execution records.
-- [ ] Energy results are labeled as abstract units, with visible fixed coefficients.
-- [ ] Manual examples demonstrate meaningful differences between the objectives.
-- [ ] New workloads and objectives can be added without changing machine semantics.
-- [ ] The evaluation interface is documented for future interchangeable search strategies.
-- [ ] No optimization strategy or autonomous AI loop has been implemented as part of this scope.
+- [x] The pinned Lean project builds from a clean checkout.
+- [x] The Arty A7-100T reference and every modeling assumption are documented.
+- [x] The allowed configuration family and resource accounting are executable and checked.
+- [x] Arithmetic, storage, scheduling, initialization, and completion have unambiguous semantics.
+- [x] Simulation and proof obligations share the same transition rules.
+- [x] Accepted matrix-vector and matrix-matrix examples are proved safe and correct for all allowed inputs.
+- [x] Both computations include a naive executable baseline, its correctness and safety proofs, and versioned results for latency and energy.
+- [x] Invalid and unverified candidates cannot receive accepted scores.
+- [x] Latency and energy are separate interchangeable objectives over shared execution records.
+- [x] Energy results are labeled as abstract units, with visible fixed coefficients.
+- [x] Manual examples demonstrate meaningful differences between the objectives.
+- [x] New workloads and objectives can be added without changing machine semantics.
+- [x] The evaluation interface is documented for future interchangeable search strategies.
+- [x] No optimization strategy or autonomous AI loop has been implemented as part of this scope.
 
 ## 8. Instructions for the coding agent
 

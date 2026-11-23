@@ -1,0 +1,2 @@
+import OptimalComputation.Examples.MatMulBaseline
+#eval OptimalComputation.Examples.MatMulNaive.reproduceConfigurations

@@ -1,0 +1,2 @@
+import OptimalComputation.Examples.MatVecBaseline
+#eval OptimalComputation.Examples.MatVecNaive.reproduceConfigurations
