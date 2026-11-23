@@ -61,13 +61,19 @@ def analyze(archive):
     actual = {str(p.relative_to(archive)) for p in archive.rglob('*')
               if p.is_file() and p.name not in ('.lock', 'inventory.json')}
     assert actual == listed, 'Inventory coverage changed'
-    attempts, runs, curves = [], [], []
+    attempts, runs, curves, timeline = [], [], [], []
+    examples = {}
     raw_refusals = Counter()
     for job in manifest['jobs']:
         folder = archive / job['runPath']
         run_manifest = read(folder / 'manifest.json')
         summary = read(folder / 'summary.json')
         baseline = read(folder / 'baseline.json')
+        launch = read(archive / 'jobs' / job['key'] / 'result.json')
+        launch_request = read(archive / launch['log'] / 'request.json')
+        timeline.append(dict(model=job['name'], seed=job['seed'],
+            startSeconds=round(launch_request['started'] - background['started'], 6),
+            endSeconds=round(launch_request['started'] + launch['process']['seconds'] - background['started'], 6)))
         assert run_manifest['config'] == job['config']
         assert summary['completed'] == len(summary['attempts']) == job['config']['attempts']
         incumbent = baseline['score']
@@ -87,6 +93,19 @@ def analyze(archive):
             assert (response is None) != (error is None)
             usage = response.get('usage') or {} if response else {}
             finish = response['choices'][0]['finish_reason'] if response else None
+            output_code_bytes = None
+            if response and finish == 'stop':
+                content = response['choices'][0]['message'].get('content')
+                if isinstance(content, str):
+                    content = content.strip()
+                    if content.startswith('```json\n') and content.endswith('```'):
+                        content = content[8:-3]
+                    try:
+                        parsed = json.loads(content)
+                        if isinstance(parsed, dict) and isinstance(parsed.get('code'), str):
+                            output_code_bytes = len(parsed['code'].encode('utf-8'))
+                    except ValueError:
+                        pass
             if response:
                 assert list(where.glob('provider-*-response.json'))
             if finish == 'content_filter':
@@ -131,6 +150,7 @@ def analyze(archive):
                 reasoningTokens=(usage.get('completion_tokens_details') or {}).get('reasoning_tokens'),
                 estimatedCostUSD=response.get('estimatedCostUSD') if response else None,
                 finishReason=finish, promptBytes=len(json.dumps(request['messages'], ensure_ascii=False).encode()),
+                outputCodeBytes=output_code_bytes,
                 historyRows=len(context['history']), codeSha256=code, candidateSha256=normalized,
                 directory=str(where.relative_to(archive))))
             curves.append(dict(model=job['name'], seed=job['seed'], attempt=index,
@@ -147,12 +167,20 @@ def analyze(archive):
             first30Attempt=next((a['attempt'] for a in these if a['best'] <= 30), None),
             secondsToBest=next(a['elapsedSeconds'] for a in these if a['attempt'] == best_seen_at),
             wallSeconds=round(elapsed, 3),
+            apiSeconds=round(sum(a['apiSeconds'] for a in these), 3),
+            outputTokens=sum(a['outputTokens'] or 0 for a in these),
+            medianApiSeconds=median(a['apiSeconds'] for a in these),
+            maxPromptBytes=max(a['promptBytes'] for a in these),
             improvements=sum(a['improved'] for a in these),
             uniqueCertifiedCandidates=len({a['candidateSha256'] for a in these if a['accepted']}),
             scheduleSize=score['execution']['scheduleSize'], loads=counters['loads'],
             stores=counters['stores'], multiplications=counters['multiplications'],
             multiplyAdds=counters['multiplyAdds'],
             bestDirectory=str(chosen.relative_to(archive))))
+        if (job['name'], job['seed']) in [('fable', 11), ('sonnet', 37)]:
+            examples[job['name']] = dict(model=job['name'], seed=job['seed'],
+                attempt=best_seen_at, cycles=incumbent, directory=str(chosen.relative_to(archive)),
+                candidateSha256=sha(chosen / 'candidate.json'), schedule=read(chosen / 'candidate.json')['schedule'])
     assert len(attempts) == batch['completedAttempts'] == 1250
     assert len(runs) == batch['completedRuns'] == 25
     models = {}
@@ -207,7 +235,7 @@ def analyze(archive):
         attemptsAfterEventualBest=sum(50-r['bestFirstAttempt'] for r in runs),
         runsBestBy10=sum(r['bestFirstAttempt'] <= 10 for r in runs),
         reference=reference, models=models)
-    return metrics, runs, curves
+    return metrics, runs, curves, attempts, timeline, examples
 
 
 def main():
@@ -219,12 +247,15 @@ def main():
     args.output = args.output.resolve()
     if args.output == archive or archive in args.output.parents:
         parser.error('Output must be outside the input archive.')
-    metrics, runs, curves = analyze(archive)
+    metrics, runs, curves, attempts, timeline, examples = analyze(archive)
     args.output.mkdir(parents=True, exist_ok=True)
     (args.output / 'metrics.json').write_text(json.dumps(metrics, indent=2, ensure_ascii=False) + '\n')
     write_csv(args.output / 'runs.csv', runs)
     write_csv(args.output / 'convergence.csv', curves)
-    print(f"Verified {metrics['source']['inventoryFiles']:,} files and {metrics['attempts']:,} attempts; wrote metrics.json, runs.csv, convergence.csv")
+    write_csv(args.output / 'attempts.csv', attempts)
+    write_csv(args.output / 'timeline.csv', timeline)
+    (args.output / 'winner-schedules.json').write_text(json.dumps(examples, indent=2) + '\n')
+    print(f"Verified {metrics['source']['inventoryFiles']:,} files and {metrics['attempts']:,} attempts; wrote six analysis data files")
 
 
 if __name__ == '__main__':

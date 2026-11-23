@@ -1,0 +1,52 @@
+[
+  {
+    "figure": "01_execution",
+    "overflowingText": [],
+    "overlappingLegends": 0
+  },
+  {
+    "figure": "02_quality",
+    "overflowingText": [],
+    "overlappingLegends": 0
+  },
+  {
+    "figure": "03_convergence",
+    "overflowingText": [],
+    "overlappingLegends": 0
+  },
+  {
+    "figure": "04_timing",
+    "overflowingText": [],
+    "overlappingLegends": 0
+  },
+  {
+    "figure": "05_repetition",
+    "overflowingText": [],
+    "overlappingLegends": 0
+  },
+  {
+    "figure": "06_designs",
+    "overflowingText": [],
+    "overlappingLegends": 0
+  },
+  {
+    "figure": "07_outcomes",
+    "overflowingText": [],
+    "overlappingLegends": 0
+  },
+  {
+    "figure": "08_sequences",
+    "overflowingText": [],
+    "overlappingLegends": 0
+  },
+  {
+    "figure": "09_resources",
+    "overflowingText": [],
+    "overlappingLegends": 0
+  },
+  {
+    "figure": "10_limits",
+    "overflowingText": [],
+    "overlappingLegends": 0
+  }
+]
