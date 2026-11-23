@@ -7,6 +7,7 @@ all prefixes are obtained by induction and actual-run composition. -/
 namespace OptimalComputation.Examples.SerialDot
 open Hardware Evaluation Evaluation.Serial Workloads
 set_option backward.isDefEq.respectTransparency false
+variable {c : ValidConfig}
 
 def block (a b : Address) : List BoundedInstruction :=
   [.load r1 a, .load r2 b, .multiplyAdd acc r1.val r2.val acc.val]
@@ -15,7 +16,7 @@ def code {n : Nat} (a b : Fin n → Address) : (k : Nat) → k ≤ n → List Bo
   | 0, _ => []
   | k + 1, h => code a b k (by omega) ++ block (a ⟨k, by omega⟩) (b ⟨k, by omega⟩)
 
-theorem block_executes (s : State C) (hs : Quiet s) (a b : Address)
+theorem block_executes (s : State c) (hs : Quiet s) (a b : Address)
     (av bv v next : Signed48)
     (ha : s.readMemory a = some (encodeSlot av)) (hb : s.readMemory b = some (encodeSlot bv))
     (hv : s.readRegister lane acc.val = some v)
@@ -45,7 +46,7 @@ def value {n : Nat} (a b : Fin n → Int) (ha : ∀ i, InSigned16 (a i))
 preserving the entire memory. The starting registers other than acc are arbitrary. -/
 theorem executes_prefix {n : Nat} (a b : Fin n → Int)
     (ha : ∀ i, InSigned16 (a i)) (hb : ∀ i, InSigned16 (b i))
-    (aa ba : Fin n → Address) (s : State C) (hs : Quiet s)
+    (aa ba : Fin n → Address) (s : State c) (hs : Quiet s)
     (hma : ∀ i, s.readMemory (aa i) = some (encodeSlot ⟨a i, signed16_fits_signed48 (ha i)⟩))
     (hmb : ∀ i, s.readMemory (ba i) = some (encodeSlot ⟨b i, signed16_fits_signed48 (hb i)⟩))
     (hz : s.readRegister lane acc.val = some zero48)

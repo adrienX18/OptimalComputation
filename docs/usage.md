@@ -11,10 +11,10 @@ lake exe optimal_computation list-candidates --json
 lake exe optimal_computation list-objectives
 ```
 
-The lists describe the compiled certificate catalog: four workloads, seven
+The lists describe the compiled certificate catalog: seven workloads, 71 configured
 candidates and two independent minimizing objectives. Candidate listings include
 configuration and the certificate's sufficient boundary budget. `evaluate` selects
-registered Lean artifacts by identifier; it never imports serialized programs or
+registered Lean artifacts by identifier and optional configuration; it never imports serialized programs or
 proof claims. To run a program written outside Lean, see
 [Simulate an unverified candidate file](#simulate-an-unverified-candidate-file).
 
@@ -270,3 +270,11 @@ on its predecessor's completion boundary reproduces exactly the certified
 `scripts/check-cli.py` runs that example for both matrix workloads. A hand-built
 eight-lane example, `docs/candidates/matvec-grid-exchange-v1.json`, simulates in
 79 cycles; see the [results guide](results/README.md#hand-built-unverified-reference).
+
+## Section 9 workloads and configurations
+
+See [experiments.md](experiments.md) for polynomial, Gram and two-stage scalar
+orders, their certified naive baselines, the scheduling heuristic and saved
+proposal records. `evaluate` and `export-candidate` accept
+`--configuration LANES,BANKS` to select a certified configuration variant.
+`simulate` always uses the configuration embedded in its candidate file.

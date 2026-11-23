@@ -423,9 +423,21 @@ Only serial one-lane schedules have reusable proofs today; the one certified par
 ### Checklist
 
 - [ ] Certification path chosen, implemented and able to certify `matvec-grid-exchange-v1`.
-- [ ] Scheduling-heuristic baseline available for every instance.
-- [ ] Matrix-matrix product: hand-built reference and lower bound recorded on the three pinned configurations.
-- [ ] Polynomial evaluation: specification, certified naive baseline and a rejected Horner candidate.
-- [ ] Symmetric product: specification, certified naive baseline and a certified candidate that uses the symmetry.
-- [ ] Two-stage linear map: specification, certified naive baseline and reference points.
-- [ ] Every instance reports gap closed, proposals certified, and proposals that passed fixtures but failed certification.
+- [x] Scheduling-heuristic baseline available for every instance.
+- [x] Matrix-matrix product: hand-built reference and lower bound recorded on the three pinned configurations.
+- [x] Polynomial evaluation: specification, certified naive baseline and a rejected Horner candidate.
+- [x] Symmetric product: specification, certified naive baseline and a certified candidate that uses the symmetry.
+- [x] Two-stage linear map: specification, certified naive baseline and reference points.
+- [x] Every instance reports gap closed, proposals certified, and proposals that passed fixtures but failed certification.
+
+Implementation note (2026-11-22): the user explicitly deferred `questions.md`
+while requesting the remaining Section 9 work. The first checklist item therefore
+remains open. The existing serial proofs now cover all sixteen configurations;
+this does not choose or implement a general parallel-schedule certifier.
+
+See [the experiment guide](docs/experiments.md) and
+[the recorded results](docs/results/section9-v1/summary.md). The run records 232
+proposals across 16 instances, with 77 certified evaluations and three Horner
+proposals that pass public fixtures but are refuted on an allowed held-out input.
+The other 152 evaluations await general certification; that status is not counted
+as a failed proof. Counting floors use compulsory I/O and are conservative.

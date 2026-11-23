@@ -124,7 +124,7 @@ theorem schedule_timed (t : Nat) (is : List BoundedInstruction)
   | cons i is ih => simp [schedule, timed, ih, lane]
 
 theorem timed_sorted (t : Nat) (is : List BoundedInstruction) :
-    (timed t is).Pairwise (fun a b => decide (a.cycle ≤ b.cycle) = true) := by
+    (timed (c := C) t is).Pairwise (fun a b => decide (a.cycle ≤ b.cycle) = true) := by
   induction is generalizing t with
   | nil => simp [timed]
   | cons i is ih =>
@@ -169,10 +169,14 @@ def candidateV2For (c : ValidConfig) : Candidate MatMul.shape := {
 
 def candidateV2 : Candidate MatMul.shape := candidateV2For defaultConfig
 
-theorem candidateV2_program : program candidateV2 = tightTimed 0 (entriesCode 256 (by omega)) := by
-  unfold program candidateV2 candidateV2For
+theorem candidateV2For_program (c : ValidConfig) :
+    program (candidateV2For c) = tightTimed 0 (entriesCode 256 (by omega)) := by
+  unfold program candidateV2For
   rw [tightSchedule_timed]
   exact List.mergeSort_of_pairwise (tightTimed_sorted _ _)
+
+theorem candidateV2_program : program candidateV2 = tightTimed 0 (entriesCode 256 (by omega)) :=
+  candidateV2For_program C
 
 theorem entry_tightDuration (i : Fin 256) : tightDuration (entryCode i) = 84 := by
   simp [entryCode, tightDuration_append, SerialDot.code_tightDuration, tightDuration, latency]

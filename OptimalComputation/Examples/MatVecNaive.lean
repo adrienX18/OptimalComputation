@@ -103,7 +103,7 @@ theorem schedule_timed (t : Nat) (is : List BoundedInstruction)
   | cons i is ih => simp [schedule, timed, ih, lane]
 
 theorem timed_sorted (t : Nat) (is : List BoundedInstruction) :
-    (timed t is).Pairwise (fun a b => decide (a.cycle ≤ b.cycle) = true) := by
+    (timed (c := C) t is).Pairwise (fun a b => decide (a.cycle ≤ b.cycle) = true) := by
   induction is generalizing t with
   | nil => simp [timed]
   | cons i is ih =>

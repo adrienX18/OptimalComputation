@@ -1,0 +1,16 @@
+import OptimalComputation
+
+#print axioms OptimalComputation.Workloads.Polynomial.power_fits
+#print axioms OptimalComputation.Workloads.Polynomial.reference_bounds
+#print axioms OptimalComputation.Workloads.Gram.symmetric
+#print axioms OptimalComputation.Workloads.TwoStage.intermediate_fits
+#print axioms OptimalComputation.Examples.SerialNetwork.seeded_executes
+#print axioms OptimalComputation.Examples.SerialNetwork.execution_correct
+#print axioms OptimalComputation.Examples.SerialNetwork.verifiedFor
+#print axioms OptimalComputation.Examples.ExperimentBaselines.gramNaiveVerified
+#print axioms OptimalComputation.Examples.ExperimentBaselines.gramSymmetricVerified
+#print axioms OptimalComputation.Examples.ExperimentBaselines.twoStageVerified
+#print axioms OptimalComputation.Examples.ExperimentBaselines.polynomialVerified
+#print axioms OptimalComputation.Examples.MatMulNaive.verifiedV2For
+#print axioms OptimalComputation.Evaluation.configurationArtifacts
+#print axioms OptimalComputation.Evaluation.objectiveCatalog

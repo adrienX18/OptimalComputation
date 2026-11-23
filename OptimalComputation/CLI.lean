@@ -1,5 +1,6 @@
 import OptimalComputation
 import Lean.Data.Json.Parser
+import OptimalComputation.Experiments.Fixtures
 
 /-! Small public interface. Certificates and scoring stay in Evaluation;
 fixtures and serialization here confer no verification authority. -/
@@ -12,10 +13,10 @@ Usage: optimal_computation [--help | --version | --check]\n\
        optimal_computation list-candidates [--json]\n\
        optimal_computation list-objectives [--json]\n\
        optimal_computation evaluate ID [--objective ID] [--fixture NAME | --input FILE]\n\
-         [--budget BOUNDARIES] [--trace FILE] [--json]\n\
+         [--configuration LANES,BANKS] [--budget BOUNDARIES] [--trace FILE] [--json]\n\
        optimal_computation simulate CANDIDATE_FILE [--fixture NAME | --input FILE]\n\
          [--budget BOUNDARIES] [--trace FILE] [--json]\n\
-       optimal_computation export-candidate ID [--json]\n\
+       optimal_computation export-candidate ID [--configuration LANES,BANKS] [--json]\n\
 Defaults: latency-v1; generated-23 for matrices, mixed-signs for tiny/pair; certified budget.\n\
 Input files contain a JSON array of integers. --trace exports an observational simulation.\n\
 simulate runs a JSON candidate file unverified and unscored; export-candidate prints one.\n\
@@ -42,6 +43,7 @@ structure Options where
   input : Option String := none
   budget : Option Nat := none
   trace : Option String := none
+  configuration : Option Config := none
   deriving Repr
 
 def parseOptions (args : List String) (options : Options := {})
@@ -62,6 +64,13 @@ def parseOptions (args : List String) (options : Options := {})
         | "--fixture" => pure {options with fixture := some value}
         | "--input" => pure {options with input := some value}
         | "--trace" => pure {options with trace := some value}
+        | "--configuration" =>
+            match value.splitOn "," with
+            | [lanes, banks] =>
+                match lanes.toNat?, banks.toNat? with
+                | some l, some b => pure {options with configuration := some ⟨l, b⟩}
+                | _, _ => throw (invalidArguments "--configuration expects LANES,BANKS.")
+            | _ => throw (invalidArguments "--configuration expects LANES,BANKS.")
         | "--budget" =>
             match value.toNat? with
             | some n => pure {options with budget := some n}
@@ -90,6 +99,8 @@ def fixtureValues (workload name : String) : Except Error (List Int) := do
   else if workload == Examples.ProductPair.specification.identifier then
     if name == "mixed-signs" then return [-7, 6, 5, -3]
     if name == "zeros" then return [0, 0, 0, 0]
+  if let some (_, values) := Experiments.fixtures workload |>.find? (fun f => f.1 == name) then
+    return values
   throw ⟨"unknown-fixture", s!"Unknown fixture {name} for {workload}.", Json.null, 1⟩
 
 private def invalidInputFile (message : String) : Error :=
@@ -290,33 +301,45 @@ private def loadInputs (workload : String) (options : Options) :
       let name := options.fixture.getD (defaultFixture workload)
       pure (name, fixtureValues workload name)
 
+/-- Identifier plus configuration selects a precise certified artifact. -/
+private def configuredCatalog (options : Options) : Except Error (List VerifiedArtifact) := do
+  match options.configuration with
+  | none => return objectiveCatalog
+  | some c =>
+      match validateConfig c with
+      | .error e => throw (failureError (.inadmissibleConfiguration e))
+      | .ok _ => return objectiveCatalog.filter (fun a => a.verified.candidate.configuration.val == c)
+
 private def evaluateCommand (identifier : String) (options : Options) : IO (Except Error Response) := do
-  let some raw := selectArtifact objectiveCatalog identifier
-    | return .error (failureError (.unverifiedCandidate identifier))
-  let some artifact := lookupArtifact objectiveCatalog raw
-    | return .error (failureError (.unverifiedCandidate identifier))
-  let objectiveId := options.objective.getD Versions.latency
-  let some objective := objectives.find? (fun o => o.identifier == objectiveId)
-    | return .error ⟨"unknown-objective", s!"Unknown objective {objectiveId}.", Json.null, 1⟩
-  let (inputId, inputs) ← loadInputs artifact.val.specification.identifier options
-  let .ok values := inputs | return inputs.map fun _ => ⟨Json.null, ""⟩
-  let budget := options.budget.getD artifact.val.verified.sufficientBoundaries
-  match evaluateObjective objectiveCatalog raw values budget inputId objective with
-  | .failure reason => return .error (failureError reason)
-  | .resourceExhausted details => return .error (exhaustionError details)
-  | .accepted accepted =>
-      if let some path := options.trace then
-        match observationalTrace accepted with
-        | .error error => return .error error
-        | .ok json =>
-            try IO.FS.writeFile path (json.pretty ++ "\n")
-            catch e => return .error ⟨"trace-io", s!"Cannot write {path}: {e}", Json.null, 1⟩
-      let record := accepted.execution.record
-      let score := accepted.result
-      let traceNote := options.trace.map (fun path => s!"\nObservational trace: {path}") |>.getD ""
-      return .ok ⟨accepted.toJson,
-        s!"{identifier}: all-input-certified; {score.objectiveIdentifier} = {score.value} {score.unit} (minimize)\n\
-        {record.cycles} cycles; {record.scheduleSize} instructions; {record.outputs.length} outputs; {record.storage.declaredBytes} declared bytes{traceNote}"⟩
+  match configuredCatalog options with
+  | .error e => return .error e
+  | .ok catalog =>
+    let some raw := selectArtifact catalog identifier
+      | return .error (failureError (.unverifiedCandidate identifier))
+    let some artifact := lookupArtifact objectiveCatalog raw
+      | return .error (failureError (.unverifiedCandidate identifier))
+    let objectiveId := options.objective.getD Versions.latency
+    let some objective := objectives.find? (fun o => o.identifier == objectiveId)
+      | return .error ⟨"unknown-objective", s!"Unknown objective {objectiveId}.", Json.null, 1⟩
+    let (inputId, inputs) ← loadInputs artifact.val.specification.identifier options
+    let .ok values := inputs | return inputs.map fun _ => ⟨Json.null, ""⟩
+    let budget := options.budget.getD artifact.val.verified.sufficientBoundaries
+    match evaluateObjective objectiveCatalog raw values budget inputId objective with
+    | .failure reason => return .error (failureError reason)
+    | .resourceExhausted details => return .error (exhaustionError details)
+    | .accepted accepted =>
+        if let some path := options.trace then
+          match observationalTrace accepted with
+          | .error error => return .error error
+          | .ok json =>
+              try IO.FS.writeFile path (json.pretty ++ "\n")
+              catch e => return .error ⟨"trace-io", s!"Cannot write {path}: {e}", Json.null, 1⟩
+        let record := accepted.execution.record
+        let score := accepted.result
+        let traceNote := options.trace.map (fun path => s!"\nObservational trace: {path}") |>.getD ""
+        return .ok ⟨accepted.toJson,
+          s!"{identifier}: all-input-certified; {score.objectiveIdentifier} = {score.value} {score.unit} (minimize)\n\
+          {record.cycles} cycles; {record.scheduleSize} instructions; {record.outputs.length} outputs; {record.storage.declaredBytes} declared bytes{traceNote}"⟩
 
 /-- Default cap on simulation boundaries (under a second of evaluation), so a huge
 `cycle` in an untrusted file cannot stall the evaluator. `--budget` overrides it. -/
@@ -355,6 +378,8 @@ private def readCandidate (file : String) : IO (Except Error RawCandidate) := do
 domain and reference come from the trusted catalog, never from the file. The
 outcome is never certified and never scored, whatever the file contains. -/
 private def simulateCommand (file : String) (options : Options) : IO (Except Error Response) := do
+  if options.configuration.isSome then
+    return .error (invalidArguments "simulate reads its configuration from the candidate file.")
   if options.objective.isSome then
     return .error (invalidArguments "simulate takes no --objective: unverified candidates are never scored.")
   let raw ← match ← readCandidate file with
@@ -406,10 +431,15 @@ private def simulateCommand (file : String) (options : Options) : IO (Except Err
         {record.cycles} cycles; {record.scheduleSize} instructions; outputs match the reference for input {inputId} (this input only){traceNote}"⟩
 
 /-- A registered candidate in the `simulate` file format: a valid starting point. -/
-private def exportCommand (identifier : String) : Except Error Response :=
-  match selectArtifact objectiveCatalog identifier with
-  | none => .error (failureError (.unverifiedCandidate identifier))
-  | some raw => .ok ⟨raw.toJson, raw.toJson.pretty⟩
+private def exportCommand (identifier : String) (options : Options) : Except Error Response := do
+  if options.objective.isSome || options.fixture.isSome || options.input.isSome || options.budget.isSome || options.trace.isSome then
+    throw (invalidArguments "export-candidate accepts only --configuration and --json.")
+  match configuredCatalog options with
+  | .error e => .error e
+  | .ok catalog =>
+    match selectArtifact catalog identifier with
+    | none => .error (failureError (.unverifiedCandidate identifier))
+    | some raw => .ok ⟨raw.toJson, raw.toJson.pretty⟩
 
 /-- IO boundary with no printing; tests exercise the same dispatch as main. -/
 def dispatch (args : List String) : IO (Except Error Response) := do
@@ -430,9 +460,9 @@ def dispatch (args : List String) : IO (Except Error Response) := do
   | "export-candidate" :: identifier :: rest =>
       if identifier.startsWith "--" then
         return .error (invalidArguments "Missing candidate identifier. Use --help.")
-      if rest != [] && rest != ["--json"] then
-        return .error (invalidArguments "Unexpected arguments. Use --help.")
-      return exportCommand identifier
+      match parseOptions rest with
+      | .error e => return .error e
+      | .ok options => return exportCommand identifier options
   | command :: rest =>
       if rest != [] && rest != ["--json"] then
         return .error (invalidArguments "Unexpected arguments. Use --help.")

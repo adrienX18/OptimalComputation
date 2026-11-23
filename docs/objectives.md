@@ -96,5 +96,7 @@ needed. Add an objective with stable identifier, unit, direction and a pure
 record-to-breakdown function. A changed energy coefficient set requires a new
 profile and objective version. See the [extension guide](extensions.md) for
 checked API examples and the future strategy boundary. Both matrix baselines and
-the small [CLI](usage.md) use these same interfaces; no search strategy or physical
-calibration is implemented.
+the small [CLI](usage.md) use these same interfaces. Section 9 adds a scheduling
+heuristic and labeled diagnostic projections for unverified reference schedules;
+these are never accepted scores. No autonomous optimizer or physical calibration
+is implemented. See [experiments.md](experiments.md).

@@ -12,8 +12,9 @@ We will start with small mathematical computations in software. Testing on physi
 
 The foundation now has verified naive matrix-vector and matrix-matrix baselines,
 a fixed hardware model, and independent latency and abstract-energy objectives.
-This release implements no search strategy or AI loop. [PLAN.md](PLAN.md) defines
-the scope and, in section 9, the harder workloads for the next phase;
+Section 9 adds certified polynomial, symmetric-product and two-stage baselines,
+a deterministic scheduling heuristic, and reproducible experiment records. There
+is no autonomous optimizer or AI loop. [PLAN.md](PLAN.md) defines the scope;
 [questions.md](questions.md) records the open design questions.
 
 Install [elan](https://github.com/leanprover/elan), then run from this directory:
@@ -49,7 +50,15 @@ the naive comparison point; v1 stays frozen for reproducibility.
 A hand-built eight-lane schedule,
 [`docs/candidates/matvec-grid-exchange-v1.json`](docs/candidates/matvec-grid-exchange-v1.json),
 simulates the matrix-vector product in 79 cycles. It is unverified and unscored:
-certifying parallel candidates is the open problem in [questions.md](questions.md).
+certifying arbitrary parallel candidates remains the deferred problem in [questions.md](questions.md).
+
+[Section 9 usage, algorithms, proof status, and measurements](docs/experiments.md)
+explain the new workloads and configuration-specific certificates. For example:
+
+```sh
+lake exe optimal_computation evaluate polynomial-naive-v1 --configuration 8,1
+python3 scripts/experiment.py --task polynomial --output /tmp/polynomial-experiment
+```
 
 These are model results. Energy coefficients are hypothetical; physical timing,
 routing and power are uncalibrated. Every accepted candidate has safety and

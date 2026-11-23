@@ -35,8 +35,8 @@ def error(category, *args, code=1):
 
 assert "arty-model-v1" in run("--version", as_json=False).stdout
 assert "--trace" in run("--help", as_json=False).stdout
-assert len(run("list-workloads")["workloads"]) == 4
-assert len(run("list-candidates")["candidates"]) == 7
+assert len(run("list-workloads")["workloads"]) == 7
+assert len(run("list-candidates")["candidates"]) == 71
 assert len(run("list-objectives")["objectives"]) == 2
 assert "matvec-naive-v1" in run("list-candidates", as_json=False).stdout
 

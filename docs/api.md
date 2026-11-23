@@ -202,7 +202,7 @@ sufficient boundary budget. Safety requires actual successful finite execution,
 including drained effects and written outputs. Correctness equates every returned
 output scalar to the mathematical reference through the workload codec.
 
-`objectiveCatalog` is the single registry of certified artifacts: all seven
+`objectiveCatalog` is the single registry of certified artifacts: all 71 configured
 candidates listed by `list-candidates`. `selectArtifact objectiveCatalog identifier`
 returns a stored raw artifact, and `evaluateObjective` (described under
 [Interchangeable objectives](#interchangeable-objectives)) is the only acceptance
@@ -322,9 +322,10 @@ score over the same execution record. Accepted scores require exact proof-carryi
 execution evidence; a record or status label alone is insufficient.
 `evaluateObjective objectiveCatalog raw inputs budget inputId objective` executes
 an exactly registered artifact, while `accepted.rescore objective` preserves the
-same record. The compiled catalog contains seven artifacts: tiny multiply, the v1
-and v2 matrix-vector and matrix-matrix baselines, and the two manually scheduled
-product-pair comparison fixtures.
+same record. The compiled catalog includes the original seven artifacts plus
+the Section 9 baselines, a symmetry-sharing example, and certified variants of
+all four experiment baselines on every admissible configuration. There are 71
+configured artifacts in total; the CLI can select them with `--configuration`.
 
 The serial pair takes 12 cycles and 172 abstract energy units; the parallel pair
 takes 6 cycles and 202 units. Both are proved safe and correct for all signed16
@@ -337,3 +338,17 @@ lake env lean scripts/audit-objectives.lean
 lake env lean scripts/reproduce-matvec-objectives.lean
 lake env lean scripts/reproduce-product-pair-objectives.lean
 ```
+
+## Section 9 serial composition
+
+`Workloads.FlatWorkload` supplies exact scalar domains and pure vector references.
+`Examples.SerialNetwork.Network` supplies an acyclic, explicitly addressed graph
+of seeded dot products, with all-input equations and operand bounds. Its compiler
+produces ordinary loads, MACs, reset additions and stores. `verifiedFor` composes
+the generalized serial execution proofs on any `ValidConfig`; it does not accept
+or prove an arbitrary candidate file. `MatMulNaive.verifiedV2For` similarly
+certifies the existing v2 matrix baseline for each configuration.
+
+`Evaluation.configurationArtifacts` registers these exact artifacts. See
+[experiments.md](experiments.md) for memory layouts, the separate scheduler,
+proposal records and the deferred parallel-certification boundary.

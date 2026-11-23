@@ -155,3 +155,12 @@ partial-sum exchange.
 
 `scripts/check-cli.py` checks the cycle count, instruction count and reference
 match on every fixture.
+
+## Section 9
+
+[section9-v1/summary.json](section9-v1/summary.json) records all four workloads,
+three pinned latency configurations per workload, and configuration-free energy
+instances. The adjacent proposal ledger preserves submission and outcome events;
+compressed candidate files bind exact schedules by SHA-256.
+[Experiment documentation](../experiments.md) explains the proof statuses,
+conservative counting bounds, diagnostic projections and reproduction command.

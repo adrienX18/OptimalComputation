@@ -5,9 +5,10 @@ namespace OptimalComputation.Examples.MatMulNaive
 open Hardware Workloads Candidates Evaluation Evaluation.Serial
 set_option backward.isDefEq.respectTransparency false
 set_option maxRecDepth 10000
+variable {c : ValidConfig}
 
 /-- Memory invariant at output-entry boundaries: all runtime inputs remain unchanged. -/
-def Inputs (x : MatMul.Input) (hx : MatMul.AllowedInput x) (s : State C) : Prop :=
+def Inputs (x : MatMul.Input) (hx : MatMul.AllowedInput x) (s : State c) : Prop :=
   (∀ i j, s.readMemory (leftAddress i j) =
     some (encodeSlot ⟨x.left i j, signed16_fits_signed48 (hx.1 i j)⟩)) ∧
   (∀ i j, s.readMemory (rightAddress i j) =
@@ -17,7 +18,7 @@ def resultValue (x : MatMul.Input) (hx : MatMul.AllowedInput x) (i : Fin 256) : 
   ⟨MatMul.reference x (entryRow i) (entryColumn i), MatMul.reference_fits_signed48 x hx (entryRow i) (entryColumn i)⟩
 
 theorem entry_executes (x : MatMul.Input) (hx : MatMul.AllowedInput x)
-    (i : Fin 256) (s : State C) (hs : Quiet s) (hi : Inputs x hx s) :
+    (i : Fin 256) (s : State c) (hs : Quiet s) (hi : Inputs x hx s) :
     ∃ final, Executes (entryCode i) s final ∧
       final.memory = (s.writeMemory (outputAddress i) (encodeSlot (resultValue x hx i))).memory := by
   let reset := s.writeRegister lane acc zero48
@@ -52,7 +53,7 @@ theorem output_injective (i j : Fin 256) : outputAddress i = outputAddress j ↔
   · intro h; subst j; rfl
 
 theorem entry_inputs (x : MatMul.Input) (hx : MatMul.AllowedInput x) (i : Fin 256)
-    (s final : State C) (hi : Inputs x hx s)
+    (s final : State c) (hi : Inputs x hx s)
     (hm : final.memory = (s.writeMemory (outputAddress i) (encodeSlot (resultValue x hx i))).memory) :
     Inputs x hx final := by
   constructor
@@ -72,7 +73,7 @@ theorem entry_inputs (x : MatMul.Input) (hx : MatMul.AllowedInput x) (i : Fin 25
 /-- Entry induction composes the same dot-product theorem 256 times. Output
 slots before the current entry are preserved, and every input remains read-only. -/
 theorem entries_executes (x : MatMul.Input) (hx : MatMul.AllowedInput x)
-    (s : State C) (hs : Quiet s) (hi : Inputs x hx s) (n : Nat) (hn : n ≤ 256) :
+    (s : State c) (hs : Quiet s) (hi : Inputs x hx s) (n : Nat) (hn : n ≤ 256) :
     ∃ final, Executes (entriesCode n hn) s final ∧ Inputs x hx final ∧
       ∀ i : Fin 256, i.val < n →
         final.readMemory (outputAddress i) = some (encodeSlot (resultValue x hx i)) := by
@@ -105,8 +106,8 @@ theorem initialization_pairs (values : Vector Signed48 512) :
     simp only [List.getElem_zip, List.getElem_ofFn, Vector.getElem_toList]
 
 theorem initial_read (values : Vector Signed48 512) (i : Fin 512) :
-    (initialState C layout values).readMemory (inputAddress i) = some (encodeSlot values[i.val]) := by
-  change (writeValues (State.empty C) (layout.inputs.zip values.toList)).readMemory _ = _
+    (initialState c layout values).readMemory (inputAddress i) = some (encodeSlot values[i.val]) := by
+  change (writeValues (State.empty c) (layout.inputs.zip values.toList)).readMemory _ = _
   rw [initialization_pairs]
   apply writeValues_read
   · exact List.mem_ofFn.mpr ⟨i, rfl⟩
@@ -116,8 +117,8 @@ theorem initial_read (values : Vector Signed48 512) (i : Fin 512) :
     subst j
     rfl
 
-theorem initial_quiet (values : Vector Signed48 512) : Quiet (initialState C layout values) := by
-  change (writeValues (State.empty C) (layout.inputs.zip values.toList)).pending = _
+theorem initial_quiet (values : Vector Signed48 512) : Quiet (initialState c layout values) := by
+  change (writeValues (State.empty c) (layout.inputs.zip values.toList)).pending = _
   rw [writeValues_pending]
   rfl
 
@@ -142,14 +143,14 @@ theorem encode_right (x : MatMul.Input) (hx : MatMul.AllowedInput x) (i j : Inde
   simpa only [h] using matrixScalars_at x.right i j
 
 theorem initial_inputs (x : MatMul.Input) (hx : MatMul.AllowedInput x) :
-    Inputs x hx (initialState C layout (MatMul.adapter.encode x hx)) := by
+    Inputs x hx (initialState c layout (MatMul.adapter.encode x hx)) := by
   constructor
   · intro i j
-    change (initialState C layout _).readMemory (inputAddress _) = _
+    change (initialState c layout _).readMemory (inputAddress _) = _
     rw [initial_read]
     exact congrArg (fun v => some (encodeSlot v)) (encode_left x hx i j)
   · intro i j
-    change (initialState C layout _).readMemory (inputAddress _) = _
+    change (initialState c layout _).readMemory (inputAddress _) = _
     rw [initial_read]
     exact congrArg (fun v => some (encodeSlot v)) (encode_right x hx i j)
 
@@ -187,13 +188,13 @@ theorem finish_correct (x : MatMul.Input) (hx : MatMul.AllowedInput x) (s : Stat
 
 /-- Abstract the finite program before composing the runner. This keeps the
 kernel proof independent of the size of the expanded matrix schedule. -/
-theorem run_complete {instructions : List BoundedInstruction} {s final : State C}
+theorem run_complete {instructions : List BoundedInstruction} {s final : State c}
     (hex : Executes instructions s final) (ticks : Nat) (ht : duration instructions = ticks) :
-    ∃ counts, run false ticks 0 (timed 0 instructions) s (Counters.empty C) [] =
+    ∃ counts, run false ticks 0 (timed 0 instructions) s (Counters.empty c) [] =
       .finished ⟨ticks - 1, final, counts, []⟩ := by
-  obtain ⟨counts, hr⟩ := run_serial hex 0 0 [] (by intro a ha; cases ha) (Counters.empty C)
+  obtain ⟨counts, hr⟩ := run_serial hex 0 0 [] (by intro a ha; cases ha) (Counters.empty c)
   refine ⟨counts, ?_⟩
-  have hr' : run false ticks 0 (timed 0 instructions) s (Counters.empty C) [] =
+  have hr' : run false ticks 0 (timed 0 instructions) s (Counters.empty c) [] =
       run false 0 ticks [] final counts [] := by
     simpa only [ht, Nat.zero_add, Nat.add_zero, List.append_nil] using hr
   rw [hr', run_finished false 0 ticks final counts [] (quiet_drained (executes_quiet hex))]
@@ -247,13 +248,13 @@ def verified : VerifiedCandidate MatMul.adapter where
 The entry and initialization proofs above are timing-independent (`Executes`);
 only the runner composition changes, to `Serial.run_tight_complete`. -/
 
-theorem finish_correct_v2 (x : MatMul.Input) (hx : MatMul.AllowedInput x) (s : State C)
+theorem finish_correct_v2_for (c : ValidConfig) (x : MatMul.Input) (hx : MatMul.AllowedInput x) (s : State c)
     (counts : Counters) (cycles : Nat)
     (ho : ∀ i, s.readMemory (outputAddress i) = some (encodeSlot (resultValue x hx i))) :
-    ∃ record, finish candidateV2 ⟨cycles, s, counts, []⟩ = .success record ∧
+    ∃ record, finish (candidateV2For c) ⟨cycles, s, counts, []⟩ = .success record ∧
       record.outputs = (MatMul.adapter.outputScalars (MatMul.reference x)).toList ∧
       record.cycles = cycles := by
-  have hl : candidateV2.layout = layout := rfl
+  have hl : (candidateV2For c).layout = layout := rfl
   have hm : (layout.outputs.filter (fun a => (s.readMemory a).isNone)) = [] := by
     apply List.filter_eq_nil_iff.mpr
     intro a ha
@@ -272,20 +273,34 @@ theorem finish_correct_v2 (x : MatMul.Input) (hx : MatMul.AllowedInput x) (s : S
   exact ⟨_, rfl, hout, rfl⟩
 
 /-- All-input execution of the exact v2 artifact: 21,504 elapsed cycles. -/
+theorem execution_correct_v2_for (c : ValidConfig) (x : MatMul.Input) (hx : MatMul.AllowedInput x) :
+    ∃ record, executeValues (candidateV2For c) (MatMul.adapter.encode x hx) 21505 false = .success record ∧
+      record.outputs = (MatMul.adapter.outputScalars (MatMul.reference x)).toList ∧
+      record.cycles = 21504 := by
+  let initial := initialState c layout (MatMul.adapter.encode x hx)
+  obtain ⟨final, hex, _, ho⟩ := entries_executes x hx initial (initial_quiet _) (initial_inputs x hx) 256 (by omega)
+  obtain ⟨counts, hr⟩ := run_tight_complete hex 21504 (entries_tightDuration 256 (by omega)) (by decide)
+  have hrun : run false 21505 0 (program (candidateV2For c)) initial (Counters.empty c) [] =
+      .finished ⟨21504, final, counts, []⟩ := by
+    rw [candidateV2For_program]
+    exact hr
+  obtain ⟨record, hf, hout, ht⟩ := finish_correct_v2_for c x hx final counts 21504 (fun i => ho i i.isLt)
+  refine ⟨record, ?_, hout, ht⟩
+  exact execute_of_finished (candidateV2For c) _ _ _ _ hrun hf
+
+theorem finish_correct_v2 (x : MatMul.Input) (hx : MatMul.AllowedInput x) (s : State C)
+    (counts : Counters) (cycles : Nat)
+    (ho : ∀ i, s.readMemory (outputAddress i) = some (encodeSlot (resultValue x hx i))) :
+    ∃ record, finish candidateV2 ⟨cycles, s, counts, []⟩ = .success record ∧
+      record.outputs = (MatMul.adapter.outputScalars (MatMul.reference x)).toList ∧
+      record.cycles = cycles :=
+  finish_correct_v2_for C x hx s counts cycles ho
+
 theorem execution_correct_v2 (x : MatMul.Input) (hx : MatMul.AllowedInput x) :
     ∃ record, executeValues candidateV2 (MatMul.adapter.encode x hx) 21505 false = .success record ∧
       record.outputs = (MatMul.adapter.outputScalars (MatMul.reference x)).toList ∧
-      record.cycles = 21504 := by
-  let initial := initialState C layout (MatMul.adapter.encode x hx)
-  obtain ⟨final, hex, _, ho⟩ := entries_executes x hx initial (initial_quiet _) (initial_inputs x hx) 256 (by omega)
-  obtain ⟨counts, hr⟩ := run_tight_complete hex 21504 (entries_tightDuration 256 (by omega)) (by decide)
-  have hrun : run false 21505 0 (program candidateV2) initial (Counters.empty C) [] =
-      .finished ⟨21504, final, counts, []⟩ := by
-    rw [candidateV2_program]
-    exact hr
-  obtain ⟨record, hf, hout, ht⟩ := finish_correct_v2 x hx final counts 21504 (fun i => ho i i.isLt)
-  refine ⟨record, ?_, hout, ht⟩
-  exact execute_of_finished candidateV2 _ _ _ _ hrun hf
+      record.cycles = 21504 :=
+  execution_correct_v2_for C x hx
 
 def verifiedV2 : VerifiedCandidate MatMul.adapter where
   candidate := candidateV2
@@ -297,6 +312,20 @@ def verifiedV2 : VerifiedCandidate MatMul.adapter where
   correctness := by
     intro x hx record he
     obtain ⟨expected, hh, ho, _⟩ := execution_correct_v2 x hx
+    have hr : expected = record := ExecutionOutcome.success.inj (hh.symm.trans he)
+    subst record
+    exact ho
+
+def verifiedV2For (c : ValidConfig) : VerifiedCandidate MatMul.adapter where
+  candidate := candidateV2For c
+  sufficientBoundaries := 21505
+  safety := by
+    intro x hx
+    obtain ⟨record, he, _, _⟩ := execution_correct_v2_for c x hx
+    exact ⟨record, he⟩
+  correctness := by
+    intro x hx record he
+    obtain ⟨expected, hh, ho, _⟩ := execution_correct_v2_for c x hx
     have hr : expected = record := ExecutionOutcome.success.inj (hh.symm.trans he)
     subst record
     exact ho

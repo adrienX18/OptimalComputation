@@ -78,7 +78,8 @@ private def candidateFiles : IO Unit := do
     checkCLI "candidate JSON value round trip" ((RawCandidate.fromJson? raw.toJson).toOption == some raw)
     checkCLI "candidate file round trip" ((parseCandidate raw.toJson.compress).toOption == some raw)
     checkCLI "pretty candidate file round trip" ((parseCandidate raw.toJson.pretty).toOption == some raw)
-    let exported ← response ["export-candidate", raw.identifier]
+    let exported ← response ["export-candidate", raw.identifier, "--configuration",
+      s!"{raw.configuration.lanes},{raw.configuration.banks}"]
     checkCLI "export prints the registered candidate" ((RawCandidate.fromJson? exported).toOption == some raw)
   checkCLI "minimal candidate file accepted" (parseCandidate candidateText).toOption.isSome
   checkCLI "digits and exponent letters inside strings accepted"
@@ -172,9 +173,9 @@ def cli : IO Unit := do
   rejects ["evaluate", "tiny-multiply-v1", "--fixture", "missing"] "unknown-fixture"
   rejects ["evaluate", "tiny-multiply-v1", "--budget", "6"] "resource-exhausted"
   let workloads ← response ["list-workloads", "--json"]
-  checkCLI "four workloads" (((workloads.getObjValAs? (Array Json) "workloads").toOption.map Array.size) == some 4)
+  checkCLI "seven workloads" (((workloads.getObjValAs? (Array Json) "workloads").toOption.map Array.size) == some 7)
   let candidates ← response ["list-candidates", "--json"]
-  checkCLI "seven candidates" (((candidates.getObjValAs? (Array Json) "candidates").toOption.map Array.size) == some 7)
+  checkCLI "71 configured candidates" (((candidates.getObjValAs? (Array Json) "candidates").toOption.map Array.size) == some 71)
   let objectives ← response ["list-objectives", "--json"]
   checkCLI "two objectives" (((objectives.getObjValAs? (Array Json) "objectives").toOption.map Array.size) == some 2)
   for (id, cycles, energyCost) in [("tiny-multiply-v1", 6, 86), ("matvec-naive-v1", 2143, 59607),
@@ -208,6 +209,6 @@ def cli : IO Unit := do
   checkCLI "workload domain reported" ((failureError badInput).category == "invalid-input")
   candidateFiles
   failureReports
-  IO.println "PASS: CLI catalogs, parsing, structured failures, seven candidates, both objectives, complete trace binding and candidate files"
+  IO.println "PASS: CLI catalogs, parsing, structured failures, 71 configured candidates, both objectives, complete trace binding and candidate files"
 
 end OptimalComputation.Tests
