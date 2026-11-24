@@ -1,0 +1,33 @@
+{
+  "status": "prepared-not-launched",
+  "directory": "runs/suite-full-ready-20261123",
+  "revision": "f158b9a39cfabdcf3c33ab8258128d3879208b7a",
+  "manifestSha256": "5d8104edcfa7fcb2421e75fd2d96eecd587868f8fc993cbe4ed77f78c08eaa74",
+  "inventorySha256": "7f8f0d51cc9feb27f39eccb89949fd3d462cb6bb42c38cf47cd8508077c7914b",
+  "plannedRuns": 400,
+  "plannedAttempts": 20000,
+  "completedAttempts": 0,
+  "concurrency": 5,
+  "requiresUserGo": true,
+  "inventoryVerified": true,
+  "inventoryFiles": 514,
+  "sourceDifferencesFromSmoke": [
+    "scripts/audit-search-batch.py",
+    "scripts/check-search-batch.py"
+  ],
+  "sourceDifferenceReason": "Only the archive auditor and its tests changed after the smoke; search, generation, simulation, certification and scoring sources are identical.",
+  "supersededPreparedPlan": {
+    "status": "prepared-not-launched",
+    "directory": "runs/suite-full-20261123",
+    "revision": "ec5f9ffa13c91b61b5035d50ce72a41e0df8f684",
+    "manifestSha256": "d754554863dc4e7250fc73499735c9819a845fa10fc36e35caa89ad174cf19c0",
+    "inventorySha256": "5fcb6c34f7f739d7c838b6cdd64ab53acaab8363c88b67fd13114e5d74c31258",
+    "plannedRuns": 400,
+    "plannedAttempts": 20000,
+    "completedAttempts": 0,
+    "concurrency": 5,
+    "requiresUserGo": true,
+    "inventoryVerified": true,
+    "inventoryFiles": 514
+  }
+}

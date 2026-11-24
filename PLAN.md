@@ -487,6 +487,6 @@ are authorized; the full campaign requires the user's next go.
 - [x] Extend the existing batch runner with explicit named instances.
 - [x] Make the energy formula and configuration freedom explicit in prompts.
 - [x] Complete offline end-to-end checks across the 16 instances.
-- [ ] Complete and audit three live attempts per instance/model (80 loops / 240 attempts).
-- [ ] Save the full campaign manifest without launching it.
+- [x] Complete and audit three scheduled slots per instance/model (80 loops / 240 slots: 236 finished attempts and 4 interrupted slots preserved during recovery).
+- [x] Save the full campaign manifest without launching it.
 - [ ] Launch the full campaign only after the user's next go.

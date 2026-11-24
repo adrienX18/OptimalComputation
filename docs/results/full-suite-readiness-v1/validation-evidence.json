@@ -14,5 +14,9 @@
   "historical-archive-audit.json": {
     "path": "runs/suite-readiness-checks-20261123/historical-archive-audit.json",
     "sha256": "ac522fb3515e3ae2e1ac80409a224103d034b7f9da7215c0fc823ee18b18472b"
+  },
+  "batch-audit-recovery.log": {
+    "path": "runs/suite-readiness-checks-20261123/batch-audit-recovery.log",
+    "sha256": "2ef1977ef8ca0eeeda02470a179600654ab90a42e4307a5d07a59d4c0923e017"
   }
 }

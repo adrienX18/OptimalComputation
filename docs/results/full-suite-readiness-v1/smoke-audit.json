@@ -1,0 +1,1266 @@
+{
+  "version": "search-batch-audit-v1",
+  "archive": "suite-smoke-20261123",
+  "manifestSha256": "27dca0a9680dd7d2f3995b3ae1ed37ce498b341a6b796dd660ac59085de9bf0a",
+  "inventorySha256": "478124c2a59291645e8e0f90d99440f18ba635c226c393f5717574f8d3e5605b",
+  "inventoryFiles": 28001,
+  "inventoryBytes": 1053272112,
+  "completedRuns": 80,
+  "completedAttempts": 240,
+  "categories": {
+    "certified": 182,
+    "simulation-failed": 14,
+    "proposal-error": 30,
+    "kernel-timeout": 1,
+    "api-error": 3,
+    "range-not-proved": 6,
+    "interrupted": 4
+  },
+  "runs": [
+    {
+      "instance": "matmul-latency-8x8",
+      "model": "fable",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "certified": 2,
+        "simulation-failed": 1
+      },
+      "baseline": 21504,
+      "best": 986,
+      "unit": "cycles",
+      "maxPromptBytes": 15692
+    },
+    {
+      "instance": "matmul-latency-8x8",
+      "model": "opus",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 1,
+      "categories": {
+        "proposal-error": 2,
+        "certified": 1
+      },
+      "baseline": 21504,
+      "best": 1052,
+      "unit": "cycles",
+      "maxPromptBytes": 9524
+    },
+    {
+      "instance": "matmul-latency-8x8",
+      "model": "sonnet",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "certified": 2,
+        "kernel-timeout": 1
+      },
+      "baseline": 21504,
+      "best": 1071,
+      "unit": "cycles",
+      "maxPromptBytes": 13887
+    },
+    {
+      "instance": "matmul-latency-8x8",
+      "model": "astra",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 21504,
+      "best": 933,
+      "unit": "cycles",
+      "maxPromptBytes": 13758
+    },
+    {
+      "instance": "matmul-latency-8x8",
+      "model": "sol",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 21504,
+      "best": 961,
+      "unit": "cycles",
+      "maxPromptBytes": 15501
+    },
+    {
+      "instance": "matmul-latency-8x1",
+      "model": "fable",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 21504,
+      "best": 1508,
+      "unit": "cycles",
+      "maxPromptBytes": 18848
+    },
+    {
+      "instance": "matmul-latency-8x1",
+      "model": "opus",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 21504,
+      "best": 1520,
+      "unit": "cycles",
+      "maxPromptBytes": 16531
+    },
+    {
+      "instance": "matmul-latency-8x1",
+      "model": "sonnet",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 21504,
+      "best": 1663,
+      "unit": "cycles",
+      "maxPromptBytes": 12824
+    },
+    {
+      "instance": "matmul-latency-8x1",
+      "model": "astra",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 21504,
+      "best": 1479,
+      "unit": "cycles",
+      "maxPromptBytes": 12021
+    },
+    {
+      "instance": "matmul-latency-8x1",
+      "model": "sol",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "certified": 2,
+        "proposal-error": 1
+      },
+      "baseline": 21504,
+      "best": 1517,
+      "unit": "cycles",
+      "maxPromptBytes": 17813
+    },
+    {
+      "instance": "matmul-latency-2x8",
+      "model": "fable",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 21504,
+      "best": 3723,
+      "unit": "cycles",
+      "maxPromptBytes": 15369
+    },
+    {
+      "instance": "matmul-latency-2x8",
+      "model": "opus",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 0,
+      "categories": {
+        "proposal-error": 2,
+        "simulation-failed": 1
+      },
+      "baseline": 21504,
+      "best": 21504,
+      "unit": "cycles",
+      "maxPromptBytes": 9530
+    },
+    {
+      "instance": "matmul-latency-2x8",
+      "model": "sonnet",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "certified": 2,
+        "proposal-error": 1
+      },
+      "baseline": 21504,
+      "best": 5120,
+      "unit": "cycles",
+      "maxPromptBytes": 12581
+    },
+    {
+      "instance": "matmul-latency-2x8",
+      "model": "astra",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 21504,
+      "best": 3808,
+      "unit": "cycles",
+      "maxPromptBytes": 12211
+    },
+    {
+      "instance": "matmul-latency-2x8",
+      "model": "sol",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 1,
+      "categories": {
+        "certified": 1,
+        "proposal-error": 2
+      },
+      "baseline": 21504,
+      "best": 3990,
+      "unit": "cycles",
+      "maxPromptBytes": 17448
+    },
+    {
+      "instance": "matmul-energy",
+      "model": "fable",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 634112,
+      "best": 85787,
+      "unit": "abstract energy units",
+      "maxPromptBytes": 25238
+    },
+    {
+      "instance": "matmul-energy",
+      "model": "opus",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 0,
+      "categories": {
+        "proposal-error": 3
+      },
+      "baseline": 634112,
+      "best": 634112,
+      "unit": "abstract energy units",
+      "maxPromptBytes": 11212
+    },
+    {
+      "instance": "matmul-energy",
+      "model": "sonnet",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "certified": 2,
+        "simulation-failed": 1
+      },
+      "baseline": 634112,
+      "best": 94912,
+      "unit": "abstract energy units",
+      "maxPromptBytes": 15613
+    },
+    {
+      "instance": "matmul-energy",
+      "model": "astra",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 634112,
+      "best": 86048,
+      "unit": "abstract energy units",
+      "maxPromptBytes": 15211
+    },
+    {
+      "instance": "matmul-energy",
+      "model": "sol",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "certified": 2,
+        "proposal-error": 1
+      },
+      "baseline": 634112,
+      "best": 84773,
+      "unit": "abstract energy units",
+      "maxPromptBytes": 17235
+    },
+    {
+      "instance": "polynomial-latency-8x8",
+      "model": "fable",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 2,
+      "certified": 2,
+      "categories": {
+        "api-error": 1,
+        "certified": 2
+      },
+      "baseline": 1520,
+      "best": 35,
+      "unit": "cycles",
+      "maxPromptBytes": 11550
+    },
+    {
+      "instance": "polynomial-latency-8x8",
+      "model": "opus",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "certified": 2,
+        "proposal-error": 1
+      },
+      "baseline": 1520,
+      "best": 35,
+      "unit": "cycles",
+      "maxPromptBytes": 11836
+    },
+    {
+      "instance": "polynomial-latency-8x8",
+      "model": "sonnet",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 1,
+      "categories": {
+        "range-not-proved": 1,
+        "simulation-failed": 1,
+        "certified": 1
+      },
+      "baseline": 1520,
+      "best": 42,
+      "unit": "cycles",
+      "maxPromptBytes": 10590
+    },
+    {
+      "instance": "polynomial-latency-8x8",
+      "model": "astra",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 1520,
+      "best": 30,
+      "unit": "cycles",
+      "maxPromptBytes": 10566
+    },
+    {
+      "instance": "polynomial-latency-8x8",
+      "model": "sol",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 1,
+      "categories": {
+        "certified": 1,
+        "simulation-failed": 2
+      },
+      "baseline": 1520,
+      "best": 30,
+      "unit": "cycles",
+      "maxPromptBytes": 10629
+    },
+    {
+      "instance": "polynomial-latency-8x1",
+      "model": "fable",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 1520,
+      "best": 46,
+      "unit": "cycles",
+      "maxPromptBytes": 14005
+    },
+    {
+      "instance": "polynomial-latency-8x1",
+      "model": "opus",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "certified": 2,
+        "proposal-error": 1
+      },
+      "baseline": 1520,
+      "best": 51,
+      "unit": "cycles",
+      "maxPromptBytes": 14812
+    },
+    {
+      "instance": "polynomial-latency-8x1",
+      "model": "sonnet",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 1,
+      "categories": {
+        "range-not-proved": 1,
+        "certified": 1,
+        "proposal-error": 1
+      },
+      "baseline": 1520,
+      "best": 63,
+      "unit": "cycles",
+      "maxPromptBytes": 10886
+    },
+    {
+      "instance": "polynomial-latency-8x1",
+      "model": "astra",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "certified": 2,
+        "range-not-proved": 1
+      },
+      "baseline": 1520,
+      "best": 46,
+      "unit": "cycles",
+      "maxPromptBytes": 10323
+    },
+    {
+      "instance": "polynomial-latency-8x1",
+      "model": "sol",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "certified": 2,
+        "proposal-error": 1
+      },
+      "baseline": 1520,
+      "best": 51,
+      "unit": "cycles",
+      "maxPromptBytes": 15733
+    },
+    {
+      "instance": "polynomial-latency-2x8",
+      "model": "fable",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 1520,
+      "best": 90,
+      "unit": "cycles",
+      "maxPromptBytes": 18105
+    },
+    {
+      "instance": "polynomial-latency-2x8",
+      "model": "opus",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "simulation-failed": 1,
+        "certified": 2
+      },
+      "baseline": 1520,
+      "best": 104,
+      "unit": "cycles",
+      "maxPromptBytes": 11719
+    },
+    {
+      "instance": "polynomial-latency-2x8",
+      "model": "sonnet",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "range-not-proved": 1,
+        "certified": 2
+      },
+      "baseline": 1520,
+      "best": 114,
+      "unit": "cycles",
+      "maxPromptBytes": 9267
+    },
+    {
+      "instance": "polynomial-latency-2x8",
+      "model": "astra",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 1520,
+      "best": 88,
+      "unit": "cycles",
+      "maxPromptBytes": 10756
+    },
+    {
+      "instance": "polynomial-latency-2x8",
+      "model": "sol",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "certified": 2,
+        "proposal-error": 1
+      },
+      "baseline": 1520,
+      "best": 88,
+      "unit": "cycles",
+      "maxPromptBytes": 13456
+    },
+    {
+      "instance": "polynomial-energy",
+      "model": "fable",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 44128,
+      "best": 2576,
+      "unit": "abstract energy units",
+      "maxPromptBytes": 15363
+    },
+    {
+      "instance": "polynomial-energy",
+      "model": "opus",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 44128,
+      "best": 2576,
+      "unit": "abstract energy units",
+      "maxPromptBytes": 13841
+    },
+    {
+      "instance": "polynomial-energy",
+      "model": "sonnet",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 1,
+      "categories": {
+        "range-not-proved": 1,
+        "certified": 1,
+        "simulation-failed": 1
+      },
+      "baseline": 44128,
+      "best": 3087,
+      "unit": "abstract energy units",
+      "maxPromptBytes": 11756
+    },
+    {
+      "instance": "polynomial-energy",
+      "model": "astra",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 44128,
+      "best": 2576,
+      "unit": "abstract energy units",
+      "maxPromptBytes": 12984
+    },
+    {
+      "instance": "polynomial-energy",
+      "model": "sol",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "range-not-proved": 1,
+        "certified": 2
+      },
+      "baseline": 44128,
+      "best": 2576,
+      "unit": "abstract energy units",
+      "maxPromptBytes": 16107
+    },
+    {
+      "instance": "gram-latency-8x8",
+      "model": "fable",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 22016,
+      "best": 484,
+      "unit": "cycles",
+      "maxPromptBytes": 17250
+    },
+    {
+      "instance": "gram-latency-8x8",
+      "model": "opus",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 1,
+      "categories": {
+        "certified": 1,
+        "proposal-error": 2
+      },
+      "baseline": 22016,
+      "best": 662,
+      "unit": "cycles",
+      "maxPromptBytes": 15848
+    },
+    {
+      "instance": "gram-latency-8x8",
+      "model": "sonnet",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 22016,
+      "best": 638,
+      "unit": "cycles",
+      "maxPromptBytes": 13897
+    },
+    {
+      "instance": "gram-latency-8x8",
+      "model": "astra",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 22016,
+      "best": 478,
+      "unit": "cycles",
+      "maxPromptBytes": 14270
+    },
+    {
+      "instance": "gram-latency-8x8",
+      "model": "sol",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "certified": 2,
+        "simulation-failed": 1
+      },
+      "baseline": 22016,
+      "best": 500,
+      "unit": "cycles",
+      "maxPromptBytes": 24987
+    },
+    {
+      "instance": "gram-latency-8x1",
+      "model": "fable",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 22016,
+      "best": 760,
+      "unit": "cycles",
+      "maxPromptBytes": 21182
+    },
+    {
+      "instance": "gram-latency-8x1",
+      "model": "opus",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 22016,
+      "best": 771,
+      "unit": "cycles",
+      "maxPromptBytes": 20060
+    },
+    {
+      "instance": "gram-latency-8x1",
+      "model": "sonnet",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 22016,
+      "best": 950,
+      "unit": "cycles",
+      "maxPromptBytes": 13658
+    },
+    {
+      "instance": "gram-latency-8x1",
+      "model": "astra",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 22016,
+      "best": 689,
+      "unit": "cycles",
+      "maxPromptBytes": 13611
+    },
+    {
+      "instance": "gram-latency-8x1",
+      "model": "sol",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 1,
+      "categories": {
+        "certified": 1,
+        "proposal-error": 2
+      },
+      "baseline": 22016,
+      "best": 721,
+      "unit": "cycles",
+      "maxPromptBytes": 17762
+    },
+    {
+      "instance": "gram-latency-2x8",
+      "model": "fable",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 2,
+      "certified": 2,
+      "categories": {
+        "certified": 2,
+        "api-error": 1
+      },
+      "baseline": 22016,
+      "best": 1942,
+      "unit": "cycles",
+      "maxPromptBytes": 15857
+    },
+    {
+      "instance": "gram-latency-2x8",
+      "model": "opus",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 0,
+      "categories": {
+        "proposal-error": 2,
+        "simulation-failed": 1
+      },
+      "baseline": 22016,
+      "best": 22016,
+      "unit": "cycles",
+      "maxPromptBytes": 9469
+    },
+    {
+      "instance": "gram-latency-2x8",
+      "model": "sonnet",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 22016,
+      "best": 2668,
+      "unit": "cycles",
+      "maxPromptBytes": 12734
+    },
+    {
+      "instance": "gram-latency-2x8",
+      "model": "astra",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 22016,
+      "best": 1914,
+      "unit": "cycles",
+      "maxPromptBytes": 12944
+    },
+    {
+      "instance": "gram-latency-2x8",
+      "model": "sol",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "certified": 2,
+        "proposal-error": 1
+      },
+      "baseline": 22016,
+      "best": 1918,
+      "unit": "cycles",
+      "maxPromptBytes": 12990
+    },
+    {
+      "instance": "gram-energy",
+      "model": "fable",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 649472,
+      "best": 44623,
+      "unit": "abstract energy units",
+      "maxPromptBytes": 18326
+    },
+    {
+      "instance": "gram-energy",
+      "model": "opus",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 1,
+      "categories": {
+        "certified": 1,
+        "proposal-error": 2
+      },
+      "baseline": 649472,
+      "best": 46015,
+      "unit": "abstract energy units",
+      "maxPromptBytes": 16982
+    },
+    {
+      "instance": "gram-energy",
+      "model": "sonnet",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "simulation-failed": 1,
+        "certified": 2
+      },
+      "baseline": 649472,
+      "best": 92432,
+      "unit": "abstract energy units",
+      "maxPromptBytes": 13369
+    },
+    {
+      "instance": "gram-energy",
+      "model": "astra",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 649472,
+      "best": 44507,
+      "unit": "abstract energy units",
+      "maxPromptBytes": 15736
+    },
+    {
+      "instance": "gram-energy",
+      "model": "sol",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "certified": 2,
+        "proposal-error": 1
+      },
+      "baseline": 649472,
+      "best": 44014,
+      "unit": "abstract energy units",
+      "maxPromptBytes": 17435
+    },
+    {
+      "instance": "two-stage-latency-8x8",
+      "model": "fable",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 2720,
+      "best": 164,
+      "unit": "cycles",
+      "maxPromptBytes": 13116
+    },
+    {
+      "instance": "two-stage-latency-8x8",
+      "model": "opus",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "certified": 2,
+        "proposal-error": 1
+      },
+      "baseline": 2720,
+      "best": 171,
+      "unit": "cycles",
+      "maxPromptBytes": 14708
+    },
+    {
+      "instance": "two-stage-latency-8x8",
+      "model": "sonnet",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 2720,
+      "best": 204,
+      "unit": "cycles",
+      "maxPromptBytes": 11295
+    },
+    {
+      "instance": "two-stage-latency-8x8",
+      "model": "astra",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 2720,
+      "best": 164,
+      "unit": "cycles",
+      "maxPromptBytes": 10404
+    },
+    {
+      "instance": "two-stage-latency-8x8",
+      "model": "sol",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 2720,
+      "best": 162,
+      "unit": "cycles",
+      "maxPromptBytes": 11696
+    },
+    {
+      "instance": "two-stage-latency-8x1",
+      "model": "fable",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 2720,
+      "best": 328,
+      "unit": "cycles",
+      "maxPromptBytes": 13658
+    },
+    {
+      "instance": "two-stage-latency-8x1",
+      "model": "opus",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 2720,
+      "best": 348,
+      "unit": "cycles",
+      "maxPromptBytes": 14642
+    },
+    {
+      "instance": "two-stage-latency-8x1",
+      "model": "sonnet",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "certified": 2,
+        "simulation-failed": 1
+      },
+      "baseline": 2720,
+      "best": 400,
+      "unit": "cycles",
+      "maxPromptBytes": 14397
+    },
+    {
+      "instance": "two-stage-latency-8x1",
+      "model": "astra",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 2720,
+      "best": 328,
+      "unit": "cycles",
+      "maxPromptBytes": 10588
+    },
+    {
+      "instance": "two-stage-latency-8x1",
+      "model": "sol",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 2720,
+      "best": 328,
+      "unit": "cycles",
+      "maxPromptBytes": 19086
+    },
+    {
+      "instance": "two-stage-latency-2x8",
+      "model": "fable",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 2720,
+      "best": 562,
+      "unit": "cycles",
+      "maxPromptBytes": 13820
+    },
+    {
+      "instance": "two-stage-latency-2x8",
+      "model": "opus",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 1,
+      "categories": {
+        "certified": 1,
+        "proposal-error": 1,
+        "interrupted": 1
+      },
+      "baseline": 2720,
+      "best": 581,
+      "unit": "cycles",
+      "maxPromptBytes": 14263
+    },
+    {
+      "instance": "two-stage-latency-2x8",
+      "model": "sonnet",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "simulation-failed": 1,
+        "certified": 2
+      },
+      "baseline": 2720,
+      "best": 592,
+      "unit": "cycles",
+      "maxPromptBytes": 11063
+    },
+    {
+      "instance": "two-stage-latency-2x8",
+      "model": "astra",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "certified": 2,
+        "interrupted": 1
+      },
+      "baseline": 2720,
+      "best": 555,
+      "unit": "cycles",
+      "maxPromptBytes": 12885
+    },
+    {
+      "instance": "two-stage-latency-2x8",
+      "model": "sol",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "interrupted": 1,
+        "certified": 2
+      },
+      "baseline": 2720,
+      "best": 555,
+      "unit": "cycles",
+      "maxPromptBytes": 11883
+    },
+    {
+      "instance": "two-stage-energy",
+      "model": "fable",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 2,
+      "certified": 2,
+      "categories": {
+        "interrupted": 1,
+        "certified": 2
+      },
+      "baseline": 80224,
+      "best": 13381,
+      "unit": "abstract energy units",
+      "maxPromptBytes": 16053
+    },
+    {
+      "instance": "two-stage-energy",
+      "model": "opus",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 2,
+      "certified": 1,
+      "categories": {
+        "proposal-error": 1,
+        "certified": 1,
+        "api-error": 1
+      },
+      "baseline": 80224,
+      "best": 14657,
+      "unit": "abstract energy units",
+      "maxPromptBytes": 14673
+    },
+    {
+      "instance": "two-stage-energy",
+      "model": "sonnet",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 2,
+      "categories": {
+        "certified": 2,
+        "simulation-failed": 1
+      },
+      "baseline": 80224,
+      "best": 14722,
+      "unit": "abstract energy units",
+      "maxPromptBytes": 14404
+    },
+    {
+      "instance": "two-stage-energy",
+      "model": "astra",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 80224,
+      "best": 13300,
+      "unit": "abstract energy units",
+      "maxPromptBytes": 12895
+    },
+    {
+      "instance": "two-stage-energy",
+      "model": "sol",
+      "seed": 11,
+      "attempts": 3,
+      "responses": 3,
+      "certified": 3,
+      "categories": {
+        "certified": 3
+      },
+      "baseline": 80224,
+      "best": 12827,
+      "unit": "abstract energy units",
+      "maxPromptBytes": 14568
+    }
+  ]
+}

@@ -154,6 +154,9 @@ other loops continue. The batch reports incomplete and exits nonzero if any
 loop stops early. It never silently adds paid retries to reach 50 successes.
 Providing `--config` without `--smoke` or `--prepare-only` starts a full batch
 immediately; use the prepare/resume pair when staging an experiment.
+For long runs, detach the launcher and redirect its input/output away from the
+interactive terminal. Keep the console log outside the batch archive so it does
+not invalidate the final inventory; see the [prepared launch handoff](../HANDOFF.md).
 
 Each batch saves a manifest with its exact matrix, configurations, source hashes,
 Python version and Git revision, plus a source snapshot and working-tree patch.
@@ -189,6 +192,9 @@ Names become directories under `runs/<instance>/<model>/seed-<seed>/`. The manif
 summary and attempt CSV retain the instance and objective, so unlike units are
 never implicitly pooled into one best score. Older single-case configurations
 continue to work with their original directory layout.
+The batch table's `configuration` identifies the case's initial configuration;
+for energy cases, read each accepted attempt's `score.json` for the actual
+candidate hardware, which may differ from that baseline.
 
 Test three attempts for every case/model using the first seed (80 loops, 240 calls
 at most), then audit the complete archive:
@@ -222,6 +228,11 @@ sampled, shortened or discarded. The archive auditor checks both stored-file
 hashes and the decompressed trace hashes. This matters for matrix workloads,
 where retaining both copies would multiply disk use. Read a trace with
 `gzip -dc path/to/trace.json.gz`; older archives retain their original format.
+The auditor accepts partial metadata only for explicitly interrupted slots,
+validates every available request/response, and keeps their incumbent unchanged.
+These slots are censored observations and must not be counted as incorrect designs.
+Finished attempts still require their complete request, randomness and response
+or API-error records.
 
 `check-search-suite.py --output <new-directory>` runs all sixteen cases through
 real Docker generation, simulation, certification and scoring using known
