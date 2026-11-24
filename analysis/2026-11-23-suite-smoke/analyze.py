@@ -20,7 +20,7 @@ def read(path):
 
 def write_csv(path, rows):
     with path.open('w', newline='') as stream:
-        writer = csv.DictWriter(stream, list(rows[0]))
+        writer = csv.DictWriter(stream, list(rows[0]), lineterminator='\n')
         writer.writeheader()
         writer.writerows(rows)
 

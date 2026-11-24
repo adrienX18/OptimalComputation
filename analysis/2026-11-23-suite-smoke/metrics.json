@@ -96,9 +96,9 @@
   },
   "uncertainty": "One seed per case/model. Descriptive census only; no confidence intervals or significance tests. Cases are not exchangeable repeats.",
   "source_tables": {
-    "runs.csv": "ffda7cda850f155f86b983a676685f527aa83f31f2140ca5ca2fc204705d6457",
-    "attempts.csv": "3f069d97aa876db00c9d2100c8798d56e3d599c0c95bd2b37ef99951acb63a4f",
-    "convergence.csv": "28b47236894e84f200c0b427b49716db5430b07459f0cbba2bb62b04064c4179",
-    "kernel-checks.csv": "4d1806cc05bb52aba8be48387242316a336f4791bf6a8ad7b59a8d89306c5884"
+    "runs.csv": "599047d4964b2e8f769f04d257ee2e510730ba6a67ddb8bc5a1a8b74c4db4109",
+    "attempts.csv": "1853edf57dadbfa066b8812324028412a8a4a72fb9ba020d3b02865e4f547543",
+    "convergence.csv": "24649d1c5fbffc7b3056df7fdfa5b80b8e1d488e6c6b2a7032c85adfb1f6edec",
+    "kernel-checks.csv": "841fbc271709076dbb718db709cce3b3d07a22ce70108ff9ce46319cfd7730eb"
   }
 }
