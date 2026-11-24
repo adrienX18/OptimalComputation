@@ -1,0 +1,126 @@
+{
+  "archive": "nightly-five-models-20261123",
+  "archive_inventory_sha256": "00f2bfcff7093edae48df8463227764fcc02cc43ebfa858de602a6030b7695d4",
+  "files": [
+    {
+      "file": "winner/request.json",
+      "source": "runs/sol/seed-11/attempts/0002/request.json",
+      "bytes": 11362,
+      "sha256": "b97ad69d565d0b33f2b8bad02c3ba161f5a16eec25483a29852b2be9f0fec078"
+    },
+    {
+      "file": "winner/response.json",
+      "source": "runs/sol/seed-11/attempts/0002/response.json",
+      "bytes": 11598,
+      "sha256": "fa55ef0bfbb98307d4edbde22d758f0e1ea630583292b1bce6c152bbee11ab18"
+    },
+    {
+      "file": "winner/proposal.json",
+      "source": "runs/sol/seed-11/attempts/0002/proposal.json",
+      "bytes": 8122,
+      "sha256": "c23322d2ccf7a990a07f4fd1b6f4cd03330a36821941e9c8e577b36ca8ac39ef"
+    },
+    {
+      "file": "winner/generator.py",
+      "source": "runs/sol/seed-11/attempts/0002/generator.py",
+      "bytes": 6988,
+      "sha256": "33b9bb1560f5fab5af53fa6899cbfc61db4f02100b6cef9e87806422d095380c"
+    },
+    {
+      "file": "winner/candidate.json",
+      "source": "runs/sol/seed-11/attempts/0002/candidate.json",
+      "bytes": 24743,
+      "sha256": "262fc34b8f94d64ec61e73630018aa03c98900fd0f3dcd7d4df971b3e60d7d67"
+    },
+    {
+      "file": "winner/score.json",
+      "source": "runs/sol/seed-11/attempts/0002/score.json",
+      "bytes": 2538,
+      "sha256": "90385a91c4ab5ba2b82c0a933a65a00345f28d33cd2986af582d32c315d9bc0b"
+    },
+    {
+      "file": "winner/feedback.json",
+      "source": "runs/sol/seed-11/attempts/0002/feedback.json",
+      "bytes": 608,
+      "sha256": "c0dc81f81fe97ff51c64472f15ef377ada082e4716adba29e99ebcac5dd5e37f"
+    },
+    {
+      "file": "winner/randomness.json",
+      "source": "runs/sol/seed-11/attempts/0002/randomness.json",
+      "bytes": 139,
+      "sha256": "d22f36732d3c25f763d2d240c4027509970f2939811bfad2b146198534f0ef01"
+    },
+    {
+      "file": "winner/certification/result.json",
+      "source": "runs/sol/seed-11/attempts/0002/certification/result.json",
+      "bytes": 3718,
+      "sha256": "94ab6560bf486c6454aefc86af43ebd4e16b0803528f62c4b12e6c4025aec4a2"
+    },
+    {
+      "file": "winner/certification/kernel/result.json",
+      "source": "runs/sol/seed-11/attempts/0002/certification/kernel/result.json",
+      "bytes": 78,
+      "sha256": "5c1abe1d745900885ba832b3816dfdf4471476bc9a41461d9858b9a441a026d7"
+    },
+    {
+      "file": "winner/provider-001-request.json",
+      "source": "runs/sol/seed-11/attempts/0002/provider-001-request.json",
+      "bytes": 23014,
+      "sha256": "d237e314e8fa022cb2fd2ee5d3ca25cf440a1f193aa59591ae5f5347b20fe762"
+    },
+    {
+      "file": "winner/provider-002-response.json",
+      "source": "runs/sol/seed-11/attempts/0002/provider-002-response.json",
+      "bytes": 20931,
+      "sha256": "a2670ba2ce560e4a010d7850802ff4f7af47e6d5b1ae93b7a905a92a6f23c565"
+    },
+    {
+      "file": "baseline/candidate.json",
+      "source": "runs/sol/seed-11/baseline/1795422312493666000/candidate.json",
+      "bytes": 152961,
+      "sha256": "53b59455785f790b7591bcfe1a5435c38472768f10b77a4e23d83369bc4675da"
+    },
+    {
+      "file": "baseline/score.json",
+      "source": "runs/sol/seed-11/baseline/1795422312493666000/score.json",
+      "bytes": 2535,
+      "sha256": "92636b658798cca1fc52699b474c68b1f4947ddec71bca5b6781fdbfff7315af"
+    },
+    {
+      "file": "baseline/generator.py",
+      "source": "runs/sol/seed-11/baseline/1795422312493666000/generator.py",
+      "bytes": 73,
+      "sha256": "61f2c087d145cf6425fb7339d53943d3217fe655a850ca5184b95afc8bfd29ab"
+    },
+    {
+      "file": "run-manifest.json",
+      "source": "runs/sol/seed-11/manifest.json",
+      "bytes": 13381,
+      "sha256": "ca43604411c68a455bc9703367a880f02bd1c4bac4a3398c02ecc966713c0b70"
+    },
+    {
+      "file": "run-summary.json",
+      "source": "runs/sol/seed-11/summary.json",
+      "bytes": 33825,
+      "sha256": "ea04c37522204742fdc55f5da93918027e2da9dc3e681f8d22bf7d4142dc92cf"
+    },
+    {
+      "file": "prompt-at-run.py",
+      "source": "source/scripts/harness/prompt.py",
+      "bytes": 5376,
+      "sha256": "60a732ab2bba461ea1f6a50b9f8c65288ea8fcf3c9af6fe4df174fc821c3b64f"
+    },
+    {
+      "file": "previous-feedback.json",
+      "source": "runs/sol/seed-11/attempts/0001/feedback.json",
+      "bytes": 589,
+      "sha256": "1084657ef40fe1ff68d225a11740a28a3cd503a93aeee0e104bf41fdb6d97670"
+    },
+    {
+      "file": "next-request.json",
+      "source": "runs/sol/seed-11/attempts/0003/request.json",
+      "bytes": 14833,
+      "sha256": "25a016497429ad1dc15b39f0c5c59ffb7164ce217816a7b3e15e9321e5269fe4"
+    }
+  ]
+}

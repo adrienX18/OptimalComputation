@@ -126,7 +126,7 @@ assert not any(row['overlappingLegends'] for row in layout),layout
 
 report=(ROOT/'report.md').read_text()
 images=re.findall(r'!\[[^\]]*\]\(([^)]+)\)',report)
-assert len(images)==10 and len(set(images))==10
+assert len(images)==12 and len(set(images))==12
 for name in ['report.md','figure-methods.md']:
     for link in re.findall(r'\]\(([^)]+)\)',(ROOT/name).read_text()):
         if not link.startswith(('https://','http://','#')):

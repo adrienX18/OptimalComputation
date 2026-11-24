@@ -1,0 +1,88 @@
+{
+  "id": "chatcmpl-EnXHZw9UJJf943lC0h6rooNho7MzS",
+  "created": 1795474717,
+  "model": "gpt-6.2-astra",
+  "object": "chat.completion",
+  "system_fingerprint": null,
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "{\n\"idea\":\"Amortize the load/writeback transition over multiple columns: try periodic templates with unequal gaps between load bursts, and use spare registers to extend selected operand lifetimes. Match each dot update to a slot and drain the stores as soon as their accumulators are ready.\",\n\"code\":\"from candidate_tools import baseline,load,mac,store,issue,seed\\nfrom itertools import combinations\\nimport random\\n\\ndef build():\\n rng=random.Random(seed());c=baseline()\\n def cls(a,b):\\n  if (a^b)&1:\\n   if a&1:a,b=b,a\\n   return ((b-a)%16)//2\\n  return 8+4*(a%2)+min((a-b)%16,(b-a)%16)//2-1\\n blocks={}\\n for n in (4,5):\\n  for r in combinations(range(16),n):\\n   if min(r)>1:continue\\n   es=list(combinations(r,2));mask=sum(1<<x for x in set(cls(*e) for e in es));blocks.setdefault((n,mask),(r,es))\\n best=None\\n for (n,m),x in blocks.items():\\n  for (N,M),y in blocks.items():\\n   if m|M==65535:\\n    key=(n+N,-min(m.bit_count(),M.bit_count()))\\n    if best is None or key<best[0]:best=key,[x,y]\\n bs=best[1]\\n def plan(h):\\n  ts=[[],[]]\\n  for j in sorted(range(16),key=lambda j:sum(cls(*e)==j for r,es in bs for e in es)):\\n   if j in (11,15) and h!=(j-11)//4:continue\\n   i,e=min(((i,e) for i,(r,es) in enumerate(bs) for e in es if cls(*e)==j),key=lambda x:len(ts[x[0]]));ts[i].append(e)\\n  for p in (0,1):\\n   i,e=min(((i,(a,a)) for i,(r,_) in enumerate(bs) for a in r if a%2==p),key=lambda x:len(ts[x[0]]));ts[i].append(e)\\n  return ts\\n def template(es):\\n  rows=sorted(set(a for e in es for a in e));n=len(rows);m=len(es);sp=15-n-m;assert sp>=0\\n  best=None\\n  for trial in range(1800):\\n   q=rng.choice([1,2,2,4]);T=q*(n+m)+rng.choice([1,1,2,q,q+1]);order=rows[:];rng.shuffle(order)\\n   extra=order[:min(sp,n)] if q>1 else [];reg={a:i+1 for i,a in enumerate(rows)};dup={a:n+m+i+1 for i,a in enumerate(extra)}\\n   gaps=[0]*q;g=T-2*n*q\\n   if g<0:continue\\n   if trial%3:gaps[-1]=g\\n   else:\\n    for _ in range(g):gaps[rng.randrange(q)]+=1\\n   at=[];st=0\\n   for k in range(q):\\n    if rng.random()<.25:rng.shuffle(order)\\n    at.append({a:st+2*i for i,a in enumerate(order)});st+=2*n+gaps[k]\\n   ls={v for d in at for v in d.values()};slots=set(range(T))-ls-{(t-2)%T for t in ls}\\n   if len(slots)<m*q:continue\\n   opts={}\\n   for k in range(q):\\n    for i,(a,b) in enumerate(es):\\n     lo=max(at[k][a],at[k][b])+1\\n     def end(a):\\n      z=k+1+(a in dup);return at[z%q][a]+T*(z//q)\\n     hi=min(end(a),end(b))-1\\n     opts[k,i]=[v for v in range(lo,hi+1) if v%T in slots]\\n   if not all(opts.values()):continue\\n   match={}\\n   def fit(j,seen):\\n    for v in opts[j]:\\n     t=v%T\\n     if t in seen:continue\\n     seen.add(t)\\n     if t not in match or fit(match[t][0],seen):match[t]=(j,v);return True\\n    return False\\n   if not all(fit(j,set()) for j in sorted(opts,key=lambda j:len(opts[j]))):continue\\n   mt=dict(match.values());\\n   if any(mt[(k+1)%q,i]+(T if k+1==q else 0)-mt[k,i]<3 for k in range(q) for i in range(m)):continue\\n   def times(k,i):return k//q*T+mt[k%q,i]\\n   last=max(times(15,i) for i in range(m));used={times(k,i) for k in range(16) for i in range(m) if times(k,i)>=times(15,0)-2*T};used.update((16//q-1)*T+v for d in at for v in d.values())\\n   sts=[]\\n   for i in sorted(range(m),key=lambda i:times(15,i)):\\n    a,b=es[i];v=times(15,i)+3\\n    for e in ([(a,b)] if a==b else [(a,b),(b,a)]):\\n     while v in used:v+=1\\n     sts.append((v,i,e));used.add(v)\\n   end=max(v for v,i,e in sts)+1\\n   if best is None or end<best[0]:best=end,q,T,at,mt,reg,dup,sts\\n  if best is None:\\n   T=n+m+2;best=16*T+2*m,1,T,[{a:i for i,a in enumerate(rows)}],{(0,i):n+i for i in range(m)},reg,{},[(16*T+2*i+j,i,e) for i,(a,b) in enumerate(es) for j,e in enumerate([(a,b)] if a==b else [(a,b),(b,a)])]\\n  return best\\n ins=[8*(16*(r%2)+k)+r//2 for r in range(16) for k in range(16)];outs=[None]*256;s=[]\\n for h in (0,1):\\n  tiles=plan(h);temps=list(map(template,tiles))\\n  for l in range(4*h,4*h+4):\\n   t=cnt=0\\n   def row(a):return (a+2*l)%16\\n   for es,(end,q,T,at,mt,reg,dup,sts) in zip(tiles,temps):\\n    for k in range(16):\\n     z=t+k//q*T;d=k%q\\n     def rr(a):return dup.get(a,reg[a]) if k%2 else reg[a]\\n     for a,v in at[d].items():s.append(issue(z+v,l,load(rr(a),ins[16*row(a)+k])))\\n     for i,(a,b) in enumerate(es):\\n      dst=len(reg)+i+1;s.append(issue(z+mt[d,i],l,mac(dst,rr(a),rr(b),dst if k else 0)))\\n    for v,i,(a,b) in sts:\\n     addr=256+8*cnt+l;cnt+=1;outs[16*row(a)+row(b)]=addr;s.append(issue(t+v,l,store(len(reg)+i+1,addr)))\\n    t+=end\\n assert None not in outs;c['layout']=dict(inputs=ins,outputs=outs,scratch=[]);c['schedule']=sorted(s,key=lambda x:(x['cycle'],x['lane']));return c\",\n\"notes\":\"Keeps the translation-orbit covering. Period search includes one-, two-, and four-column groups with alternating registers for selected rows. Only accept matchings with cross-column accumulator spacing >=3. Stores use otherwise vacant cycles in the tail.\"}",
+        "role": "assistant",
+        "tool_calls": null,
+        "function_call": null,
+        "annotations": [],
+        "refusal": null
+      },
+      "provider_specific_fields": {}
+    }
+  ],
+  "usage": {
+    "completion_tokens": 2781,
+    "prompt_tokens": 5103,
+    "total_tokens": 7884,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": 0,
+      "audio_tokens": 0,
+      "reasoning_tokens": 968,
+      "rejected_prediction_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "audio_tokens": 0,
+      "cache_write_tokens": 5100,
+      "cached_tokens": 0,
+      "cache_creation_tokens": 5100
+    }
+  },
+  "service_tier": "default",
+  "providerMetadata": {
+    "custom_llm_provider": "openai",
+    "region_name": null,
+    "additional_headers": {
+      "x-ratelimit-limit-requests": "5000",
+      "x-ratelimit-remaining-requests": "4999",
+      "x-ratelimit-limit-tokens": "1000000",
+      "x-ratelimit-remaining-tokens": "996560",
+      "llm_provider-date": "Mon, 23 Nov 2026 22:59:34 GMT",
+      "llm_provider-content-type": "application/json",
+      "llm_provider-transfer-encoding": "chunked",
+      "llm_provider-connection": "keep-alive",
+      "llm_provider-cf-ray": "a5f3c7941c13176a-SJC",
+      "llm_provider-cf-cache-status": "DYNAMIC",
+      "llm_provider-server": "cloudflare",
+      "llm_provider-strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "llm_provider-vary": "Origin",
+      "llm_provider-x-content-type-options": "nosniff",
+      "llm_provider-access-control-expose-headers": "X-Request-ID, CF-Ray, CF-Ray",
+      "llm_provider-openai-organization": "user-ca6rw1hux6ttrnb2z1dnwov9",
+      "llm_provider-openai-processing-ms": "56689",
+      "llm_provider-openai-project": "proj_pWQj4tH4avxV8tGhXPlvbOXv",
+      "llm_provider-openai-version": "2020-10-01",
+      "llm_provider-x-openai-proxy-wasm": "v0.1",
+      "llm_provider-x-ratelimit-limit-requests": "5000",
+      "llm_provider-x-ratelimit-limit-tokens": "1000000",
+      "llm_provider-x-ratelimit-remaining-requests": "4999",
+      "llm_provider-x-ratelimit-remaining-tokens": "996560",
+      "llm_provider-x-ratelimit-reset-requests": "12ms",
+      "llm_provider-x-ratelimit-reset-tokens": "206ms",
+      "llm_provider-x-request-id": "req_ea0d24ab613445d58007757fd8cbfab1",
+      "llm_provider-content-encoding": "gzip",
+      "llm_provider-alt-svc": "h3=\":443\"; ma=86400",
+      "llm_provider-request-id": "req_ea0d24ab613445d58007757fd8cbfab1",
+      "request-id": "req_ea0d24ab613445d58007757fd8cbfab1"
+    },
+    "_response_ms": 57690.946102142334,
+    "litellm_overhead_time_ms": 3.4281,
+    "callback_duration_ms": 0.0,
+    "litellm_call_id": "e1878562-4ade-4454-8676-19c39efbed54",
+    "api_base": "https://api.openai.com",
+    "model_id": null,
+    "response_cost": 0.0,
+    "litellm_model_name": "openai/gpt-6.2-astra",
+    "provider_response_model": "gpt-6.2-astra"
+  },
+  "estimatedCostUSD": null,
+  "seconds": 57.6918158531189
+}

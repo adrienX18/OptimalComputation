@@ -1,0 +1,14 @@
+{
+  "accepted": true,
+  "category": "certified",
+  "score": 35,
+  "unit": "cycles",
+  "cycles": 35,
+  "certificate": "Certificate_ee46a82f082f34714b02584756024910d578f8343f1a3e8fd7bc37ccd8873d2c.artifact",
+  "attempt": 1,
+  "idea": "Evaluate two points per lane, sharing the eight coefficient loads. Use Horner for coefficients c7 through c2, then combine that result with the linear term using x². Search static schedules that respect bank bandwidth, writeback slots, and register lifetimes.",
+  "directory": "attempts/0001",
+  "seconds": 51.541,
+  "improved": true,
+  "bestScore": 35
+}

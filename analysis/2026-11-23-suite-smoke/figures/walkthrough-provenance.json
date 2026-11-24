@@ -1,0 +1,37 @@
+{
+  "matplotlib": "3.11.2",
+  "numpy": "2.5.5",
+  "layout": [
+    {
+      "figure": "04_winner_progress",
+      "overflowing_labels": []
+    },
+    {
+      "figure": "05_winner_architecture",
+      "overflowing_labels": []
+    }
+  ],
+  "script_sha256": "9ae90b4192db541851df6541f0dd0eb9d2bee823f67fd9a7bb7c47f313db6ba5",
+  "inputs": {
+    "convergence.csv": "24649d1c5fbffc7b3056df7fdfa5b80b8e1d488e6c6b2a7032c85adfb1f6edec",
+    "runs.csv": "599047d4964b2e8f769f04d257ee2e510730ba6a67ddb8bc5a1a8b74c4db4109",
+    "walkthrough/architecture.json": "c388f5d8df17eb67eb61a4994605de56a11b2d8810e760ad60e13136c414f4d0",
+    "walkthrough/baseline/candidate.json": "39f73228dc081e1a01e18ac9975cc6a584c1a66c37fa1d1b690064bb574cbbdf",
+    "walkthrough/baseline/score.json": "0caf39a6abebf30d2455f29403e732b69baf76e6dd508eae99a0d9018847724a",
+    "walkthrough/previous-feedback.json": "4a0605abdb2112201bab7040f9b8dd55d060b13c7a41c829867f6c2278342859",
+    "walkthrough/provenance.json": "c6103bfb1c2782e3c238e611cb2dd10c72c9690a228ee02c6aaceeb9dd0a765a",
+    "walkthrough/run-manifest.json": "55598d0125fdf113d752d34c09087622bc6d6a0685ce70884a332b4629cba287",
+    "walkthrough/run-summary.json": "95ffa5c068185a5d3e31b654ca0bdd9df80a67eae27c3d00bc4a9b141e56e588",
+    "walkthrough/winner/candidate.json": "fe00586fa37df76f8071175ba527b4d20244e241ff66c2588d5cf8b74c123827",
+    "walkthrough/winner/certification/kernel/result.json": "513dcde5ffa25916f22dde9ed109d661b109252821977dcad9e77d5620dcadcb",
+    "walkthrough/winner/certification/result.json": "74abeee0acd6fc11765219f284f554ded40749c38abc175753be01527f7f97b4",
+    "walkthrough/winner/feedback.json": "ed822bc712e3035d34dd8be6634558f364290add5a8b1b8f8255b0617c468088",
+    "walkthrough/winner/proposal.json": "5c4c7da4ac09f51a15510eb6e3ce287e1802db7f182dda752d56e18cf5a6786d",
+    "walkthrough/winner/provider-001-request.json": "1cf44c8e1673d2ce00ef43905bcb8ddc129403f9cfe4dd17da2ceb16bd52aa2d",
+    "walkthrough/winner/provider-002-response.json": "ede40fd55fa426ee11da64444aca3870ce93f6f72dfa5efbbfe60034fd4e446a",
+    "walkthrough/winner/randomness.json": "50bbeb2aaaa928a9b6a43812e89a2d3581b19d39ca9b1d3d0299ed433244ff79",
+    "walkthrough/winner/request.json": "45dc28c6374b2501d0b25ef7399db47cd35e300581119b063f623bc304dd8d49",
+    "walkthrough/winner/response.json": "8bc581f55c0c3450d7d2c3d3ec60615534b564014cda5e0fe083948a45c5824f",
+    "walkthrough/winner/score.json": "9104b9b885cc328fcac10b615e379e662599e87490f4935b05cce7de38da63c4"
+  }
+}

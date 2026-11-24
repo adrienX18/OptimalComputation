@@ -1,0 +1,14 @@
+{
+  "accepted": true,
+  "category": "certified",
+  "score": 508,
+  "unit": "cycles",
+  "cycles": 508,
+  "certificate": "Certificate_966cc02d5cea25130172c9c9f3af9d5eb3ffc3dac4115b7c44f04fa15a1fc205.artifact",
+  "attempt": 2,
+  "idea": "Search for two small row sets whose even translations cover every unordered pair. Within each tile, stagger the loads onto alternate cycles and match MACs to periodic slots, allowing a few MACs to finish during the next column's loads.",
+  "directory": "attempts/0002",
+  "seconds": 327.325,
+  "improved": true,
+  "bestScore": 508
+}

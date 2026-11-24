@@ -1,0 +1,14 @@
+{
+  "accepted": true,
+  "category": "certified",
+  "score": 30,
+  "unit": "cycles",
+  "cycles": 30,
+  "certificate": "Certificate_4f62a6b595a2d7c69c6e898c7d10a1ee38f11e146492a6d7259ae00d43acf790.artifact",
+  "attempt": 2,
+  "idea": "Pack the same signed16-safe polynomial evaluation into four lane-pair schedules. Search for a 29-cycle schedule first, requiring each pair to load a given coefficient in a different cycle. Assign point and output banks after scheduling, when their available bank slots are known.",
+  "directory": "attempts/0002",
+  "seconds": 78.531,
+  "improved": true,
+  "bestScore": 30
+}

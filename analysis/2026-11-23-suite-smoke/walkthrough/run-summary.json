@@ -1,0 +1,61 @@
+{
+  "completed": 3,
+  "best": {
+    "accepted": true,
+    "category": "certified",
+    "score": 478,
+    "unit": "cycles",
+    "cycles": 478,
+    "certificate": "Certificate_5eca61d1deecafac3e6e9729d9d3a7c976299059af24b01cab68e0ef1c59b0e2.artifact",
+    "attempt": 3,
+    "idea": "Amortize the load/writeback transition over multiple columns: try periodic templates with unequal gaps between load bursts, and use spare registers to extend selected operand lifetimes. Match each dot update to a slot and drain the stores as soon as their accumulators are ready.",
+    "directory": "attempts/0003",
+    "seconds": 317.596,
+    "improved": true,
+    "bestScore": 478
+  },
+  "attempts": [
+    {
+      "accepted": true,
+      "category": "certified",
+      "score": 556,
+      "unit": "cycles",
+      "cycles": 556,
+      "certificate": "Certificate_570044cb9238121886ea04ec1ee5a7d0649f8561868019352ab3281d447dee7f.artifact",
+      "attempt": 1,
+      "idea": "Assign a cyclic row-pair index to each lane and compute 17 distinct dot products per lane, in two register-resident tiles. Lay out inputs by row-pair bank and place symmetric outputs directly in the computing lane's bank.",
+      "directory": "attempts/0001",
+      "seconds": 268.846,
+      "improved": true,
+      "bestScore": 556
+    },
+    {
+      "accepted": true,
+      "category": "certified",
+      "score": 508,
+      "unit": "cycles",
+      "cycles": 508,
+      "certificate": "Certificate_966cc02d5cea25130172c9c9f3af9d5eb3ffc3dac4115b7c44f04fa15a1fc205.artifact",
+      "attempt": 2,
+      "idea": "Search for two small row sets whose even translations cover every unordered pair. Within each tile, stagger the loads onto alternate cycles and match MACs to periodic slots, allowing a few MACs to finish during the next column's loads.",
+      "directory": "attempts/0002",
+      "seconds": 327.325,
+      "improved": true,
+      "bestScore": 508
+    },
+    {
+      "accepted": true,
+      "category": "certified",
+      "score": 478,
+      "unit": "cycles",
+      "cycles": 478,
+      "certificate": "Certificate_5eca61d1deecafac3e6e9729d9d3a7c976299059af24b01cab68e0ef1c59b0e2.artifact",
+      "attempt": 3,
+      "idea": "Amortize the load/writeback transition over multiple columns: try periodic templates with unequal gaps between load bursts, and use spare registers to extend selected operand lifetimes. Match each dot update to a slot and drain the stores as soon as their accumulators are ready.",
+      "directory": "attempts/0003",
+      "seconds": 317.596,
+      "improved": true,
+      "bestScore": 478
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "selection": {
+    "rule": "Lowest median final cycles; ties: fewest median attempts to final best, then name. Example: smallest seed.",
+    "final_medians": {
+      "astra": 30,
+      "fable": 30,
+      "opus": 30,
+      "sol": 30,
+      "sonnet": 40
+    },
+    "quality_ties": [
+      "astra",
+      "fable",
+      "opus",
+      "sol"
+    ],
+    "median_first_best_attempt": {
+      "astra": 2,
+      "fable": 2,
+      "opus": 10,
+      "sol": 1
+    }
+  },
+  "model": "openai/gpt-6.2-sol",
+  "run": "runs/sol/seed-11",
+  "attempt": 2,
+  "prompt_bytes": 11128,
+  "output_code_bytes": 6988,
+  "history": [
+    {
+      "attempt": 1,
+      "idea": "Evaluate two points per lane, sharing the eight coefficient loads. Use Horner for coefficients c7 th",
+      "status": "certified",
+      "score": 35
+    }
+  ],
+  "baseline": {
+    "cycles": 1520,
+    "instructions": 912,
+    "counts": {
+      "load": 464,
+      "store": 144,
+      "add": 96,
+      "multiplyAdd": 208
+    },
+    "lane_issues": [
+      912,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "scratch_slots": 128,
+    "output_lanes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "distinct_output_formulas": 16,
+    "symbolic_outputs_checked": true
+  },
+  "winner": {
+    "cycles": 30,
+    "instructions": 224,
+    "counts": {
+      "load": 80,
+      "multiplyAdd": 112,
+      "multiply": 16,
+      "store": 16
+    },
+    "lane_issues": [
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28
+    ],
+    "scratch_slots": 0,
+    "output_lanes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "distinct_output_formulas": 16,
+    "symbolic_outputs_checked": true
+  },
+  "certificate_bindings_checked": true
+}

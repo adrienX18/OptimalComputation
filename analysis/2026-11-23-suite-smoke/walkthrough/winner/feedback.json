@@ -1,0 +1,14 @@
+{
+  "accepted": true,
+  "category": "certified",
+  "score": 478,
+  "unit": "cycles",
+  "cycles": 478,
+  "certificate": "Certificate_5eca61d1deecafac3e6e9729d9d3a7c976299059af24b01cab68e0ef1c59b0e2.artifact",
+  "attempt": 3,
+  "idea": "Amortize the load/writeback transition over multiple columns: try periodic templates with unequal gaps between load bursts, and use spare registers to extend selected operand lifetimes. Match each dot update to a slot and drain the stores as soon as their accumulators are ready.",
+  "directory": "attempts/0003",
+  "seconds": 317.596,
+  "improved": true,
+  "bestScore": 478
+}
