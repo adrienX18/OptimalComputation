@@ -139,9 +139,49 @@ interruptions. Energy and latency stay separate. One seed cannot support
 repeat-based confidence intervals or a general model ranking.*
 
 **77/80 loops improved the baseline**; 35 improved on their last slot.
-Astra's Gram winner exploits symmetry: 136 distinct dot products instead of 256,
-with input reuse ([architecture][smoke-walkthrough]). This establishes feasibility,
-not convergence. The larger suite experiment remains unlaunched.
+This establishes feasibility, not convergence. The larger suite experiment
+remains unlaunched.
+
+The comparisons below show the **full stored baseline and the best certified
+candidate for each row above**, all from seed 11, attempt 3. Each model prompt
+contained the baseline's score, full layout, instruction count and first five/last
+two instructions; generated Python could load the complete baseline through
+`candidate_tools.baseline()`. The figures reconstruct those artifacts afterward.
+
+**Reading the schedules:** left and right use different time scales, but each
+covers the entire execution. Colors identify issued instructions, not their full
+duration. Dense baseline events are an overview at normal display size. These
+are fixed artifacts, so no confidence intervals apply. [Source files and vector
+figures][architecture-index] retain the complete schedules and provenance.
+
+### 6.1 Matrix multiplication — Astra
+
+The baseline computes one output at a time on lane 0. Astra assigns two output
+rows to each lane, tiles columns to reuse `A` and `B` values, and overlaps loads,
+arithmetic and stores. The number of products stays at 4,096; loads fall from
+8,192 to 3,024. [Exact model input][matrix-request] · [Winning program][matrix-code].
+
+![Matrix multiplication: full baseline and Astra winner schedules, algorithms and counts side by side.][matrix-architecture]
+
+### 6.2 Gram product — Astra
+
+The baseline computes all 256 ordered row-pair dot products serially. Astra
+computes 136 distinct products across eight lanes and writes each off-diagonal
+result to both symmetric positions, reusing loaded row values.
+[Exact model input][gram-request] · [Winning program][gram-code] ·
+[Detailed walkthrough][smoke-walkthrough].
+
+![Gram product: full baseline and Astra winner schedules with exact output-to-lane maps.][gram-architecture]
+
+### 6.3 Two-stage linear map — Sol
+
+The baseline performs both matrix-vector products serially. Sol shares vector
+loads across partial dot products, exchanges partial sums between paired lanes,
+then computes two final output rows per lane. Both designs use 512 multiply-adds;
+loads fall from 1,040 to 704. [Exact model input][two-stage-request] ·
+[Winning program][two-stage-code].
+
+![Two-stage linear map: full baseline and Sol winner schedules, algorithms and counts side by side.][two-stage-architecture]
 
 ## Evidence and limits
 
@@ -176,3 +216,13 @@ naive baselines; neither physical speedups nor general model superiority are est
 [convergence-figure]: https://raw.githubusercontent.com/adrienX18/OptimalComputation/cdcbe5e9734bf06f414e4fd5e6995311ce3c15ca/analysis/2026-11-23-five-model-search/figures/03_convergence.png
 [architecture-figure]: https://raw.githubusercontent.com/adrienX18/OptimalComputation/cdcbe5e9734bf06f414e4fd5e6995311ce3c15ca/analysis/2026-11-23-five-model-search/figures/12_winner_architecture.png
 [smoke-figure]: https://raw.githubusercontent.com/adrienX18/OptimalComputation/cdcbe5e9734bf06f414e4fd5e6995311ce3c15ca/analysis/2026-11-23-suite-smoke/figures/01_quality.png
+[architecture-index]: https://github.com/adrienX18/OptimalComputation/blob/9de5888e81d148772161ced59cb3d8dc1d92c97c/analysis/2026-11-23-suite-smoke/architectures/README.md
+[matrix-request]: https://github.com/adrienX18/OptimalComputation/blob/9de5888e81d148772161ced59cb3d8dc1d92c97c/analysis/2026-11-23-suite-smoke/architectures/matmul/winner/request.json
+[matrix-code]: https://github.com/adrienX18/OptimalComputation/blob/9de5888e81d148772161ced59cb3d8dc1d92c97c/analysis/2026-11-23-suite-smoke/architectures/matmul/winner/generator.py
+[matrix-architecture]: https://raw.githubusercontent.com/adrienX18/OptimalComputation/9de5888e81d148772161ced59cb3d8dc1d92c97c/analysis/2026-11-23-suite-smoke/figures/06_matmul_architecture.png
+[gram-request]: https://github.com/adrienX18/OptimalComputation/blob/9de5888e81d148772161ced59cb3d8dc1d92c97c/analysis/2026-11-23-suite-smoke/walkthrough/winner/request.json
+[gram-code]: https://github.com/adrienX18/OptimalComputation/blob/9de5888e81d148772161ced59cb3d8dc1d92c97c/analysis/2026-11-23-suite-smoke/walkthrough/winner/generator.py
+[gram-architecture]: https://raw.githubusercontent.com/adrienX18/OptimalComputation/9de5888e81d148772161ced59cb3d8dc1d92c97c/analysis/2026-11-23-suite-smoke/figures/05_winner_architecture.png
+[two-stage-request]: https://github.com/adrienX18/OptimalComputation/blob/9de5888e81d148772161ced59cb3d8dc1d92c97c/analysis/2026-11-23-suite-smoke/architectures/two-stage/winner/request.json
+[two-stage-code]: https://github.com/adrienX18/OptimalComputation/blob/9de5888e81d148772161ced59cb3d8dc1d92c97c/analysis/2026-11-23-suite-smoke/architectures/two-stage/winner/generator.py
+[two-stage-architecture]: https://raw.githubusercontent.com/adrienX18/OptimalComputation/9de5888e81d148772161ced59cb3d8dc1d92c97c/analysis/2026-11-23-suite-smoke/figures/07_two_stage_architecture.png
