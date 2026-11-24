@@ -1,0 +1,15 @@
+{
+  "version": "smoke-archive-bundle-v1",
+  "archive": "suite-smoke-20261123.tar.gz",
+  "bytes": 130158610,
+  "sha256": "65cbac08ab7568b3bc7386e410bc76988851c91a3cec637b36b6c0ceddf4e027",
+  "source_directory": "suite-smoke-20261123",
+  "files": 28083,
+  "uncompressed_file_bytes": 1059091239,
+  "includes": "Every raw run file, including source snapshots, partial attempts, logs, locks and the original inventory. File bytes and timestamps are preserved; tar ownership is normalized.",
+  "source_inventory_sha256": "478124c2a59291645e8e0f90d99440f18ba635c226c393f5717574f8d3e5605b",
+  "all_member_bytes_verified": true,
+  "configured_and_pattern_credential_scan": "passed",
+  "release_url": "https://github.com/adrienX18/OptimalComputation/releases/tag/suite-smoke-2026-11-23",
+  "download_url": "https://github.com/adrienX18/OptimalComputation/releases/download/suite-smoke-2026-11-23/suite-smoke-20261123.tar.gz"
+}

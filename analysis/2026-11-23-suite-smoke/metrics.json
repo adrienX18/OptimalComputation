@@ -1,0 +1,104 @@
+{
+  "version": "suite-smoke-analysis-v1",
+  "source": "suite-smoke-20261123",
+  "manifest_sha256": "27dca0a9680dd7d2f3995b3ae1ed37ce498b341a6b796dd660ac59085de9bf0a",
+  "inventory_sha256": "478124c2a59291645e8e0f90d99440f18ba635c226c393f5717574f8d3e5605b",
+  "source_revision": "54f3c0c4e2bb27778f22254c6cc8515b90e99dc6",
+  "audit": {
+    "version": "search-batch-audit-v1",
+    "archive": "suite-smoke-20261123",
+    "manifestSha256": "27dca0a9680dd7d2f3995b3ae1ed37ce498b341a6b796dd660ac59085de9bf0a",
+    "inventorySha256": "478124c2a59291645e8e0f90d99440f18ba635c226c393f5717574f8d3e5605b",
+    "inventoryFiles": 28001,
+    "inventoryBytes": 1053272112,
+    "completedRuns": 80,
+    "completedAttempts": 240,
+    "categories": {
+      "certified": 182,
+      "simulation-failed": 14,
+      "proposal-error": 30,
+      "kernel-timeout": 1,
+      "api-error": 3,
+      "range-not-proved": 6,
+      "interrupted": 4
+    },
+    "runs": null
+  },
+  "scope": {
+    "cases": 16,
+    "models": 5,
+    "seeds": [
+      11
+    ],
+    "slots_per_loop": 3
+  },
+  "elapsed_seconds": 14133.765738010406,
+  "outcomes": {
+    "Certified": 182,
+    "Simulation failed": 14,
+    "Filtered response": 14,
+    "Proof timeout": 1,
+    "Code limit": 10,
+    "Invalid JSON": 6,
+    "API error": 3,
+    "Range unproved": 6,
+    "Interrupted": 4
+  },
+  "improved_loops": 77,
+  "loops_with_certified_proposal": 77,
+  "last_slot_improved_loops": 35,
+  "by_model": {
+    "fable": {
+      "certified": 44,
+      "improved_loops": 16,
+      "first_final_best": {
+        "1": 5,
+        "3": 6,
+        "2": 5
+      }
+    },
+    "opus": {
+      "certified": 25,
+      "improved_loops": 13,
+      "first_final_best": {
+        "3": 5,
+        "0": 3,
+        "2": 3,
+        "1": 5
+      }
+    },
+    "sonnet": {
+      "certified": 34,
+      "improved_loops": 16,
+      "first_final_best": {
+        "1": 6,
+        "2": 6,
+        "3": 4
+      }
+    },
+    "astra": {
+      "certified": 46,
+      "improved_loops": 16,
+      "first_final_best": {
+        "3": 13,
+        "2": 3
+      }
+    },
+    "sol": {
+      "certified": 33,
+      "improved_loops": 16,
+      "first_final_best": {
+        "2": 5,
+        "3": 7,
+        "1": 4
+      }
+    }
+  },
+  "uncertainty": "One seed per case/model. Descriptive census only; no confidence intervals or significance tests. Cases are not exchangeable repeats.",
+  "source_tables": {
+    "runs.csv": "ffda7cda850f155f86b983a676685f527aa83f31f2140ca5ca2fc204705d6457",
+    "attempts.csv": "3f069d97aa876db00c9d2100c8798d56e3d599c0c95bd2b37ef99951acb63a4f",
+    "convergence.csv": "28b47236894e84f200c0b427b49716db5430b07459f0cbba2bb62b04064c4179",
+    "kernel-checks.csv": "4d1806cc05bb52aba8be48387242316a336f4791bf6a8ad7b59a8d89306c5884"
+  }
+}

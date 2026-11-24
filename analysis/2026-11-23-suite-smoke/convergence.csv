@@ -1,0 +1,321 @@
+instance,task,model,model_id,seed,objective,initial_lanes,initial_banks,unit,attempt,best_score,baseline_ratio,interrupted
+matmul-latency-8x8,matmul,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,0,21504,1.0,False
+matmul-latency-8x8,matmul,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,1,986,21.809330628803245,False
+matmul-latency-8x8,matmul,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,2,986,21.809330628803245,False
+matmul-latency-8x8,matmul,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,3,986,21.809330628803245,False
+matmul-latency-8x8,matmul,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,0,21504,1.0,False
+matmul-latency-8x8,matmul,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,1,21504,1.0,False
+matmul-latency-8x8,matmul,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,2,21504,1.0,False
+matmul-latency-8x8,matmul,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,3,1052,20.44106463878327,False
+matmul-latency-8x8,matmul,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,0,21504,1.0,False
+matmul-latency-8x8,matmul,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,1,1071,20.07843137254902,False
+matmul-latency-8x8,matmul,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,2,1071,20.07843137254902,False
+matmul-latency-8x8,matmul,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,3,1071,20.07843137254902,False
+matmul-latency-8x8,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,0,21504,1.0,False
+matmul-latency-8x8,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,1,1048,20.519083969465647,False
+matmul-latency-8x8,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,2,948,22.68354430379747,False
+matmul-latency-8x8,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,3,933,23.04823151125402,False
+matmul-latency-8x8,matmul,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,0,21504,1.0,False
+matmul-latency-8x8,matmul,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,1,1032,20.837209302325583,False
+matmul-latency-8x8,matmul,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,2,961,22.37669094693028,False
+matmul-latency-8x8,matmul,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,3,961,22.37669094693028,False
+matmul-latency-8x1,matmul,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,0,21504,1.0,False
+matmul-latency-8x1,matmul,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,1,1768,12.16289592760181,False
+matmul-latency-8x1,matmul,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,2,1768,12.16289592760181,False
+matmul-latency-8x1,matmul,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,3,1508,14.259946949602123,False
+matmul-latency-8x1,matmul,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,0,21504,1.0,False
+matmul-latency-8x1,matmul,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,1,1669,12.884361893349311,False
+matmul-latency-8x1,matmul,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,2,1563,13.758157389635317,False
+matmul-latency-8x1,matmul,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,3,1520,14.147368421052631,False
+matmul-latency-8x1,matmul,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,0,21504,1.0,False
+matmul-latency-8x1,matmul,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,1,1669,12.884361893349311,False
+matmul-latency-8x1,matmul,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,2,1663,12.930847865303669,False
+matmul-latency-8x1,matmul,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,3,1663,12.930847865303669,False
+matmul-latency-8x1,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,0,21504,1.0,False
+matmul-latency-8x1,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,1,1536,14.0,False
+matmul-latency-8x1,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,2,1524,14.11023622047244,False
+matmul-latency-8x1,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,3,1479,14.539553752535497,False
+matmul-latency-8x1,matmul,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,0,21504,1.0,False
+matmul-latency-8x1,matmul,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,1,1527,14.082514734774067,False
+matmul-latency-8x1,matmul,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,2,1527,14.082514734774067,False
+matmul-latency-8x1,matmul,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,3,1517,14.175346077785102,False
+matmul-latency-2x8,matmul,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,0,21504,1.0,False
+matmul-latency-2x8,matmul,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,1,3830,5.614621409921671,False
+matmul-latency-2x8,matmul,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,2,3723,5.775987107171636,False
+matmul-latency-2x8,matmul,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,3,3723,5.775987107171636,False
+matmul-latency-2x8,matmul,opus,anthropic/claude-opus-5-5,11,latency-v1,2,8,cycles,0,21504,1.0,False
+matmul-latency-2x8,matmul,opus,anthropic/claude-opus-5-5,11,latency-v1,2,8,cycles,1,21504,1.0,False
+matmul-latency-2x8,matmul,opus,anthropic/claude-opus-5-5,11,latency-v1,2,8,cycles,2,21504,1.0,False
+matmul-latency-2x8,matmul,opus,anthropic/claude-opus-5-5,11,latency-v1,2,8,cycles,3,21504,1.0,False
+matmul-latency-2x8,matmul,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,0,21504,1.0,False
+matmul-latency-2x8,matmul,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,1,5120,4.2,False
+matmul-latency-2x8,matmul,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,2,5120,4.2,False
+matmul-latency-2x8,matmul,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,3,5120,4.2,False
+matmul-latency-2x8,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,0,21504,1.0,False
+matmul-latency-2x8,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,1,4064,5.291338582677166,False
+matmul-latency-2x8,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,2,3851,5.584004154764996,False
+matmul-latency-2x8,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,3,3808,5.647058823529412,False
+matmul-latency-2x8,matmul,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,0,21504,1.0,False
+matmul-latency-2x8,matmul,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,1,3990,5.389473684210526,False
+matmul-latency-2x8,matmul,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,2,3990,5.389473684210526,False
+matmul-latency-2x8,matmul,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,3,3990,5.389473684210526,False
+matmul-energy,matmul,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,0,634112,1.0,False
+matmul-energy,matmul,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,1,85787,7.391702705538135,False
+matmul-energy,matmul,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,2,85787,7.391702705538135,False
+matmul-energy,matmul,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,3,85787,7.391702705538135,False
+matmul-energy,matmul,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,0,634112,1.0,False
+matmul-energy,matmul,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,1,634112,1.0,False
+matmul-energy,matmul,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,2,634112,1.0,False
+matmul-energy,matmul,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,3,634112,1.0,False
+matmul-energy,matmul,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,0,634112,1.0,False
+matmul-energy,matmul,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,1,94980,6.676268688144873,False
+matmul-energy,matmul,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,2,94912,6.681051921780175,False
+matmul-energy,matmul,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,3,94912,6.681051921780175,False
+matmul-energy,matmul,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,0,634112,1.0,False
+matmul-energy,matmul,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,1,87192,7.272593815946417,False
+matmul-energy,matmul,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,2,86508,7.330096638461183,False
+matmul-energy,matmul,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,3,86048,7.369282261063592,False
+matmul-energy,matmul,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,0,634112,1.0,False
+matmul-energy,matmul,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,1,86172,7.358677992851506,False
+matmul-energy,matmul,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,2,84773,7.480117490238637,False
+matmul-energy,matmul,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,3,84773,7.480117490238637,False
+polynomial-latency-8x8,polynomial,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,0,1520,1.0,False
+polynomial-latency-8x8,polynomial,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,1,1520,1.0,False
+polynomial-latency-8x8,polynomial,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,2,36,42.22222222222222,False
+polynomial-latency-8x8,polynomial,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,3,35,43.42857142857143,False
+polynomial-latency-8x8,polynomial,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,0,1520,1.0,False
+polynomial-latency-8x8,polynomial,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,1,38,40.0,False
+polynomial-latency-8x8,polynomial,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,2,38,40.0,False
+polynomial-latency-8x8,polynomial,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,3,35,43.42857142857143,False
+polynomial-latency-8x8,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,0,1520,1.0,False
+polynomial-latency-8x8,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,1,1520,1.0,False
+polynomial-latency-8x8,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,2,1520,1.0,False
+polynomial-latency-8x8,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,3,42,36.19047619047619,False
+polynomial-latency-8x8,polynomial,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,0,1520,1.0,False
+polynomial-latency-8x8,polynomial,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,1,31,49.03225806451613,False
+polynomial-latency-8x8,polynomial,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,2,30,50.666666666666664,False
+polynomial-latency-8x8,polynomial,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,3,30,50.666666666666664,False
+polynomial-latency-8x8,polynomial,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,0,1520,1.0,False
+polynomial-latency-8x8,polynomial,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,1,30,50.666666666666664,False
+polynomial-latency-8x8,polynomial,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,2,30,50.666666666666664,False
+polynomial-latency-8x8,polynomial,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,3,30,50.666666666666664,False
+polynomial-latency-8x1,polynomial,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,0,1520,1.0,False
+polynomial-latency-8x1,polynomial,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,1,51,29.80392156862745,False
+polynomial-latency-8x1,polynomial,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,2,46,33.04347826086956,False
+polynomial-latency-8x1,polynomial,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,3,46,33.04347826086956,False
+polynomial-latency-8x1,polynomial,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,0,1520,1.0,False
+polynomial-latency-8x1,polynomial,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,1,52,29.23076923076923,False
+polynomial-latency-8x1,polynomial,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,2,51,29.80392156862745,False
+polynomial-latency-8x1,polynomial,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,3,51,29.80392156862745,False
+polynomial-latency-8x1,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,0,1520,1.0,False
+polynomial-latency-8x1,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,1,1520,1.0,False
+polynomial-latency-8x1,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,2,63,24.126984126984127,False
+polynomial-latency-8x1,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,3,63,24.126984126984127,False
+polynomial-latency-8x1,polynomial,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,0,1520,1.0,False
+polynomial-latency-8x1,polynomial,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,1,52,29.23076923076923,False
+polynomial-latency-8x1,polynomial,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,2,46,33.04347826086956,False
+polynomial-latency-8x1,polynomial,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,3,46,33.04347826086956,False
+polynomial-latency-8x1,polynomial,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,0,1520,1.0,False
+polynomial-latency-8x1,polynomial,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,1,55,27.636363636363637,False
+polynomial-latency-8x1,polynomial,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,2,51,29.80392156862745,False
+polynomial-latency-8x1,polynomial,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,3,51,29.80392156862745,False
+polynomial-latency-2x8,polynomial,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,0,1520,1.0,False
+polynomial-latency-2x8,polynomial,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,1,90,16.88888888888889,False
+polynomial-latency-2x8,polynomial,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,2,90,16.88888888888889,False
+polynomial-latency-2x8,polynomial,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,3,90,16.88888888888889,False
+polynomial-latency-2x8,polynomial,opus,anthropic/claude-opus-5-5,11,latency-v1,2,8,cycles,0,1520,1.0,False
+polynomial-latency-2x8,polynomial,opus,anthropic/claude-opus-5-5,11,latency-v1,2,8,cycles,1,1520,1.0,False
+polynomial-latency-2x8,polynomial,opus,anthropic/claude-opus-5-5,11,latency-v1,2,8,cycles,2,112,13.571428571428571,False
+polynomial-latency-2x8,polynomial,opus,anthropic/claude-opus-5-5,11,latency-v1,2,8,cycles,3,104,14.615384615384615,False
+polynomial-latency-2x8,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,0,1520,1.0,False
+polynomial-latency-2x8,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,1,1520,1.0,False
+polynomial-latency-2x8,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,2,156,9.743589743589743,False
+polynomial-latency-2x8,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,3,114,13.333333333333334,False
+polynomial-latency-2x8,polynomial,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,0,1520,1.0,False
+polynomial-latency-2x8,polynomial,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,1,102,14.901960784313726,False
+polynomial-latency-2x8,polynomial,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,2,90,16.88888888888889,False
+polynomial-latency-2x8,polynomial,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,3,88,17.272727272727273,False
+polynomial-latency-2x8,polynomial,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,0,1520,1.0,False
+polynomial-latency-2x8,polynomial,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,1,90,16.88888888888889,False
+polynomial-latency-2x8,polynomial,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,2,90,16.88888888888889,False
+polynomial-latency-2x8,polynomial,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,3,88,17.272727272727273,False
+polynomial-energy,polynomial,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,0,44128,1.0,False
+polynomial-energy,polynomial,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,1,2680,16.465671641791044,False
+polynomial-energy,polynomial,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,2,2576,17.130434782608695,False
+polynomial-energy,polynomial,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,3,2576,17.130434782608695,False
+polynomial-energy,polynomial,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,0,44128,1.0,False
+polynomial-energy,polynomial,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,1,2576,17.130434782608695,False
+polynomial-energy,polynomial,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,2,2576,17.130434782608695,False
+polynomial-energy,polynomial,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,3,2576,17.130434782608695,False
+polynomial-energy,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,0,44128,1.0,False
+polynomial-energy,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,1,44128,1.0,False
+polynomial-energy,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,2,3087,14.294784580498867,False
+polynomial-energy,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,3,3087,14.294784580498867,False
+polynomial-energy,polynomial,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,0,44128,1.0,False
+polynomial-energy,polynomial,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,1,2680,16.465671641791044,False
+polynomial-energy,polynomial,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,2,2602,16.959262106072252,False
+polynomial-energy,polynomial,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,3,2576,17.130434782608695,False
+polynomial-energy,polynomial,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,0,44128,1.0,False
+polynomial-energy,polynomial,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,1,44128,1.0,False
+polynomial-energy,polynomial,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,2,2615,16.87495219885277,False
+polynomial-energy,polynomial,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,3,2576,17.130434782608695,False
+gram-latency-8x8,gram,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,0,22016,1.0,False
+gram-latency-8x8,gram,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,1,489,45.02249488752556,False
+gram-latency-8x8,gram,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,2,486,45.300411522633745,False
+gram-latency-8x8,gram,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,3,484,45.48760330578512,False
+gram-latency-8x8,gram,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,0,22016,1.0,False
+gram-latency-8x8,gram,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,1,662,33.25679758308157,False
+gram-latency-8x8,gram,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,2,662,33.25679758308157,False
+gram-latency-8x8,gram,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,3,662,33.25679758308157,False
+gram-latency-8x8,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,0,22016,1.0,False
+gram-latency-8x8,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,1,1153,19.09453599306158,False
+gram-latency-8x8,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,2,638,34.507836990595614,False
+gram-latency-8x8,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,3,638,34.507836990595614,False
+gram-latency-8x8,gram,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,0,22016,1.0,False
+gram-latency-8x8,gram,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,1,556,39.597122302158276,False
+gram-latency-8x8,gram,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,2,508,43.338582677165356,False
+gram-latency-8x8,gram,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,3,478,46.05857740585774,False
+gram-latency-8x8,gram,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,0,22016,1.0,False
+gram-latency-8x8,gram,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,1,512,43.0,False
+gram-latency-8x8,gram,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,2,512,43.0,False
+gram-latency-8x8,gram,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,3,500,44.032,False
+gram-latency-8x1,gram,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,0,22016,1.0,False
+gram-latency-8x1,gram,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,1,768,28.666666666666668,False
+gram-latency-8x1,gram,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,2,768,28.666666666666668,False
+gram-latency-8x1,gram,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,3,760,28.96842105263158,False
+gram-latency-8x1,gram,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,0,22016,1.0,False
+gram-latency-8x1,gram,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,1,817,26.94736842105263,False
+gram-latency-8x1,gram,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,2,817,26.94736842105263,False
+gram-latency-8x1,gram,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,3,771,28.555123216601817,False
+gram-latency-8x1,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,0,22016,1.0,False
+gram-latency-8x1,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,1,950,23.174736842105265,False
+gram-latency-8x1,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,2,950,23.174736842105265,False
+gram-latency-8x1,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,3,950,23.174736842105265,False
+gram-latency-8x1,gram,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,0,22016,1.0,False
+gram-latency-8x1,gram,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,1,771,28.555123216601817,False
+gram-latency-8x1,gram,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,2,698,31.541547277936964,False
+gram-latency-8x1,gram,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,3,689,31.95355587808418,False
+gram-latency-8x1,gram,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,0,22016,1.0,False
+gram-latency-8x1,gram,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,1,721,30.535367545076284,False
+gram-latency-8x1,gram,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,2,721,30.535367545076284,False
+gram-latency-8x1,gram,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,3,721,30.535367545076284,False
+gram-latency-2x8,gram,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,0,22016,1.0,False
+gram-latency-2x8,gram,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,1,1942,11.336766220391349,False
+gram-latency-2x8,gram,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,2,1942,11.336766220391349,False
+gram-latency-2x8,gram,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,3,1942,11.336766220391349,False
+gram-latency-2x8,gram,opus,anthropic/claude-opus-5-5,11,latency-v1,2,8,cycles,0,22016,1.0,False
+gram-latency-2x8,gram,opus,anthropic/claude-opus-5-5,11,latency-v1,2,8,cycles,1,22016,1.0,False
+gram-latency-2x8,gram,opus,anthropic/claude-opus-5-5,11,latency-v1,2,8,cycles,2,22016,1.0,False
+gram-latency-2x8,gram,opus,anthropic/claude-opus-5-5,11,latency-v1,2,8,cycles,3,22016,1.0,False
+gram-latency-2x8,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,0,22016,1.0,False
+gram-latency-2x8,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,1,2668,8.251874062968517,False
+gram-latency-2x8,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,2,2668,8.251874062968517,False
+gram-latency-2x8,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,3,2668,8.251874062968517,False
+gram-latency-2x8,gram,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,0,22016,1.0,False
+gram-latency-2x8,gram,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,1,2028,10.856015779092703,False
+gram-latency-2x8,gram,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,2,1928,11.41908713692946,False
+gram-latency-2x8,gram,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,3,1914,11.502612330198538,False
+gram-latency-2x8,gram,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,0,22016,1.0,False
+gram-latency-2x8,gram,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,1,2052,10.729044834307992,False
+gram-latency-2x8,gram,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,2,2052,10.729044834307992,False
+gram-latency-2x8,gram,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,3,1918,11.478623566214807,False
+gram-energy,gram,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,0,649472,1.0,False
+gram-energy,gram,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,1,46006,14.117115158892318,False
+gram-energy,gram,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,2,44623,14.554646706855209,False
+gram-energy,gram,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,3,44623,14.554646706855209,False
+gram-energy,gram,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,0,649472,1.0,False
+gram-energy,gram,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,1,46015,14.11435401499511,False
+gram-energy,gram,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,2,46015,14.11435401499511,False
+gram-energy,gram,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,3,46015,14.11435401499511,False
+gram-energy,gram,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,0,649472,1.0,False
+gram-energy,gram,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,1,649472,1.0,False
+gram-energy,gram,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,2,143798,4.51655794934561,False
+gram-energy,gram,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,3,92432,7.026484334429635,False
+gram-energy,gram,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,0,649472,1.0,False
+gram-energy,gram,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,1,45567,14.253121776724385,False
+gram-energy,gram,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,2,44740,14.516584711667411,False
+gram-energy,gram,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,3,44507,14.59258094232368,False
+gram-energy,gram,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,0,649472,1.0,False
+gram-energy,gram,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,1,45516,14.269092187362686,False
+gram-energy,gram,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,2,44014,14.756032171581769,False
+gram-energy,gram,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,3,44014,14.756032171581769,False
+two-stage-latency-8x8,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,0,2720,1.0,False
+two-stage-latency-8x8,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,1,167,16.2874251497006,False
+two-stage-latency-8x8,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,2,164,16.585365853658537,False
+two-stage-latency-8x8,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,3,164,16.585365853658537,False
+two-stage-latency-8x8,two-stage,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,0,2720,1.0,False
+two-stage-latency-8x8,two-stage,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,1,171,15.90643274853801,False
+two-stage-latency-8x8,two-stage,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,2,171,15.90643274853801,False
+two-stage-latency-8x8,two-stage,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,3,171,15.90643274853801,False
+two-stage-latency-8x8,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,0,2720,1.0,False
+two-stage-latency-8x8,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,1,226,12.035398230088495,False
+two-stage-latency-8x8,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,2,224,12.142857142857142,False
+two-stage-latency-8x8,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,3,204,13.333333333333334,False
+two-stage-latency-8x8,two-stage,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,0,2720,1.0,False
+two-stage-latency-8x8,two-stage,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,1,170,16.0,False
+two-stage-latency-8x8,two-stage,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,2,167,16.2874251497006,False
+two-stage-latency-8x8,two-stage,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,3,164,16.585365853658537,False
+two-stage-latency-8x8,two-stage,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,0,2720,1.0,False
+two-stage-latency-8x8,two-stage,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,1,165,16.484848484848484,False
+two-stage-latency-8x8,two-stage,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,2,164,16.585365853658537,False
+two-stage-latency-8x8,two-stage,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,3,162,16.790123456790123,False
+two-stage-latency-8x1,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,0,2720,1.0,False
+two-stage-latency-8x1,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,1,328,8.292682926829269,False
+two-stage-latency-8x1,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,2,328,8.292682926829269,False
+two-stage-latency-8x1,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,3,328,8.292682926829269,False
+two-stage-latency-8x1,two-stage,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,0,2720,1.0,False
+two-stage-latency-8x1,two-stage,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,1,414,6.570048309178744,False
+two-stage-latency-8x1,two-stage,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,2,348,7.816091954022989,False
+two-stage-latency-8x1,two-stage,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,3,348,7.816091954022989,False
+two-stage-latency-8x1,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,0,2720,1.0,False
+two-stage-latency-8x1,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,1,400,6.8,False
+two-stage-latency-8x1,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,2,400,6.8,False
+two-stage-latency-8x1,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,3,400,6.8,False
+two-stage-latency-8x1,two-stage,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,0,2720,1.0,False
+two-stage-latency-8x1,two-stage,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,1,341,7.976539589442815,False
+two-stage-latency-8x1,two-stage,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,2,328,8.292682926829269,False
+two-stage-latency-8x1,two-stage,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,3,328,8.292682926829269,False
+two-stage-latency-8x1,two-stage,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,0,2720,1.0,False
+two-stage-latency-8x1,two-stage,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,1,328,8.292682926829269,False
+two-stage-latency-8x1,two-stage,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,2,328,8.292682926829269,False
+two-stage-latency-8x1,two-stage,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,3,328,8.292682926829269,False
+two-stage-latency-2x8,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,0,2720,1.0,False
+two-stage-latency-2x8,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,1,567,4.797178130511464,False
+two-stage-latency-2x8,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,2,563,4.8312611012433395,False
+two-stage-latency-2x8,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,3,562,4.839857651245552,False
+two-stage-latency-2x8,two-stage,opus,anthropic/claude-opus-5-5,11,latency-v1,2,8,cycles,0,2720,1.0,False
+two-stage-latency-2x8,two-stage,opus,anthropic/claude-opus-5-5,11,latency-v1,2,8,cycles,1,581,4.6815834767641995,False
+two-stage-latency-2x8,two-stage,opus,anthropic/claude-opus-5-5,11,latency-v1,2,8,cycles,2,581,4.6815834767641995,False
+two-stage-latency-2x8,two-stage,opus,anthropic/claude-opus-5-5,11,latency-v1,2,8,cycles,3,581,4.6815834767641995,True
+two-stage-latency-2x8,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,0,2720,1.0,False
+two-stage-latency-2x8,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,1,2720,1.0,False
+two-stage-latency-2x8,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,2,592,4.594594594594595,False
+two-stage-latency-2x8,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,3,592,4.594594594594595,False
+two-stage-latency-2x8,two-stage,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,0,2720,1.0,False
+two-stage-latency-2x8,two-stage,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,1,558,4.874551971326165,False
+two-stage-latency-2x8,two-stage,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,2,558,4.874551971326165,True
+two-stage-latency-2x8,two-stage,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,3,555,4.900900900900901,False
+two-stage-latency-2x8,two-stage,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,0,2720,1.0,False
+two-stage-latency-2x8,two-stage,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,1,2720,1.0,True
+two-stage-latency-2x8,two-stage,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,2,555,4.900900900900901,False
+two-stage-latency-2x8,two-stage,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,3,555,4.900900900900901,False
+two-stage-energy,two-stage,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,0,80224,1.0,False
+two-stage-energy,two-stage,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,1,80224,1.0,True
+two-stage-energy,two-stage,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,2,13857,5.789420509489789,False
+two-stage-energy,two-stage,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,3,13381,5.995366564531799,False
+two-stage-energy,two-stage,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,0,80224,1.0,False
+two-stage-energy,two-stage,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,1,80224,1.0,False
+two-stage-energy,two-stage,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,2,14657,5.473425666916832,False
+two-stage-energy,two-stage,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,3,14657,5.473425666916832,False
+two-stage-energy,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,0,80224,1.0,False
+two-stage-energy,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,1,14722,5.449259611465833,False
+two-stage-energy,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,2,14722,5.449259611465833,False
+two-stage-energy,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,3,14722,5.449259611465833,False
+two-stage-energy,two-stage,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,0,80224,1.0,False
+two-stage-energy,two-stage,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,1,13482,5.950452455125352,False
+two-stage-energy,two-stage,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,2,13317,6.024179620034542,False
+two-stage-energy,two-stage,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,3,13300,6.031879699248121,False
+two-stage-energy,two-stage,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,0,80224,1.0,False
+two-stage-energy,two-stage,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,1,13334,6.016499175041248,False
+two-stage-energy,two-stage,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,2,12844,6.246029274369356,False
+two-stage-energy,two-stage,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,3,12827,6.254307320495829,False

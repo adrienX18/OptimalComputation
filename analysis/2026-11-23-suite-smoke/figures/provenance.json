@@ -1,0 +1,25 @@
+{
+  "matplotlib": "3.11.2",
+  "numpy": "2.5.5",
+  "layout": [
+    {
+      "figure": "01_quality",
+      "overflowing_labels": []
+    },
+    {
+      "figure": "02_outcomes",
+      "overflowing_labels": []
+    },
+    {
+      "figure": "03_search_and_verification",
+      "overflowing_labels": []
+    }
+  ],
+  "inputs": {
+    "runs.csv": "ffda7cda850f155f86b983a676685f527aa83f31f2140ca5ca2fc204705d6457",
+    "attempts.csv": "3f069d97aa876db00c9d2100c8798d56e3d599c0c95bd2b37ef99951acb63a4f",
+    "convergence.csv": "28b47236894e84f200c0b427b49716db5430b07459f0cbba2bb62b04064c4179",
+    "kernel-checks.csv": "4d1806cc05bb52aba8be48387242316a336f4791bf6a8ad7b59a8d89306c5884"
+  },
+  "script_sha256": "9483cf13dc4d223448d4880dc24e4903d92ec42344b2e739e5e4aba0f6d80378"
+}

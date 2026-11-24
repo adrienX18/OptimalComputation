@@ -1,0 +1,185 @@
+instance,task,model,model_id,seed,objective,initial_lanes,initial_banks,unit,attempt,status,seconds,exit_code,start_seconds
+matmul-latency-8x8,matmul,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,1,completed,114.4358561038971,0,539.0081522464752
+matmul-latency-8x8,matmul,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,3,completed,117.7682888507843,0,1629.0737993717194
+matmul-latency-8x8,matmul,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,3,completed,113.76263999938965,0,425.24450612068176
+matmul-latency-8x8,matmul,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,1,completed,138.28945684432983,0,37.031665325164795
+matmul-latency-8x8,matmul,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,2,timeout,600.018721818924,-9,653.4450223445892
+matmul-latency-8x8,matmul,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,3,completed,130.62318110466003,0,1746.8452742099762
+matmul-latency-8x8,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,1,completed,128.54154682159424,0,175.32305121421814
+matmul-latency-8x8,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,2,completed,129.05751514434814,0,1253.4817490577698
+matmul-latency-8x8,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,3,completed,123.78159475326538,0,1877.4706811904907
+matmul-latency-8x8,matmul,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,1,completed,121.3771059513092,0,303.8663122653961
+matmul-latency-8x8,matmul,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,2,completed,124.69168901443481,0,1382.5536360740662
+matmul-latency-8x8,matmul,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,3,completed,120.10005497932434,0,2001.2538192272186
+matmul-latency-8x1,matmul,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,1,completed,121.7760808467865,0,1507.2766473293304
+matmul-latency-8x1,matmul,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,2,completed,119.16325402259827,0,2121.355165243149
+matmul-latency-8x1,matmul,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,3,completed,116.30756402015686,0,2710.222498178482
+matmul-latency-8x1,matmul,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,1,completed,119.81328010559082,0,2240.519781112671
+matmul-latency-8x1,matmul,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,2,completed,118.41040515899658,0,2826.531583070755
+matmul-latency-8x1,matmul,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,3,completed,119.35974788665771,0,3281.9632182121277
+matmul-latency-8x1,matmul,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,1,completed,121.77442622184753,0,2360.3349220752716
+matmul-latency-8x1,matmul,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,2,completed,119.69088411331177,0,2944.9439611434937
+matmul-latency-8x1,matmul,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,3,completed,124.55344581604004,0,3509.606798171997
+matmul-latency-8x1,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,1,completed,120.27570986747742,0,2482.1109833717346
+matmul-latency-8x1,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,2,completed,110.98548793792725,0,3064.6366991996765
+matmul-latency-8x1,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,3,completed,117.88082790374756,0,3634.162414073944
+matmul-latency-8x1,matmul,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,1,completed,107.83222508430481,0,2602.388575077057
+matmul-latency-8x1,matmul,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,3,completed,106.33783602714539,0,3175.6238951683044
+matmul-latency-2x8,matmul,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,1,completed,108.27978491783142,0,3401.3248043060303
+matmul-latency-2x8,matmul,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,2,completed,125.47478175163269,0,4033.7754282951355
+matmul-latency-2x8,matmul,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,3,completed,109.42988896369934,0,4720.381554365158
+matmul-latency-2x8,matmul,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,1,completed,169.96808290481567,0,3752.044801235199
+matmul-latency-2x8,matmul,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,3,completed,166.8034110069275,0,4285.298855304718
+matmul-latency-2x8,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,1,completed,111.75918579101562,0,3922.014749288559
+matmul-latency-2x8,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,2,completed,128.98657393455505,0,4591.393004179001
+matmul-latency-2x8,matmul,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,3,completed,110.94909906387329,0,5083.1709632873535
+matmul-latency-2x8,matmul,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,1,completed,126.04434013366699,0,4159.252331018448
+matmul-energy,matmul,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,1,completed,139.2862069606781,0,4452.104693174362
+matmul-energy,matmul,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,2,completed,123.50506591796875,0,5194.121590137482
+matmul-energy,matmul,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,3,completed,141.76599884033203,0,5709.036659240723
+matmul-energy,matmul,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,1,completed,130.63594007492065,0,4829.81326007843
+matmul-energy,matmul,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,2,completed,131.45565104484558,0,5442.232259273529
+matmul-energy,matmul,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,1,completed,122.71825695037842,0,4960.451139211655
+matmul-energy,matmul,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,2,completed,135.3442301750183,0,5573.6901960372925
+matmul-energy,matmul,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,3,completed,136.23213505744934,0,5996.994335174561
+matmul-energy,matmul,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,1,completed,124.60312914848328,0,5317.627652168274
+matmul-energy,matmul,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,2,completed,141.58882999420166,0,5850.8047342300415
+polynomial-latency-8x8,polynomial,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,2,completed,4.724771022796631,0,6138.459259271622
+polynomial-latency-8x8,polynomial,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,3,completed,4.521735191345215,0,6263.30650806427
+polynomial-latency-8x8,polynomial,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,1,completed,4.596718072891235,0,5992.395787000656
+polynomial-latency-8x8,polynomial,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,3,completed,4.481122016906738,0,6148.625935316086
+polynomial-latency-8x8,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,3,completed,5.228540897369385,0,6133.228698253632
+polynomial-latency-8x8,polynomial,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,1,completed,4.853636980056763,0,6174.125018119812
+polynomial-latency-8x8,polynomial,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,2,completed,4.412550687789917,0,6255.280177354813
+polynomial-latency-8x8,polynomial,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,3,completed,4.113425970077515,0,6354.771695137024
+polynomial-latency-8x8,polynomial,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,1,completed,4.4683709144592285,0,6210.735544204712
+polynomial-latency-8x1,polynomial,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,1,completed,4.584064960479736,0,6317.562484025955
+polynomial-latency-8x1,polynomial,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,2,completed,4.059598207473755,0,6531.855651140213
+polynomial-latency-8x1,polynomial,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,3,completed,4.053894281387329,0,6605.230782985687
+polynomial-latency-8x1,polynomial,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,1,completed,4.487283945083618,0,6340.538957118988
+polynomial-latency-8x1,polynomial,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,2,completed,3.93581223487854,0,6564.1839480400085
+polynomial-latency-8x1,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,2,completed,4.646050691604614,0,6360.539036273956
+polynomial-latency-8x1,polynomial,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,1,completed,4.055277109146118,0,6396.214614152908
+polynomial-latency-8x1,polynomial,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,2,completed,3.89389705657959,0,6443.98092007637
+polynomial-latency-8x1,polynomial,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,1,completed,4.25838828086853,0,6465.597898006439
+polynomial-latency-8x1,polynomial,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,2,completed,2.4570422172546387,0,6553.868096113205
+polynomial-latency-2x8,polynomial,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,1,completed,3.7785117626190186,0,6646.803079366684
+polynomial-latency-2x8,polynomial,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,2,completed,3.800736904144287,0,6820.92093706131
+polynomial-latency-2x8,polynomial,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,3,completed,3.929737091064453,0,7026.230366230011
+polynomial-latency-2x8,polynomial,opus,anthropic/claude-opus-5-5,11,latency-v1,2,8,cycles,2,completed,3.7329800128936768,0,6639.521530151367
+polynomial-latency-2x8,polynomial,opus,anthropic/claude-opus-5-5,11,latency-v1,2,8,cycles,3,completed,3.6772100925445557,0,6789.144373178482
+polynomial-latency-2x8,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,2,completed,4.296885967254639,0,6661.4458963871
+polynomial-latency-2x8,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,3,completed,3.933455228805542,0,6715.925763130188
+polynomial-latency-2x8,polynomial,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,1,completed,3.8187389373779297,0,6700.455753326416
+polynomial-latency-2x8,polynomial,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,2,completed,3.8849148750305176,0,6734.177985191345
+polynomial-latency-2x8,polynomial,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,3,completed,3.81516695022583,0,6806.364379167557
+polynomial-latency-2x8,polynomial,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,1,completed,3.9340720176696777,0,6725.122103214264
+polynomial-latency-2x8,polynomial,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,3,completed,4.079341173171997,0,6927.807035207748
+polynomial-energy,polynomial,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,1,completed,3.839961051940918,0,6923.150084257126
+polynomial-energy,polynomial,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,2,completed,3.8526298999786377,0,7056.573814153671
+polynomial-energy,polynomial,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,3,completed,3.8270010948181152,0,7116.06125330925
+polynomial-energy,polynomial,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,1,completed,3.9860029220581055,0,6931.887366294861
+polynomial-energy,polynomial,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,2,completed,3.9950108528137207,0,7075.170065164566
+polynomial-energy,polynomial,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,3,completed,4.1819047927856445,0,7272.192483186722
+polynomial-energy,polynomial,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,2,completed,3.868006944656372,0,6896.066163301468
+polynomial-energy,polynomial,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,1,completed,2.551319122314453,0,6946.0924680233
+polynomial-energy,polynomial,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,2,completed,2.150902032852173,0,7000.80456328392
+polynomial-energy,polynomial,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,3,completed,2.3245699405670166,0,7030.219131231308
+polynomial-energy,polynomial,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,2,completed,2.182537078857422,0,7048.812394142151
+polynomial-energy,polynomial,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,3,completed,2.1705868244171143,0,7152.487122297287
+gram-latency-8x8,gram,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,1,completed,81.80583500862122,0,7426.846304178238
+gram-latency-8x8,gram,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,2,completed,81.47092509269714,0,7754.174900054932
+gram-latency-8x8,gram,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,3,completed,82.71476984024048,0,8071.773826122284
+gram-latency-8x8,gram,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,1,completed,84.14001893997192,0,7276.376100301743
+gram-latency-8x8,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,1,completed,117.53122615814209,0,7154.658743143082
+gram-latency-8x8,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,2,completed,88.72901129722595,0,7508.653130054474
+gram-latency-8x8,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,3,completed,88.4539430141449,0,7835.646911144257
+gram-latency-8x8,gram,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,1,completed,66.32736587524414,0,7360.5179262161255
+gram-latency-8x8,gram,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,2,completed,64.01939463615417,0,7690.154472351074
+gram-latency-8x8,gram,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,3,completed,64.5023820400238,0,8007.270436286926
+gram-latency-8x8,gram,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,1,completed,92.77027106285095,0,7597.383161067963
+gram-latency-8x8,gram,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,3,completed,94.2524209022522,0,8154.489626169205
+gram-latency-8x1,gram,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,1,completed,83.16759300231934,0,7924.101810216904
+gram-latency-8x1,gram,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,2,completed,84.98435401916504,0,8502.675024271011
+gram-latency-8x1,gram,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,3,completed,88.39470911026001,0,9010.131672143936
+gram-latency-8x1,gram,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,1,completed,83.68595099449158,0,8336.466765165329
+gram-latency-8x1,gram,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,2,completed,87.54975295066833,0,8828.290755271912
+gram-latency-8x1,gram,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,3,completed,87.35586190223694,0,9183.467177152634
+gram-latency-8x1,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,1,completed,87.72280287742615,0,8248.74300122261
+gram-latency-8x1,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,2,completed,92.54102802276611,0,8652.183171272278
+gram-latency-8x1,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,3,completed,94.28794288635254,0,8915.841616153717
+gram-latency-8x1,gram,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,1,completed,82.52022504806519,0,8420.153714179993
+gram-latency-8x1,gram,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,2,completed,83.56433820724487,0,8744.7253241539
+gram-latency-8x1,gram,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,3,completed,84.9383270740509,0,9098.527812242508
+gram-latency-8x1,gram,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,1,completed,64.52120208740234,0,8587.660436153412
+gram-latency-2x8,gram,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,1,completed,82.30099201202393,0,9270.824080228806
+gram-latency-2x8,gram,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,3,completed,78.80135583877563,0,10199.67193031311
+gram-latency-2x8,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,1,completed,93.70264005661011,0,9353.12606215477
+gram-latency-2x8,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,2,completed,93.41684603691101,0,9695.09336924553
+gram-latency-2x8,gram,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,3,completed,93.94628810882568,0,9867.633887052536
+gram-latency-2x8,gram,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,1,completed,80.16318893432617,0,9446.829669237137
+gram-latency-2x8,gram,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,2,completed,79.12160778045654,0,9788.511269330978
+gram-latency-2x8,gram,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,3,completed,78.41327381134033,0,10041.127621173859
+gram-latency-2x8,gram,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,1,completed,80.53500080108643,0,9526.993865251541
+gram-latency-2x8,gram,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,3,completed,79.54513216018677,0,9961.581369161606
+gram-energy,gram,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,1,completed,87.56248807907104,0,9607.529882192612
+gram-energy,gram,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,2,completed,80.1289758682251,0,10119.541854381561
+gram-energy,gram,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,3,completed,80.596923828125,0,10509.352643251419
+gram-energy,gram,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,1,completed,80.97861886024475,0,10369.640634298325
+gram-energy,gram,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,2,completed,91.16533994674683,0,10278.474323272705
+gram-energy,gram,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,3,completed,92.20020580291748,0,10656.651465415955
+gram-energy,gram,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,1,completed,58.73144793510437,0,10450.62027812004
+gram-energy,gram,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,2,completed,60.02678608894348,0,10748.853228092194
+gram-energy,gram,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,3,completed,57.78685998916626,0,11048.125298261642
+gram-energy,gram,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,1,completed,66.69986987113953,0,10589.950590372086
+gram-energy,gram,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,2,completed,62.404759883880615,0,10985.71956729889
+two-stage-latency-8x8,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,1,completed,59.048598766326904,0,10808.881341218948
+two-stage-latency-8x8,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,2,completed,58.69522476196289,0,11163.370310306549
+two-stage-latency-8x8,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,8,8,cycles,3,completed,58.82420468330383,0,11464.17767238617
+two-stage-latency-8x8,two-stage,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,1,completed,58.22195219993591,0,10927.496563196182
+two-stage-latency-8x8,two-stage,opus,anthropic/claude-opus-5-5,11,latency-v1,8,8,cycles,3,completed,57.70591998100281,0,11281.022370100021
+two-stage-latency-8x8,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,1,completed,59.564605951309204,0,10867.930967092514
+two-stage-latency-8x8,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,2,completed,57.45601987838745,0,11105.913149356842
+two-stage-latency-8x8,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,8,cycles,3,completed,57.516154766082764,0,11338.729305267334
+two-stage-latency-8x8,two-stage,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,1,completed,58.954883098602295,0,11222.066462993622
+two-stage-latency-8x8,two-stage,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,2,completed,60.694220781326294,0,11523.002834320068
+two-stage-latency-8x8,two-stage,astra,openai/gpt-6.2-astra,11,latency-v1,8,8,cycles,3,completed,59.590445041656494,0,11830.660929203033
+two-stage-latency-8x8,two-stage,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,1,completed,67.93020105361938,0,11396.246477127075
+two-stage-latency-8x8,two-stage,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,2,completed,64.42386412620544,0,11642.743787050247
+two-stage-latency-8x8,two-stage,sol,openai/gpt-6.2-sol,11,latency-v1,8,8,cycles,3,completed,64.78919315338135,0,11890.252387046814
+two-stage-latency-8x1,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,1,completed,59.04474496841431,0,11583.698070049286
+two-stage-latency-8x1,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,2,completed,59.3243408203125,0,11955.042524337769
+two-stage-latency-8x1,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,8,1,cycles,3,completed,59.02801203727722,0,12253.753297328949
+two-stage-latency-8x1,two-stage,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,1,completed,61.194244146347046,0,11769.465651988983
+two-stage-latency-8x1,two-stage,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,2,completed,60.38131403923035,0,12193.369787216187
+two-stage-latency-8x1,two-stage,opus,anthropic/claude-opus-5-5,11,latency-v1,8,1,cycles,3,completed,55.32520508766174,0,12485.47773528099
+two-stage-latency-8x1,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,1,completed,62.29590916633606,0,11707.168790102005
+two-stage-latency-8x1,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,8,1,cycles,3,completed,60.43460392951965,0,12014.367900371552
+two-stage-latency-8x1,two-stage,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,1,completed,60.06142020225525,0,12074.803498983383
+two-stage-latency-8x1,two-stage,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,2,completed,58.45927977561951,0,12312.782319307327
+two-stage-latency-8x1,two-stage,astra,openai/gpt-6.2-astra,11,latency-v1,8,1,cycles,3,completed,56.556090116500854,0,12598.980674028397
+two-stage-latency-8x1,two-stage,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,1,completed,58.5021858215332,0,12134.865915298462
+two-stage-latency-8x1,two-stage,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,2,completed,58.732189893722534,0,12426.744473218918
+two-stage-latency-8x1,two-stage,sol,openai/gpt-6.2-sol,11,latency-v1,8,1,cycles,3,completed,58.38007616996765,0,12773.13531422615
+two-stage-latency-2x8,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,1,completed,55.50076603889465,0,12371.242732048035
+two-stage-latency-2x8,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,2,completed,57.570570945739746,0,12655.538133144379
+two-stage-latency-2x8,two-stage,fable,anthropic/claude-fable-5-2,11,latency-v1,2,8,cycles,3,completed,56.86889886856079,0,12949.514689207077
+two-stage-latency-2x8,two-stage,opus,anthropic/claude-opus-5-5,11,latency-v1,2,8,cycles,1,completed,58.17560291290283,0,12540.804012060165
+two-stage-latency-2x8,two-stage,opus,anthropic/claude-opus-5-5,11,latency-v1,2,8,cycles,3,interrupted,0.48833203315734863,-9,13006.38474702835
+two-stage-latency-2x8,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,2,completed,60.0245578289032,0,12713.109670162201
+two-stage-latency-2x8,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,latency-v1,2,8,cycles,3,completed,60.376307249069214,0,12889.137248039246
+two-stage-latency-2x8,two-stage,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,1,completed,57.619823932647705,0,12831.516391277313
+two-stage-latency-2x8,two-stage,astra,openai/gpt-6.2-astra,11,latency-v1,2,8,cycles,3,completed,59.09105467796326,0,13189.034536361694
+two-stage-latency-2x8,two-stage,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,2,completed,58.46893811225891,0,13248.126650094986
+two-stage-latency-2x8,two-stage,sol,openai/gpt-6.2-sol,11,latency-v1,2,8,cycles,3,completed,57.52150297164917,0,13607.59472823143
+two-stage-energy,two-stage,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,2,completed,59.90857696533203,0,13306.59666109085
+two-stage-energy,two-stage,fable,anthropic/claude-fable-5-2,11,energy-proxy-v1,8,8,abstract energy units,3,completed,58.026233196258545,0,13549.567425012589
+two-stage-energy,two-stage,opus,anthropic/claude-opus-5-5,11,energy-proxy-v1,8,8,abstract energy units,2,completed,59.661529779434204,0,13489.904765367508
+two-stage-energy,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,1,completed,58.80864596366882,0,13130.22488117218
+two-stage-energy,two-stage,sonnet,anthropic/claude-sonnet-5-5,11,energy-proxy-v1,8,8,abstract energy units,2,completed,58.80362820625305,0,13366.50651216507
+two-stage-energy,two-stage,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,1,completed,64.59205603599548,0,13425.311359167099
+two-stage-energy,two-stage,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,2,completed,65.83987593650818,0,13724.885542154312
+two-stage-energy,two-stage,astra,openai/gpt-6.2-astra,11,energy-proxy-v1,8,8,abstract energy units,3,completed,63.47656488418579,0,13851.01672410965
+two-stage-energy,two-stage,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,1,completed,59.767123222351074,0,13665.117290019989
+two-stage-energy,two-stage,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,2,completed,59.27288293838501,0,13914.494264125824
+two-stage-energy,two-stage,sol,openai/gpt-6.2-sol,11,energy-proxy-v1,8,8,abstract energy units,3,completed,56.33217096328735,0,14077.022589206696
