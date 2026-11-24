@@ -9,9 +9,17 @@
     {
       "figure": "05_winner_architecture",
       "overflowing_labels": []
+    },
+    {
+      "figure": "06_matmul_architecture",
+      "overflowing_labels": []
+    },
+    {
+      "figure": "07_two_stage_architecture",
+      "overflowing_labels": []
     }
   ],
-  "script_sha256": "9ae90b4192db541851df6541f0dd0eb9d2bee823f67fd9a7bb7c47f313db6ba5",
+  "script_sha256": "968adcde559ff2b5be21f2912e617a53d14db70800929785246e799c3624713a",
   "inputs": {
     "convergence.csv": "24649d1c5fbffc7b3056df7fdfa5b80b8e1d488e6c6b2a7032c85adfb1f6edec",
     "runs.csv": "599047d4964b2e8f769f04d257ee2e510730ba6a67ddb8bc5a1a8b74c4db4109",
@@ -32,6 +40,42 @@
     "walkthrough/winner/randomness.json": "50bbeb2aaaa928a9b6a43812e89a2d3581b19d39ca9b1d3d0299ed433244ff79",
     "walkthrough/winner/request.json": "45dc28c6374b2501d0b25ef7399db47cd35e300581119b063f623bc304dd8d49",
     "walkthrough/winner/response.json": "8bc581f55c0c3450d7d2c3d3ec60615534b564014cda5e0fe083948a45c5824f",
-    "walkthrough/winner/score.json": "9104b9b885cc328fcac10b615e379e662599e87490f4935b05cce7de38da63c4"
+    "walkthrough/winner/score.json": "9104b9b885cc328fcac10b615e379e662599e87490f4935b05cce7de38da63c4",
+    "architectures/matmul/architecture.json": "57de6d3a6f6ac1647d449dc40219b582db6ca00c907083aee0816afe13f60c67",
+    "architectures/matmul/baseline/candidate.json": "ab1a639f8d3acd00d8c6b036c7d167786181e2c13417ab4fa0ed22b24fb56b4e",
+    "architectures/matmul/baseline/score.json": "c20004b0405c774ad84d7afebf5369bd0427b1d7adcdda64b929f57e1ce575c1",
+    "architectures/matmul/previous-feedback.json": "aa7e2709a22141071b20caa802a559c782f0813d29b8fce9075daebde4eb4bde",
+    "architectures/matmul/provenance.json": "7080a3854bce23bcc4faa765963ec23dabdb1c64b88c7bb57ac693fa631c38d0",
+    "architectures/matmul/run-manifest.json": "c7bcd4fe08b032ba5d8c996e74e98cd268e8724d0b2a63bff76632eec0fb83a0",
+    "architectures/matmul/run-summary.json": "1f9077b1b3ed0f8c69e76e0a9c62c8c6f25286fce1760d40158883c1cf2cedb8",
+    "architectures/matmul/winner/candidate.json": "ff7c92266477568ed5393276477f6682e2d46cb638f018ae6a930b4304e5eef1",
+    "architectures/matmul/winner/certification/kernel/result.json": "67eecc07913de59ff671542bc01c65456c5bc8925e1697606c5750a8d84ef4d4",
+    "architectures/matmul/winner/certification/result.json": "865364604f64c6b48edd68d89e565448b6bff9c0d9e1b6b3997026d9ab1bcbbd",
+    "architectures/matmul/winner/feedback.json": "21ee68ffda294097cfeb68f63925c841a8db67d54d1200a76dfd4f7427d40a97",
+    "architectures/matmul/winner/proposal.json": "0734493ae5b74c73dc5a5974f4cfd9161162249382c6cd45101b8d8111086b06",
+    "architectures/matmul/winner/provider-001-request.json": "5c66aae07dce80f39a022a0d95c5ad7113d6f628e34cefe0efb3426e82842c45",
+    "architectures/matmul/winner/provider-002-response.json": "d4fc2b0cb784efd946ffcda55e9b1be3b7e797f3915f759d0b3ba73316e95736",
+    "architectures/matmul/winner/randomness.json": "50bbeb2aaaa928a9b6a43812e89a2d3581b19d39ca9b1d3d0299ed433244ff79",
+    "architectures/matmul/winner/request.json": "51879ff7d4aebb3b1e84357fe9555aabffec29492ca990090ce7e8ad51fb75d1",
+    "architectures/matmul/winner/response.json": "5aeeb63e6d9c9e189f5de5c25f3f4ab2503ae014e8c7dc7f1cb02a596e9270eb",
+    "architectures/matmul/winner/score.json": "663292f2fac1154e488989766cd6d2f1941a7d695cbf3d289c79be70658a8aed",
+    "architectures/two-stage/architecture.json": "1aabd8c2d2e24b993edfeab51abcc5bb19058995c2a013940a309e6daeecd462",
+    "architectures/two-stage/baseline/candidate.json": "4944d6f56027a41a3a3d37111d246b55d29b98891419a67c1de46528fcdb82b4",
+    "architectures/two-stage/baseline/score.json": "62f4a52aed3c534bcf27dfe3a0541f271a41bfa244d34ca0f2789bcd9b256323",
+    "architectures/two-stage/previous-feedback.json": "0e63ee5324ed5f18ca69bf158edc9d0763381a16e1d5e36adf6800b1ae4b07b8",
+    "architectures/two-stage/provenance.json": "930d30e3b5121e18134f4d5405077e3f970633ce24796d23429242aae065373c",
+    "architectures/two-stage/run-manifest.json": "4c3c4d9cf74e96f8a99e80e3b19715bdefe929b4d89e3220ba411303ee0e42a6",
+    "architectures/two-stage/run-summary.json": "b266817dfc6953ea8d337e8cd745be67b2d0ae71f5924774ab63dda130eb3113",
+    "architectures/two-stage/winner/candidate.json": "f714455a97cf6c20252b295e750cb752e2ee62cd71640d03ec184e2a7781c60b",
+    "architectures/two-stage/winner/certification/kernel/result.json": "8a12550132e7f954f812df7f6bf5026417459e3a913b1e01a7abfdb7a0b3e3f6",
+    "architectures/two-stage/winner/certification/result.json": "501a98e8615be3f9d7954b47f1e0428dd3fd564101941dbb74bfe4ae53267e4d",
+    "architectures/two-stage/winner/feedback.json": "3a7d4f170d6a9136fb46002ea150d7248f71ecc57b85d14976e57d754c561c97",
+    "architectures/two-stage/winner/proposal.json": "6f7500528e03e81c14cce91283bd6db3ff1b8124c192ab08323d9560d7a7a98b",
+    "architectures/two-stage/winner/provider-001-request.json": "f67d3911f2fd32a54539f9c17e5a37cd97909eb573e4d3493099ad34b96b60c0",
+    "architectures/two-stage/winner/provider-002-response.json": "6ef05502e44c7d4a8d55fddbf8dc99a33d5b2297938b035963f060aa48181e3a",
+    "architectures/two-stage/winner/randomness.json": "50bbeb2aaaa928a9b6a43812e89a2d3581b19d39ca9b1d3d0299ed433244ff79",
+    "architectures/two-stage/winner/request.json": "830e02fd22d3576d034d38645cba74324de379c506c8adcc721584f3281a26b4",
+    "architectures/two-stage/winner/response.json": "684f741be60cd80e46981ff294e4f6065ffb06166c850ac1e283b25317c4c813",
+    "architectures/two-stage/winner/score.json": "d01d79bc4b307eef80cf9e81fe293e5d3108ac305aeb922e726f2f2094d922b3"
   }
 }

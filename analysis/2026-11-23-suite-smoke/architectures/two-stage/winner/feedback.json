@@ -1,0 +1,14 @@
+{
+  "accepted": true,
+  "category": "certified",
+  "score": 162,
+  "unit": "cycles",
+  "cycles": 162,
+  "certificate": "Certificate_576b88b682baf3aa0bf6942bff7636a2ce6dd0408dd42a4ce2900229c648de26.artifact",
+  "attempt": 3,
+  "idea": "Split A*x into eight-column tiles shared by lane pairs, then exchange partial sums. Each lane loads only eight x values, and the reduced results feed the existing two-row B pipeline.",
+  "directory": "attempts/0003",
+  "seconds": 247.872,
+  "improved": true,
+  "bestScore": 162
+}

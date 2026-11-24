@@ -1,0 +1,109 @@
+{
+  "selection": {
+    "rule": "Lowest final certified latency among the five models for this task at 8 lanes / 8 banks; model name breaks ties.",
+    "instance": "two-stage-latency-8x8",
+    "selected_model": "sol"
+  },
+  "model": "openai/gpt-6.2-sol",
+  "run": "runs/two-stage-latency-8x8/sol/seed-11",
+  "attempt": 3,
+  "prompt_bytes": 11696,
+  "output_code_bytes": 2063,
+  "history": [
+    {
+      "attempt": 1,
+      "idea": "Assign two rows of each matrix to each lane. Alternate the two dot products to sustain one matrix lo",
+      "status": "certified",
+      "score": 165
+    },
+    {
+      "attempt": 2,
+      "idea": "Move the second A*x publication into the second-stage writeback gap. Start the first B octet one cyc",
+      "status": "certified",
+      "score": 164
+    }
+  ],
+  "baseline": {
+    "cycles": 2720,
+    "instructions": 1632,
+    "counts": {
+      "add": 32,
+      "load": 1040,
+      "multiplyAdd": 512,
+      "store": 48
+    },
+    "lane_issues": [
+      1632,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "scratch_slots": 32,
+    "output_lanes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "distinct_output_formulas": 16,
+    "symbolic_outputs_checked": true
+  },
+  "winner": {
+    "cycles": 162,
+    "instructions": 1280,
+    "counts": {
+      "load": 704,
+      "multiplyAdd": 512,
+      "store": 48,
+      "add": 16
+    },
+    "lane_issues": [
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160
+    ],
+    "scratch_slots": 32,
+    "output_lanes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "distinct_output_formulas": 16,
+    "symbolic_outputs_checked": true
+  },
+  "certificate_bindings_checked": true
+}

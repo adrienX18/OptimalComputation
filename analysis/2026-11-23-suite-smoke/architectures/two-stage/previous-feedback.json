@@ -1,0 +1,14 @@
+{
+  "accepted": true,
+  "category": "certified",
+  "score": 164,
+  "unit": "cycles",
+  "cycles": 164,
+  "certificate": "Certificate_ef668c35c9f011e34b5a8130ef600f1caf4ea34876ef9e1ba9ca0c9ff45f29b6.artifact",
+  "attempt": 2,
+  "idea": "Move the second A*x publication into the second-stage writeback gap. Start the first B octet one cycle earlier, then use its trailing load slot to prefetch a coefficient for the second octet.",
+  "directory": "attempts/0002",
+  "seconds": 242.989,
+  "improved": true,
+  "bestScore": 164
+}

@@ -1,0 +1,14 @@
+{
+  "accepted": true,
+  "category": "certified",
+  "score": 948,
+  "unit": "cycles",
+  "cycles": 948,
+  "certificate": "Certificate_be005ebfaaad13c8356546ad1bb0361da0b0a7a1f827683106cf2bd50d449518.artifact",
+  "attempt": 2,
+  "idea": "Search column-width partitions of each lane's two-row strip. For each width, use dynamic programming to interleave ordered operand loads with an outer-product MAC stream, accounting for operand lifetimes and writeback collisions.",
+  "directory": "attempts/0002",
+  "seconds": 1078.689,
+  "improved": true,
+  "bestScore": 948
+}

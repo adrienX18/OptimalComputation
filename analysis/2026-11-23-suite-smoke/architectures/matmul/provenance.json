@@ -1,0 +1,120 @@
+{
+  "archive": "suite-smoke-20261123",
+  "archive_inventory_sha256": "478124c2a59291645e8e0f90d99440f18ba635c226c393f5717574f8d3e5605b",
+  "files": [
+    {
+      "file": "winner/request.json",
+      "source": "runs/matmul-latency-8x8/astra/seed-11/attempts/0003/request.json",
+      "bytes": 13994,
+      "sha256": "51879ff7d4aebb3b1e84357fe9555aabffec29492ca990090ce7e8ad51fb75d1"
+    },
+    {
+      "file": "winner/response.json",
+      "source": "runs/matmul-latency-8x8/astra/seed-11/attempts/0003/response.json",
+      "bytes": 7877,
+      "sha256": "5aeeb63e6d9c9e189f5de5c25f3f4ab2503ae014e8c7dc7f1cb02a596e9270eb"
+    },
+    {
+      "file": "winner/proposal.json",
+      "source": "runs/matmul-latency-8x8/astra/seed-11/attempts/0003/proposal.json",
+      "bytes": 4478,
+      "sha256": "0734493ae5b74c73dc5a5974f4cfd9161162249382c6cd45101b8d8111086b06"
+    },
+    {
+      "file": "winner/generator.py",
+      "source": "runs/matmul-latency-8x8/astra/seed-11/attempts/0003/generator.py",
+      "bytes": 3857,
+      "sha256": "e0e20c8f71340ca0804814cb236f367424e3a933d03bb1c497ad40c4eab40bb1"
+    },
+    {
+      "file": "winner/candidate.json",
+      "source": "runs/matmul-latency-8x8/astra/seed-11/attempts/0003/candidate.json",
+      "bytes": 828309,
+      "sha256": "ff7c92266477568ed5393276477f6682e2d46cb638f018ae6a930b4304e5eef1"
+    },
+    {
+      "file": "winner/score.json",
+      "source": "runs/matmul-latency-8x8/astra/seed-11/attempts/0003/score.json",
+      "bytes": 9619,
+      "sha256": "663292f2fac1154e488989766cd6d2f1941a7d695cbf3d289c79be70658a8aed"
+    },
+    {
+      "file": "winner/feedback.json",
+      "source": "runs/matmul-latency-8x8/astra/seed-11/attempts/0003/feedback.json",
+      "bytes": 564,
+      "sha256": "21ee68ffda294097cfeb68f63925c841a8db67d54d1200a76dfd4f7427d40a97"
+    },
+    {
+      "file": "winner/randomness.json",
+      "source": "runs/matmul-latency-8x8/astra/seed-11/attempts/0003/randomness.json",
+      "bytes": 139,
+      "sha256": "50bbeb2aaaa928a9b6a43812e89a2d3581b19d39ca9b1d3d0299ed433244ff79"
+    },
+    {
+      "file": "winner/certification/result.json",
+      "source": "runs/matmul-latency-8x8/astra/seed-11/attempts/0003/certification/result.json",
+      "bytes": 12285,
+      "sha256": "865364604f64c6b48edd68d89e565448b6bff9c0d9e1b6b3997026d9ab1bcbbd"
+    },
+    {
+      "file": "winner/certification/kernel/result.json",
+      "source": "runs/matmul-latency-8x8/astra/seed-11/attempts/0003/certification/kernel/result.json",
+      "bytes": 78,
+      "sha256": "67eecc07913de59ff671542bc01c65456c5bc8925e1697606c5750a8d84ef4d4"
+    },
+    {
+      "file": "winner/provider-001-request.json",
+      "source": "runs/matmul-latency-8x8/astra/seed-11/attempts/0003/provider-001-request.json",
+      "bytes": 28278,
+      "sha256": "5c66aae07dce80f39a022a0d95c5ad7113d6f628e34cefe0efb3426e82842c45"
+    },
+    {
+      "file": "winner/provider-002-response.json",
+      "source": "runs/matmul-latency-8x8/astra/seed-11/attempts/0003/provider-002-response.json",
+      "bytes": 19530,
+      "sha256": "d4fc2b0cb784efd946ffcda55e9b1be3b7e797f3915f759d0b3ba73316e95736"
+    },
+    {
+      "file": "baseline/candidate.json",
+      "source": "runs/matmul-latency-8x8/astra/seed-11/baseline/1795466964640137000/candidate.json",
+      "bytes": 2196251,
+      "sha256": "ab1a639f8d3acd00d8c6b036c7d167786181e2c13417ab4fa0ed22b24fb56b4e"
+    },
+    {
+      "file": "baseline/score.json",
+      "source": "runs/matmul-latency-8x8/astra/seed-11/baseline/1795466964640137000/score.json",
+      "bytes": 9601,
+      "sha256": "c20004b0405c774ad84d7afebf5369bd0427b1d7adcdda64b929f57e1ce575c1"
+    },
+    {
+      "file": "baseline/generator.py",
+      "source": "runs/matmul-latency-8x8/astra/seed-11/baseline/1795466964640137000/generator.py",
+      "bytes": 73,
+      "sha256": "61f2c087d145cf6425fb7339d53943d3217fe655a850ca5184b95afc8bfd29ab"
+    },
+    {
+      "file": "run-manifest.json",
+      "source": "runs/matmul-latency-8x8/astra/seed-11/manifest.json",
+      "bytes": 13586,
+      "sha256": "c7bcd4fe08b032ba5d8c996e74e98cd268e8724d0b2a63bff76632eec0fb83a0"
+    },
+    {
+      "file": "run-summary.json",
+      "source": "runs/matmul-latency-8x8/astra/seed-11/summary.json",
+      "bytes": 2504,
+      "sha256": "1f9077b1b3ed0f8c69e76e0a9c62c8c6f25286fce1760d40158883c1cf2cedb8"
+    },
+    {
+      "file": "prompt-at-run.py",
+      "source": "source/scripts/harness/prompt.py",
+      "bytes": 6364,
+      "sha256": "0bef168c892636e3c3c3ae4044a2a585c813b20816afb8add4c2aa5e57204658"
+    },
+    {
+      "file": "previous-feedback.json",
+      "source": "runs/matmul-latency-8x8/astra/seed-11/attempts/0002/feedback.json",
+      "bytes": 563,
+      "sha256": "aa7e2709a22141071b20caa802a559c782f0813d29b8fce9075daebde4eb4bde"
+    }
+  ]
+}

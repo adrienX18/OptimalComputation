@@ -1,0 +1,88 @@
+{
+  "id": "chatcmpl-EnYJK7s5wQxMSbeCa1I79bMVkYnBN",
+  "created": 1795478670,
+  "model": "gpt-6.2-sol",
+  "object": "chat.completion",
+  "system_fingerprint": null,
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "{\n  \"idea\": \"Split A*x into eight-column tiles shared by lane pairs, then exchange partial sums. Each lane loads only eight x values, and the reduced results feed the existing two-row B pipeline.\",\n  \"code\": \"from candidate_tools import baseline, load, store, add, mac, issue\\n\\n\\ndef build():\\n    c = baseline()\\n    a = lambda i,j: 16*j+i\\n    b = lambda i,j: 272+16*j+i\\n    y = lambda i: 544+i\\n    c['layout']['inputs'] = ([a(i,j) for i in range(16) for j in range(16)]\\n                             + list(range(256,272))\\n                             + [b(i,j) for i in range(16) for j in range(16)])\\n    s = []\\n    for lane in range(8):\\n        def emit(t, op):\\n            s.append(issue(t,lane,op))\\n\\n        peer = lane ^ 4\\n        rows = [peer, peer+8, lane, lane+8]\\n        cols = [8*(lane//4)+(lane%4+k)%8 for k in range(8)]\\n        for k,j in enumerate(cols):\\n            emit(k,load(k+1,256+j))\\n        for k,j in enumerate(cols):\\n            for q,i in enumerate(rows):\\n                t = 8+8*k+2*q\\n                r = 9+q\\n                emit(t,load(13,a(i,j)))\\n                emit(t+1,mac(r,13,k+1,r if k else 0))\\n\\n        emit(72,store(9,560+lane))\\n        emit(73,store(10,568+lane))\\n        emit(74,load(1,560+peer))\\n        emit(75,load(2,568+peer))\\n        emit(76,add(9,11,1))\\n        emit(77,add(10,12,2))\\n        emit(79,store(9,y(lane)))\\n        emit(80,load(14,b(lane,lane)))\\n        emit(119,load(14,b(lane,lane+8)))\\n        emit(120,store(10,y(lane+8)))\\n\\n        for half in range(2):\\n            cols = [8*half+(lane+k)%8 for k in range(8)]\\n            start = 81 if half == 0 else 121\\n            for k,j in enumerate(cols[1:],1):\\n                emit(start+k-1,load(k,y(j)))\\n            t = start+7\\n            for k,j in enumerate(cols):\\n                for q in range(2):\\n                    first = k == 0 and q == 0\\n                    if not first:\\n                        emit(t,load(13,b(lane+8*q,j)))\\n                        t += 1\\n                    r = 11+q\\n                    emit(t,mac(r,14 if first else 13,k if k else 9+half,r if half or k else 0))\\n                    t += 1\\n        emit(159,store(11,528+lane))\\n        emit(161,store(12,536+lane))\\n\\n    c['schedule'] = sorted(s,key=lambda e:(e['cycle'],e['lane']))\\n    return c\\n\",\n  \"notes\": \"Targets 162 cycles versus certified 164. Each lane computes four eight-term A*x partials; lane XOR 4 supplies the complementary half. Partial magnitudes are at most 16200 and reduced magnitudes at most 32400, so the B-stage multiplicands fit signed16. Partial exchange uses cycles 72–75, and reductions issue at 76–77. Publish the first y octet at 79 and the second at 120, in the B-stage load-writeback gap. Final stores issue at 159 and 161.\"\n}",
+        "role": "assistant",
+        "tool_calls": null,
+        "function_call": null,
+        "annotations": [],
+        "refusal": null
+      },
+      "provider_specific_fields": {}
+    }
+  ],
+  "usage": {
+    "completion_tokens": 4141,
+    "prompt_tokens": 4040,
+    "total_tokens": 8181,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": 0,
+      "audio_tokens": 0,
+      "reasoning_tokens": 3214,
+      "rejected_prediction_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "audio_tokens": 0,
+      "cache_write_tokens": 4037,
+      "cached_tokens": 0,
+      "cache_creation_tokens": 4037
+    }
+  },
+  "service_tier": "default",
+  "providerMetadata": {
+    "custom_llm_provider": "openai",
+    "region_name": null,
+    "additional_headers": {
+      "x-ratelimit-limit-requests": "5000",
+      "x-ratelimit-remaining-requests": "4999",
+      "x-ratelimit-limit-tokens": "1000000",
+      "x-ratelimit-remaining-tokens": "997199",
+      "llm_provider-date": "Tue, 24 Nov 2026 00:06:10 GMT",
+      "llm_provider-content-type": "application/json",
+      "llm_provider-transfer-encoding": "chunked",
+      "llm_provider-connection": "keep-alive",
+      "llm_provider-cf-ray": "a5f428163e9d67f1-SJC",
+      "llm_provider-cf-cache-status": "DYNAMIC",
+      "llm_provider-server": "cloudflare",
+      "llm_provider-strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "llm_provider-vary": "Origin",
+      "llm_provider-x-content-type-options": "nosniff",
+      "llm_provider-access-control-expose-headers": "X-Request-ID, CF-Ray, CF-Ray",
+      "llm_provider-openai-organization": "user-ca6rw1hux6ttrnb2z1dnwov9",
+      "llm_provider-openai-processing-ms": "100876",
+      "llm_provider-openai-project": "proj_pWQj4tH4avxV8tGhXPlvbOXv",
+      "llm_provider-openai-version": "2020-10-01",
+      "llm_provider-x-openai-proxy-wasm": "v0.1",
+      "llm_provider-x-ratelimit-limit-requests": "5000",
+      "llm_provider-x-ratelimit-limit-tokens": "1000000",
+      "llm_provider-x-ratelimit-remaining-requests": "4999",
+      "llm_provider-x-ratelimit-remaining-tokens": "997199",
+      "llm_provider-x-ratelimit-reset-requests": "12ms",
+      "llm_provider-x-ratelimit-reset-tokens": "168ms",
+      "llm_provider-x-request-id": "req_6e123bf874ec48bd84d19fc4e7af4bec",
+      "llm_provider-content-encoding": "gzip",
+      "llm_provider-alt-svc": "h3=\":443\"; ma=86400",
+      "llm_provider-request-id": "req_6e123bf874ec48bd84d19fc4e7af4bec",
+      "request-id": "req_6e123bf874ec48bd84d19fc4e7af4bec"
+    },
+    "_response_ms": 101229.89892959595,
+    "litellm_overhead_time_ms": 3.2389,
+    "callback_duration_ms": 0.0,
+    "litellm_call_id": "9f23c9fd-652c-45e6-9ca7-c7919d8f2c5b",
+    "api_base": "https://api.openai.com",
+    "model_id": null,
+    "response_cost": 0.0,
+    "litellm_model_name": "openai/gpt-6.2-sol",
+    "provider_response_model": "gpt-6.2-sol"
+  },
+  "estimatedCostUSD": null,
+  "seconds": 101.23079490661621
+}

@@ -1,0 +1,14 @@
+{
+  "accepted": true,
+  "category": "certified",
+  "score": 933,
+  "unit": "cycles",
+  "cycles": 933,
+  "certificate": "Certificate_0ada6531f9a6ff5b3e6ca706ce27dc89bdee1df12bbbe29a39bcb29eb8615e31.artifact",
+  "attempt": 3,
+  "idea": "Schedule the entire two-row strip as one register-allocated kernel. Reverse the reduction direction between tiles to carry A operands across the boundary, and let stores compete for issue slots as soon as individual outputs finish.",
+  "directory": "attempts/0003",
+  "seconds": 618.691,
+  "improved": true,
+  "bestScore": 933
+}

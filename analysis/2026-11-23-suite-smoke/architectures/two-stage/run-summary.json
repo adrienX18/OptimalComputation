@@ -1,0 +1,61 @@
+{
+  "completed": 3,
+  "best": {
+    "accepted": true,
+    "category": "certified",
+    "score": 162,
+    "unit": "cycles",
+    "cycles": 162,
+    "certificate": "Certificate_576b88b682baf3aa0bf6942bff7636a2ce6dd0408dd42a4ce2900229c648de26.artifact",
+    "attempt": 3,
+    "idea": "Split A*x into eight-column tiles shared by lane pairs, then exchange partial sums. Each lane loads only eight x values, and the reduced results feed the existing two-row B pipeline.",
+    "directory": "attempts/0003",
+    "seconds": 247.872,
+    "improved": true,
+    "bestScore": 162
+  },
+  "attempts": [
+    {
+      "accepted": true,
+      "category": "certified",
+      "score": 165,
+      "unit": "cycles",
+      "cycles": 165,
+      "certificate": "Certificate_efa5c501722081fdfe28926d92b09f6c6914aeb94d0e40a51bca088179524759.artifact",
+      "attempt": 1,
+      "idea": "Assign two rows of each matrix to each lane. Alternate the two dot products to sustain one matrix load and one MAC every two cycles. Bank-color matrix entries by row, rotate shared-vector reads across lanes, and retain each lane’s two A*x values for local reuse in the second stage.",
+      "directory": "attempts/0001",
+      "seconds": 225.822,
+      "improved": true,
+      "bestScore": 165
+    },
+    {
+      "accepted": true,
+      "category": "certified",
+      "score": 164,
+      "unit": "cycles",
+      "cycles": 164,
+      "certificate": "Certificate_ef668c35c9f011e34b5a8130ef600f1caf4ea34876ef9e1ba9ca0c9ff45f29b6.artifact",
+      "attempt": 2,
+      "idea": "Move the second A*x publication into the second-stage writeback gap. Start the first B octet one cycle earlier, then use its trailing load slot to prefetch a coefficient for the second octet.",
+      "directory": "attempts/0002",
+      "seconds": 242.989,
+      "improved": true,
+      "bestScore": 164
+    },
+    {
+      "accepted": true,
+      "category": "certified",
+      "score": 162,
+      "unit": "cycles",
+      "cycles": 162,
+      "certificate": "Certificate_576b88b682baf3aa0bf6942bff7636a2ce6dd0408dd42a4ce2900229c648de26.artifact",
+      "attempt": 3,
+      "idea": "Split A*x into eight-column tiles shared by lane pairs, then exchange partial sums. Each lane loads only eight x values, and the reduced results feed the existing two-row B pipeline.",
+      "directory": "attempts/0003",
+      "seconds": 247.872,
+      "improved": true,
+      "bestScore": 162
+    }
+  ]
+}

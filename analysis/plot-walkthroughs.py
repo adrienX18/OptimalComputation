@@ -72,8 +72,8 @@ def arrow(ax, a, b):
     ax.annotate('', xy=b, xytext=a, arrowprops={'arrowstyle': '->', 'color': '#334e58', 'lw': 1.4})
 
 
-def issue_plot(ax, folder, part, stats, label):
-    candidate = read(folder/'walkthrough'/part/'candidate.json')
+def issue_plot(ax, folder, part, stats, label, evidence=None):
+    candidate = read((evidence or folder/'walkthrough')/part/'candidate.json')
     cycles = stats['cycles']
     raster = np.zeros((candidate['configuration']['lanes'], cycles), dtype=int)
     for e in candidate['schedule']:
@@ -218,6 +218,70 @@ def smoke(folder):
     save(fig,folder,'05_winner_architecture')
 
 
+def preliminary_architectures(folder):
+    """The other two task winners from the root report's fixed-(8,8) table."""
+    specifications = [
+        dict(task='matmul', model='Astra', figure='06_matmul_architecture',
+             title='Matrix multiplication: tile outputs and reuse matrix values',
+             baseline_title='a  Baseline: one output at a time on lane 0',
+             winner_title='b  Astra: two output rows per lane × eight lanes',
+             baseline_boxes=[
+                 'For each C[i,j], clear one accumulator',
+                 'For k = 0,…,15: load A[i,k] and B[k,j]\nMultiply-add; wait for dependencies',
+                 'Store C[i,j]; repeat for all 256 outputs\nReload matrix values for every dot product'],
+             winner_boxes=[
+                 'Tile columns within each two-row strip\nReuse A across columns and B across both rows',
+                 'Interleave loads and independent accumulators\nReverse k between tiles to retain boundary A values',
+                 'Store each output as soon as it is ready\nBank-aware layouts; no scratch memory'],
+             interpretation='Same 4,096 products; less loading and more parallel work.'),
+        dict(task='two-stage', model='Sol', figure='07_two_stage_architecture',
+             title='Two-stage linear map: share vector loads and exchange partial sums',
+             baseline_title='a  Baseline: two serial matrix-vector products',
+             winner_title='b  Sol: paired lanes, then two output rows per lane',
+             baseline_boxes=[
+                 'Compute each t[i] = Σ A[i,k]·x[k] on lane 0\nReload vector values for each of the 16 rows',
+                 'Store t in scratch; compute y = B·t\nOne dot product at a time, still on lane 0',
+                 'Write y to scratch, then copy it to outputs\nSeven provisioned lanes remain unused'],
+             winner_boxes=[
+                 'Pair lanes (0,4), (1,5), (2,6), (3,7)\nEach loads 8 x values; reuse for 4 partial dots',
+                 'Exchange partial sums through scratch; add\nPublish complete t values in two halves',
+                 'Each lane overlaps 2 rows of B·t\nReuse t across rows; store final y directly'],
+             interpretation='Same 512 multiply-adds; fewer loads and parallel reductions.')]
+    for spec in specifications:
+        evidence=folder/'architectures'/spec['task']
+        stats=read(evidence/'architecture.json');b,w=stats['baseline'],stats['winner']
+        fig=plt.figure(figsize=(14,11.8))
+        grid=fig.add_gridspec(3,2,left=.065,right=.97,bottom=.16,top=.86,
+                             height_ratios=[1.25,.66,1],hspace=.53,wspace=.28)
+        for col,part in enumerate(['baseline','winner']):
+            ax=fig.add_subplot(grid[0,col]);ax.set_xlim(0,1);ax.set_ylim(0,1);ax.axis('off')
+            ax.set_title(spec[part+'_title'],loc='left',fontsize=11)
+            for y,content in zip([.74,.41,.07],spec[part+'_boxes']):
+                box(ax,(.04,y),(.92,.21),content,color='#edf1f6' if col==0 else '#e8f4f0',fontsize=10)
+            arrow(ax,(.5,.74),(.5,.63));arrow(ax,(.5,.41),(.5,.29))
+        ratio=b['cycles']/w['cycles']
+        reduction=100*(1-w['instructions']/b['instructions'])
+        rows=[['Completion (modeled cycles)',f"{b['cycles']:,}",f"{w['cycles']:,}",f'{ratio:.1f}× baseline / winner'],
+              ['Issued instructions',f"{b['instructions']:,}",f"{w['instructions']:,}",f'{reduction:.1f}% fewer'],
+              ['Loads / stores',f"{b['counts']['load']:,} / {b['counts']['store']:,}",
+               f"{w['counts']['load']:,} / {w['counts']['store']:,}",'Counts from the saved execution'],
+              ['Scratch slots / active lanes',f"{b['scratch_slots']} / {sum(v>0 for v in b['lane_issues'])}",
+               f"{w['scratch_slots']} / {sum(v>0 for v in w['lane_issues'])}",'Same 8-lane, 8-bank machine']]
+        ax=fig.add_subplot(grid[1,:]);ax.axis('off')
+        t=ax.table(cellText=rows,colLabels=['Measured property','Baseline',spec['model']+' winner','Comparison'],
+                   loc='center',cellLoc='left',colWidths=[.27,.18,.18,.37])
+        t.auto_set_font_size(False);t.set_fontsize(10);t.scale(1,1.6)
+        issue_plot(fig.add_subplot(grid[2,0]),folder,'baseline',b,'c  Full baseline issue schedule',evidence)
+        issue_plot(fig.add_subplot(grid[2,1]),folder,'winner',w,'d  Full winner issue schedule',evidence)
+        title(fig,spec['title'],
+              f"{spec['model']} · seed 11 · attempt {stats['attempt']} · latency at 8 lanes / 8 banks. {spec['interpretation']}")
+        legend(fig,.081)
+        fig.text(.045,.027,'Boxes summarize the saved algorithm; grids contain its complete issue timeline. Left and right have different time scales.\n'
+                 'Colors identify issued instructions, not their execution duration. Dense baseline events form an overview at this display size.\n'
+                 'Both artifacts are certified; counts and formulas were cross-checked from the saved schedules. Fixed artifacts, no confidence intervals.',fontsize=9)
+        save(fig,folder,spec['figure'])
+
+
 def main():
     plt.rcParams.update({'font.family':'DejaVu Sans','font.size':10,'axes.spines.top':False,
         'axes.spines.right':False,'figure.facecolor':'white','svg.hashsalt':'optimal-walkthrough-v1','pdf.fonttype':42})
@@ -225,11 +289,14 @@ def main():
         folder=HERE/name
         LAYOUT.clear();draw(folder)
         inputs=[folder/'convergence.csv',folder/'runs.csv']+sorted((folder/'walkthrough').rglob('*.json'))
+        if name.endswith('suite-smoke'):
+            preliminary_architectures(folder)
+            inputs+=sorted((folder/'architectures').rglob('*.json'))
         provenance=dict(matplotlib=matplotlib.__version__,numpy=np.__version__,layout=LAYOUT.copy(),
             script_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
             inputs={str(p.relative_to(folder)):hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs})
         (folder/'figures/walkthrough-provenance.json').write_text(json.dumps(provenance,indent=2)+'\n')
-    print('Rendered four walkthrough figures in PNG/SVG/PDF; all text bounds checked.')
+    print('Rendered six walkthrough figures in PNG/SVG/PDF; all text bounds checked.')
 
 
 if __name__=='__main__':

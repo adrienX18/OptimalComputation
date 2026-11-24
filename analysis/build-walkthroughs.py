@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export frozen examples and verify the data behind the two report walkthroughs.
+"""Export frozen examples and verify the data behind the report walkthroughs.
 
 Reads archives; never invokes a model, generated Python, Docker or Lean.
 Plots can subsequently be regenerated using only the tracked exports.
@@ -102,6 +102,12 @@ Registers and stores commit at their instruction's completion boundary.
         for i in range(16):
             for j in range(16):
                 expected.append(dict(Counter(tuple(sorted((16*i+k, 16*j+k))) for k in range(16))))
+    elif task.startswith('matmul'):
+        expected = [{(16*i+k, 256+16*k+j): 1 for k in range(16)}
+                    for i in range(16) for j in range(16)]
+    elif task.startswith('two-stage'):
+        expected = [{(16*j+k, 256+k, 272+16*i+j): 1
+                     for j in range(16) for k in range(16)} for i in range(16)]
     else:
         raise ValueError(task)
     assert outputs == expected, 'Diagram interpretation disagrees with symbolic output'
@@ -119,12 +125,12 @@ Registers and stores commit at their instruction's completion boundary.
         symbolic_outputs_checked=True)
 
 
-def export(study, archive_name, run_path, attempt, selection):
+def export(study, archive_name, run_path, attempt, selection, output_subdir='walkthrough'):
     folder = ANALYSIS / study
     archive = ROOT / 'runs' / archive_name
     run = archive / run_path
     origin = run / 'attempts' / f'{attempt:04d}'
-    out = folder / 'walkthrough'
+    out = folder / output_subdir
     sources = []
     inventory = {r['path']: r for r in read(archive / 'inventory.json')}
 
@@ -217,7 +223,15 @@ def main():
     out, stats = export(smoke, 'suite-smoke-20261123', 'runs/gram-latency-8x8/astra/seed-11', 3,
         dict(rule='Most case-wise lowest final scores (ties count); name breaks a count tie. Gram (8,8) is an illustrative architectural case, not the largest ratio.',
              case_wins_including_ties=wins))
-    print('Exported and checked both walkthroughs: source hashes, certificate bindings, counters and exact symbolic output formulas.')
+    for task in ('matmul', 'two-stage'):
+        selected = min((r for r in rows if r['instance'] == task+'-latency-8x8'),
+                       key=lambda r: (int(r['best_score']), r['model']))
+        export(smoke, 'suite-smoke-20261123', selected['directory'],
+               int(selected['first_final_best']),
+               dict(rule='Lowest final certified latency among the five models for this task at 8 lanes / 8 banks; model name breaks ties.',
+                    instance=selected['instance'], selected_model=selected['model']),
+               output_subdir='architectures/'+task)
+    print('Exported and checked four examples: source hashes, certificate bindings, counters and exact symbolic output formulas.')
 
 
 if __name__ == '__main__':

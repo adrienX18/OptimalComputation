@@ -1,0 +1,89 @@
+{
+  "id": "chatcmpl-EnVcoKDuPq2knAg8ABg0muZqsmIhR",
+  "created": 1795468346,
+  "model": "gpt-6.2-astra",
+  "object": "chat.completion",
+  "system_fingerprint": null,
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "{\n  \"idea\": \"Schedule the entire two-row strip as one register-allocated kernel. Reverse the reduction direction between tiles to carry A operands across the boundary, and let stores compete for issue slots as soon as individual outputs finish.\",\n  \"code\": \"from candidate_tools import baseline,load,mac,store,mul,issue\\n\\ndef solve(ws,mode,trace=False):\\n    ops=[];ld=[];end={};first={};need=[];started=[0];sd=[];fin=[];base=0\\n    for z,w in enumerate(ws):\\n        for u in range(16):\\n            k=15-u if z%2 else u\\n            pairs=[(r,j) for j in range(w) for r in range(2)] if mode==0 else [(r,j) for h in range(0,w,2) for r in range(2) for j in range(h,min(w,h+2))]\\n            if mode==2:pairs=[(r,j) for r in range(2) for j in range(w)]\\n            for r,j in pairs:\\n                d=r*16+base+j;a=(z-1 if u==0 and z else z,k,r);b=(z,k,2+j)\\n                for p in (a,b):\\n                    if p not in end:ld.append(p)\\n                    end[p]=len(ops)+1\\n                ops.append((a,b,d,u));need.append(len(ld));started.append(started[-1]+(u==0))\\n                if u==15:sd.append(d);fin.append(len(ops))\\n        base+=w\\n    n=len(ops);m=len(ld);rel=[0]*(n+1);deaths=[0]*(n+1)\\n    for e in end.values():rel[e]+=1\\n    deaths=rel[:]\\n    for i in range(n):rel[i+1]+=rel[i]\\n    init=(0,0,0,0);front=[init];par={init:None};cost=0\\n    while front:\\n        nf=[]\\n        for s in front:\\n            i,j,v,h=s\\n            if v==len(sd):\\n                if not trace:return cost\\n                steps=[]\\n                while par[s] is not None:\\n                    s,c=par[s];steps.append(c)\\n                free=list(range(1,16));regs={};acc={};i=j=v=0;sch=[];offset=[sum(ws[:z]) for z in range(len(ws))]\\n                for t,c in enumerate(reversed(steps)):\\n                    if c==0:\\n                        p=ld[j];j+=1;z,k,x=p;d=free.pop();regs[p]=d;sch.append((t,'A' if x<2 else 'B',d,k,x if x<2 else offset[z]+x-2))\\n                    if c==1:\\n                        a,b,d,u=ops[i];i+=1;ra=regs[a];rb=regs[b]\\n                        for p in (a,b):\\n                            if end[p]==i:free.append(regs.pop(p))\\n                        if not u:acc[d]=free.pop()\\n                        sch.append((t,'M',acc[d],ra,rb,u))\\n                    if c==2:\\n                        d=sd[v];v+=1;r=acc.pop(d);sch.append((t,'S',r,d));free.append(r)\\n                return sch\\n            live=j-rel[i]+started[i]-v;hh=(h*2)&3;opts=[]\\n            if j<m and live<15 and not h&2:opts.append(((i,j+1,v,hh),0))\\n            if i<n and j>=need[i] and live+(ops[i][3]==0)-deaths[i+1]<=15:\\n                d=ops[i][2]\\n                if not ((h&1 and ops[i-1][2]==d) or (h&2 and ops[i-1-(h&1)][2]==d)):opts.append(((i+1,j,v,hh+1),1))\\n            if v<len(sd) and fin[v]<=i-(h&1)-((h>>1)&1):opts.append(((i,j,v+1,hh),2))\\n            if h:opts.append(((i,j,v,hh),3))\\n            for ns,c in opts:\\n                if ns not in par:par[ns]=(s,c) if trace else 1;nf.append(ns)\\n        front=nf;cost+=1\\n    return 100000\\n\\ndef build():\\n    c=baseline();A=[8*(16*(i%2)+k)+i//2 for i in range(16) for k in range(16)];B=[256+8*(2*k+j%2)+j//2 for k in range(16) for j in range(16)];C=[512+8*(16*(i%2)+j)+i//2 for i in range(16) for j in range(16)];c['layout']['inputs']=A+B;c['layout']['outputs']=C\\n    opts=[]\\n    for mode in range(3):\\n        costs={w:solve([w],mode) for w in range(2,7)}\\n        def visit(p,n):\\n            if not n:opts.append((sum(costs[w] for w in p),tuple(p),mode))\\n            for w in costs:\\n                if w<=n:visit(p+[w],n-w)\\n        visit([],16)\\n    best=min((solve(ws,mode),ws,mode) for _,ws,mode in sorted(opts)[:12]);sch=solve(best[1],best[2],True);out=[]\\n    for t,op,*args in sch:\\n        for l in range(8):\\n            if op in ('A','B'):\\n                d,k,x=args;ins=load(d,A[(2*l+x)*16+k] if op=='A' else B[16*k+(2*l+x)%16])\\n            elif op=='M':\\n                d,a,b,u=args;ins=mac(d,a,b,d) if u else mul(d,a,b)\\n            else:\\n                r,d=args;ins=store(r,C[(2*l+d//16)*16+(2*l+d%16)%16])\\n            out.append(issue(t,l,ins))\\n    c['schedule']=out;return c\",\n  \"notes\": \"Whole-strip BFS adds a store-prefix dimension to the load/MAC issue history. Register pressure counts only live results and operands, allowing a first product to overwrite a dying input. Shortlist partitions by isolated tile costs, then rerank on actual strip latency.\"\n}",
+        "role": "assistant",
+        "tool_calls": null,
+        "function_call": null,
+        "annotations": [],
+        "refusal": null
+      },
+      "provider_specific_fields": {}
+    }
+  ],
+  "usage": {
+    "completion_tokens": 2251,
+    "prompt_tokens": 5104,
+    "total_tokens": 7355,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": 0,
+      "audio_tokens": 0,
+      "reasoning_tokens": 766,
+      "rejected_prediction_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "audio_tokens": 0,
+      "cache_write_tokens": 5101,
+      "cached_tokens": 0,
+      "cache_creation_tokens": 5101
+    }
+  },
+  "service_tier": "default",
+  "providerMetadata": {
+    "custom_llm_provider": "openai",
+    "region_name": null,
+    "additional_headers": {
+      "x-ratelimit-limit-requests": "5000",
+      "x-ratelimit-remaining-requests": "4999",
+      "x-ratelimit-limit-tokens": "1000000",
+      "x-ratelimit-remaining-tokens": "996690",
+      "llm_provider-date": "Mon, 23 Nov 2026 21:13:08 GMT",
+      "llm_provider-content-type": "application/json",
+      "llm_provider-transfer-encoding": "chunked",
+      "llm_provider-connection": "keep-alive",
+      "llm_provider-cf-ray": "a5f32c05dc5ae8cc-SJC",
+      "llm_provider-cf-cache-status": "DYNAMIC",
+      "llm_provider-server": "cloudflare",
+      "llm_provider-strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "llm_provider-vary": "Origin",
+      "llm_provider-x-content-type-options": "nosniff",
+      "llm_provider-access-control-expose-headers": "X-Request-ID, CF-Ray, CF-Ray",
+      "llm_provider-openai-organization": "user-ca6rw1hux6ttrnb2z1dnwov9",
+      "llm_provider-openai-processing-ms": "41994",
+      "llm_provider-openai-project": "proj_pWQj4tH4avxV8tGhXPlvbOXv",
+      "llm_provider-openai-version": "2020-10-01",
+      "llm_provider-x-openai-proxy-wasm": "v0.1",
+      "llm_provider-x-ratelimit-limit-requests": "5000",
+      "llm_provider-x-ratelimit-limit-tokens": "1000000",
+      "llm_provider-x-ratelimit-remaining-requests": "4999",
+      "llm_provider-x-ratelimit-remaining-tokens": "996690",
+      "llm_provider-x-ratelimit-reset-requests": "12ms",
+      "llm_provider-x-ratelimit-reset-tokens": "198ms",
+      "llm_provider-x-request-id": "req_ea3ea20683a344aa9bc1c7fa181ba13c",
+      "llm_provider-set-cookie": "[REDACTED]",
+      "llm_provider-content-encoding": "gzip",
+      "llm_provider-alt-svc": "h3=\":443\"; ma=86400",
+      "llm_provider-request-id": "req_ea3ea20683a344aa9bc1c7fa181ba13c",
+      "request-id": "req_ea3ea20683a344aa9bc1c7fa181ba13c"
+    },
+    "_response_ms": 43048.65598678589,
+    "litellm_overhead_time_ms": 56.505,
+    "callback_duration_ms": 0.0,
+    "litellm_call_id": "c6864879-83bd-42d8-bc2f-e754adea8da5",
+    "api_base": "https://api.openai.com",
+    "model_id": null,
+    "response_cost": 0.0,
+    "litellm_model_name": "openai/gpt-6.2-astra",
+    "provider_response_model": "gpt-6.2-astra"
+  },
+  "estimatedCostUSD": null,
+  "seconds": 43.053187131881714
+}

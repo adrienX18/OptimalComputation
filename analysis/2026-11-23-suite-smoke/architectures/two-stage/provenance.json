@@ -1,0 +1,120 @@
+{
+  "archive": "suite-smoke-20261123",
+  "archive_inventory_sha256": "478124c2a59291645e8e0f90d99440f18ba635c226c393f5717574f8d3e5605b",
+  "files": [
+    {
+      "file": "winner/request.json",
+      "source": "runs/two-stage-latency-8x8/sol/seed-11/attempts/0003/request.json",
+      "bytes": 11930,
+      "sha256": "830e02fd22d3576d034d38645cba74324de379c506c8adcc721584f3281a26b4"
+    },
+    {
+      "file": "winner/response.json",
+      "source": "runs/two-stage-latency-8x8/sol/seed-11/attempts/0003/response.json",
+      "bytes": 6129,
+      "sha256": "684f741be60cd80e46981ff294e4f6065ffb06166c850ac1e283b25317c4c813"
+    },
+    {
+      "file": "winner/proposal.json",
+      "source": "runs/two-stage-latency-8x8/sol/seed-11/attempts/0003/proposal.json",
+      "bytes": 2797,
+      "sha256": "6f7500528e03e81c14cce91283bd6db3ff1b8124c192ab08323d9560d7a7a98b"
+    },
+    {
+      "file": "winner/generator.py",
+      "source": "runs/two-stage-latency-8x8/sol/seed-11/attempts/0003/generator.py",
+      "bytes": 2063,
+      "sha256": "feafe6fc878eba027870bdba6542d1af7d75b046fd88b989fc6df021e806b504"
+    },
+    {
+      "file": "winner/candidate.json",
+      "source": "runs/two-stage-latency-8x8/sol/seed-11/attempts/0003/candidate.json",
+      "bytes": 140615,
+      "sha256": "f714455a97cf6c20252b295e750cb752e2ee62cd71640d03ec184e2a7781c60b"
+    },
+    {
+      "file": "winner/score.json",
+      "source": "runs/two-stage-latency-8x8/sol/seed-11/attempts/0003/score.json",
+      "bytes": 7849,
+      "sha256": "d01d79bc4b307eef80cf9e81fe293e5d3108ac305aeb922e726f2f2094d922b3"
+    },
+    {
+      "file": "winner/feedback.json",
+      "source": "runs/two-stage-latency-8x8/sol/seed-11/attempts/0003/feedback.json",
+      "bytes": 515,
+      "sha256": "3a7d4f170d6a9136fb46002ea150d7248f71ecc57b85d14976e57d754c561c97"
+    },
+    {
+      "file": "winner/randomness.json",
+      "source": "runs/two-stage-latency-8x8/sol/seed-11/attempts/0003/randomness.json",
+      "bytes": 139,
+      "sha256": "50bbeb2aaaa928a9b6a43812e89a2d3581b19d39ca9b1d3d0299ed433244ff79"
+    },
+    {
+      "file": "winner/certification/result.json",
+      "source": "runs/two-stage-latency-8x8/sol/seed-11/attempts/0003/certification/result.json",
+      "bytes": 10076,
+      "sha256": "501a98e8615be3f9d7954b47f1e0428dd3fd564101941dbb74bfe4ae53267e4d"
+    },
+    {
+      "file": "winner/certification/kernel/result.json",
+      "source": "runs/two-stage-latency-8x8/sol/seed-11/attempts/0003/certification/kernel/result.json",
+      "bytes": 77,
+      "sha256": "8a12550132e7f954f812df7f6bf5026417459e3a913b1e01a7abfdb7a0b3e3f6"
+    },
+    {
+      "file": "winner/provider-001-request.json",
+      "source": "runs/two-stage-latency-8x8/sol/seed-11/attempts/0003/provider-001-request.json",
+      "bytes": 24150,
+      "sha256": "f67d3911f2fd32a54539f9c17e5a37cd97909eb573e4d3493099ad34b96b60c0"
+    },
+    {
+      "file": "winner/provider-002-response.json",
+      "source": "runs/two-stage-latency-8x8/sol/seed-11/attempts/0003/provider-002-response.json",
+      "bytes": 15741,
+      "sha256": "6ef05502e44c7d4a8d55fddbf8dc99a33d5b2297938b035963f060aa48181e3a"
+    },
+    {
+      "file": "baseline/candidate.json",
+      "source": "runs/two-stage-latency-8x8/sol/seed-11/baseline/1795478199553726000/candidate.json",
+      "bytes": 283579,
+      "sha256": "4944d6f56027a41a3a3d37111d246b55d29b98891419a67c1de46528fcdb82b4"
+    },
+    {
+      "file": "baseline/score.json",
+      "source": "runs/two-stage-latency-8x8/sol/seed-11/baseline/1795478199553726000/score.json",
+      "bytes": 7823,
+      "sha256": "62f4a52aed3c534bcf27dfe3a0541f271a41bfa244d34ca0f2789bcd9b256323"
+    },
+    {
+      "file": "baseline/generator.py",
+      "source": "runs/two-stage-latency-8x8/sol/seed-11/baseline/1795478199553726000/generator.py",
+      "bytes": 73,
+      "sha256": "61f2c087d145cf6425fb7339d53943d3217fe655a850ca5184b95afc8bfd29ab"
+    },
+    {
+      "file": "run-manifest.json",
+      "source": "runs/two-stage-latency-8x8/sol/seed-11/manifest.json",
+      "bytes": 13588,
+      "sha256": "4c3c4d9cf74e96f8a99e80e3b19715bdefe929b4d89e3220ba411303ee0e42a6"
+    },
+    {
+      "file": "run-summary.json",
+      "source": "runs/two-stage-latency-8x8/sol/seed-11/summary.json",
+      "bytes": 2420,
+      "sha256": "b266817dfc6953ea8d337e8cd745be67b2d0ae71f5924774ab63dda130eb3113"
+    },
+    {
+      "file": "prompt-at-run.py",
+      "source": "source/scripts/harness/prompt.py",
+      "bytes": 6364,
+      "sha256": "0bef168c892636e3c3c3ae4044a2a585c813b20816afb8add4c2aa5e57204658"
+    },
+    {
+      "file": "previous-feedback.json",
+      "source": "runs/two-stage-latency-8x8/sol/seed-11/attempts/0002/feedback.json",
+      "bytes": 524,
+      "sha256": "0e63ee5324ed5f18ca69bf158edc9d0763381a16e1d5e36adf6800b1ae4b07b8"
+    }
+  ]
+}

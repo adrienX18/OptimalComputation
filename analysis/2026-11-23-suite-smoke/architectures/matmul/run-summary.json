@@ -1,0 +1,61 @@
+{
+  "completed": 3,
+  "best": {
+    "accepted": true,
+    "category": "certified",
+    "score": 933,
+    "unit": "cycles",
+    "cycles": 933,
+    "certificate": "Certificate_0ada6531f9a6ff5b3e6ca706ce27dc89bdee1df12bbbe29a39bcb29eb8615e31.artifact",
+    "attempt": 3,
+    "idea": "Schedule the entire two-row strip as one register-allocated kernel. Reverse the reduction direction between tiles to carry A operands across the boundary, and let stores compete for issue slots as soon as individual outputs finish.",
+    "directory": "attempts/0003",
+    "seconds": 618.691,
+    "improved": true,
+    "bestScore": 933
+  },
+  "attempts": [
+    {
+      "accepted": true,
+      "category": "certified",
+      "score": 1048,
+      "unit": "cycles",
+      "cycles": 1048,
+      "certificate": "Certificate_41ca06b1b6a6ad0953a3eb90b51590c7a92aa7ff9841156326be2850699336f8.artifact",
+      "attempt": 1,
+      "idea": "Assign each lane a pair of rows and rotate it through four column quartets. Keep eight dot products in registers and schedule operand loads ahead of use, recycling operand registers immediately after their final consumer issues.",
+      "directory": "attempts/0001",
+      "seconds": 300.102,
+      "improved": true,
+      "bestScore": 1048
+    },
+    {
+      "accepted": true,
+      "category": "certified",
+      "score": 948,
+      "unit": "cycles",
+      "cycles": 948,
+      "certificate": "Certificate_be005ebfaaad13c8356546ad1bb0361da0b0a7a1f827683106cf2bd50d449518.artifact",
+      "attempt": 2,
+      "idea": "Search column-width partitions of each lane's two-row strip. For each width, use dynamic programming to interleave ordered operand loads with an outer-product MAC stream, accounting for operand lifetimes and writeback collisions.",
+      "directory": "attempts/0002",
+      "seconds": 1078.689,
+      "improved": true,
+      "bestScore": 948
+    },
+    {
+      "accepted": true,
+      "category": "certified",
+      "score": 933,
+      "unit": "cycles",
+      "cycles": 933,
+      "certificate": "Certificate_0ada6531f9a6ff5b3e6ca706ce27dc89bdee1df12bbbe29a39bcb29eb8615e31.artifact",
+      "attempt": 3,
+      "idea": "Schedule the entire two-row strip as one register-allocated kernel. Reverse the reduction direction between tiles to carry A operands across the boundary, and let stores compete for issue slots as soon as individual outputs finish.",
+      "directory": "attempts/0003",
+      "seconds": 618.691,
+      "improved": true,
+      "bestScore": 933
+    }
+  ]
+}
