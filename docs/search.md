@@ -156,7 +156,7 @@ Providing `--config` without `--smoke` or `--prepare-only` starts a full batch
 immediately; use the prepare/resume pair when staging an experiment.
 For long runs, detach the launcher and redirect its input/output away from the
 interactive terminal. Keep the console log outside the batch archive so it does
-not invalidate the final inventory; see the [prepared launch handoff](../HANDOFF.md).
+not invalidate the final inventory.
 
 Each batch saves a manifest with its exact matrix, configurations, source hashes,
 Python version and Git revision, plus a source snapshot and working-tree patch.

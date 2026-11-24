@@ -1,6 +1,6 @@
 # Full workload suite readiness
 
-**Ready for the user's launch go.** The smoke batch finished at 2026-11-24T00:44:56Z: **80/80 loops, 240 scheduled slots accounted for**, comprising 236 finished attempts and four interrupted slots. The complete archive passed its audit. The full campaign is prepared and **has not been launched**. See [HANDOFF.md](../../../HANDOFF.md) for the launch procedure. The earlier [checkpoint snapshot](checkpoint-status.json) is historical, not current status.
+**Ready for the user's launch go.** The smoke batch finished at 2026-11-24T00:44:56Z: **80/80 loops, 240 scheduled slots accounted for**, comprising 236 finished attempts and four interrupted slots. The complete archive passed its audit. The full campaign is prepared and **has not been launched**. See the [search guide](../../search.md) for launch and resume instructions. The earlier [checkpoint snapshot](checkpoint-status.json) is historical, not current status.
 
 ## Scope
 
@@ -103,4 +103,4 @@ The full campaign is prepared in **`runs/suite-full-ready-20261123`** with 400 l
 
 Only `scripts/audit-search-batch.py` and its regression-test file differ from the smoke snapshot. The search and verifier source is identical. The earlier `runs/suite-full-20261123` preparation is preserved but superseded; its metadata is retained in [full-plan metadata](full-plan.json). Use the new prepared directory.
 
-**The remaining gate is the user's explicit go.** The [handoff](../../../HANDOFF.md) provides a detached launch with stdin disconnected and stdout/stderr saved outside the immutable archive. This avoids coupling a long campaign to the interactive terminal connection. Nothing in this readiness work launched the full campaign.
+**The remaining gate is the user's explicit go.** For a long campaign, detach the launcher with stdin disconnected and stdout/stderr saved outside the immutable archive, as described in the [search guide](../../search.md). This avoids coupling the campaign to the interactive terminal connection. Nothing in this readiness work launched the full campaign.
