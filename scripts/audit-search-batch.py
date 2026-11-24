@@ -53,14 +53,24 @@ def audit(root):
         for i, row in enumerate(summary['attempts'], 1):
             attempt = folder/row['directory']
             assert read_json(attempt/'feedback.json') == row and row['attempt'] == i, attempt
-            request = read_json(attempt/'request.json')
-            prompt_bytes = len(json.dumps(request['messages'],ensure_ascii=False).encode())
-            assert prompt_bytes <= job['config']['prompt_bytes'], attempt
-            max_prompt = max(max_prompt,prompt_bytes)
-            assert request['model'] == job['model']
-            assert (attempt/'randomness.json').exists()
+            interrupted = row['category'] == 'interrupted'
             response = (attempt/'response.json').exists()
-            assert response or (attempt/'api-error.json').exists(), attempt
+            api_error = (attempt/'api-error.json').exists()
+            request_path = attempt/'request.json'
+            # Resume preserves a partially written attempt without reissuing its call.
+            # Validate every available record; only interrupted slots may lack them.
+            partial_request = interrupted and not response and not api_error
+            assert request_path.exists() or partial_request, attempt
+            if request_path.exists():
+                request = read_json(request_path)
+                prompt_bytes = len(json.dumps(request['messages'],ensure_ascii=False).encode())
+                assert prompt_bytes <= job['config']['prompt_bytes'], attempt
+                max_prompt = max(max_prompt,prompt_bytes)
+                assert request['model'] == job['model'], attempt
+            assert (attempt/'randomness.json').exists() or partial_request, attempt
+            assert interrupted or response or api_error, attempt
+            if interrupted:
+                assert row['accepted'] is False, attempt
             if response:
                 assert list(attempt.glob('provider-*-response.json')), attempt
                 responses += 1
@@ -76,7 +86,9 @@ def audit(root):
                     assert list(score['configuration'][k] for k in ('lanes','banks')) == job['config']['configuration'], attempt
                 best = min(best,row['score'])
                 certified += 1
-            assert row['bestScore'] == best, attempt
+            assert interrupted or 'bestScore' in row, attempt
+            if 'bestScore' in row:
+                assert row['bestScore'] == best, attempt
             categories[row['category']] += 1
             outcomes[row['category']] += 1
         assert summary['best']['score'] == best, folder

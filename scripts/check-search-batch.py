@@ -156,5 +156,89 @@ class BatchTests(unittest.TestCase):
         self.assertLess(result['seconds'], 6)
 
 
+class AuditResumeTests(unittest.TestCase):
+    def audit(self, root):
+        from runpy import run_path
+        return run_path(str(batch.ROOT/'scripts/audit-search-batch.py'))['audit'](root)
+
+    def fixture(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        root = Path(temporary.name)/'archive'
+        folder = root/'runs/test/seed-11'
+        config = dict(attempts=4, prompt_bytes=1024, model='openai/test',
+                      objective='latency-v1', configuration=[8, 8])
+        job = dict(runPath='runs/test/seed-11', config=config, model='openai/test',
+                   name='test', seed=11, instance='fixture')
+        write_json(root/'manifest.json', dict(jobs=[job], sourceHashes={}))
+        write_json(folder/'manifest.json', dict(config=config, sourceHashes={}))
+        write_json(folder/'baseline.json', dict(score=10, unit='cycles'))
+        rows = []
+        for index in range(1, 5):
+            interrupted = index != 1
+            row = dict(attempt=index, directory=f'attempts/{index:04d}', accepted=False,
+                       category='interrupted' if interrupted else 'proposal-error')
+            if not interrupted:
+                row['bestScore'] = 10
+            where = folder/row['directory']
+            write_json(where/'feedback.json', row)
+            # Interruptions before metadata, during a call, and after a response.
+            if index != 2:
+                write_json(where/'request.json', dict(model='openai/test',
+                           messages=[dict(role='user', content='test')]))
+                write_json(where/'randomness.json', dict(runSeed=11))
+            if index in (1, 4):
+                write_json(where/'response.json', {})
+                write_json(where/'provider-001-response.json', {})
+            rows.append(row)
+        write_json(folder/'summary.json', dict(completed=4, attempts=rows, best=dict(score=10)))
+        batch.inventory(root)
+        return root, folder
+
+    def test_audit_preserves_partial_attempts_after_resume(self):
+        root, _ = self.fixture()
+        result = self.audit(root)
+        self.assertEqual(result['completedAttempts'], 4)
+        self.assertEqual(result['categories'], {'proposal-error': 1, 'interrupted': 3})
+        self.assertEqual(result['runs'][0]['responses'], 2)
+        self.assertEqual(result['runs'][0]['best'], 10)
+
+    def test_finished_attempts_still_require_complete_records(self):
+        for filename in ('request.json', 'randomness.json', 'response.json',
+                         'provider-001-response.json'):
+            with self.subTest(filename=filename):
+                root, folder = self.fixture()
+                (folder/'attempts/0001'/filename).unlink()
+                batch.inventory(root)
+                with self.assertRaises(AssertionError):
+                    self.audit(root)
+
+    def test_interrupted_responses_still_require_request_and_provider_records(self):
+        for filename in ('request.json', 'randomness.json', 'provider-001-response.json'):
+            with self.subTest(filename=filename):
+                root, folder = self.fixture()
+                (folder/'attempts/0004'/filename).unlink()
+                batch.inventory(root)
+                with self.assertRaises(AssertionError):
+                    self.audit(root)
+
+    def test_resume_cannot_accept_an_interrupted_attempt_or_change_the_incumbent(self):
+        for index, field, value in ((1, 'bestScore', None), (4, 'accepted', True),
+                                    (4, 'bestScore', 9)):
+            with self.subTest(index=index, field=field):
+                root, folder = self.fixture()
+                summary = read_json(folder/'summary.json')
+                row = summary['attempts'][index-1]
+                if value is None:
+                    row.pop(field)
+                else:
+                    row[field] = value
+                write_json(folder/row['directory']/'feedback.json', row)
+                write_json(folder/'summary.json', summary)
+                batch.inventory(root)
+                with self.assertRaises(AssertionError):
+                    self.audit(root)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
