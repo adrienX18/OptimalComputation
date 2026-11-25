@@ -8,6 +8,10 @@ loop. A completed polynomial study reached **30 versus 1,520 modeled cycles**;
 three additional workloads have preliminary results. These are model results,
 not FPGA measurements or proofs of optimality.
 
+For direct inspection of the implementation and evidence, see
+[DEEP_DIVE.md](DEEP_DIVE.md): exact source excerpts, pinned file/line links,
+the certification proof chain, and a complete model-exchange walkthrough.
+
 ## 1. The machine being optimized
 
 `arty-model-v1` is an abstract accelerator inspired by the Arty A7-100T.

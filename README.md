@@ -8,6 +8,10 @@ The aim is to use AI to find better ways to carry out a computation within those
 
 We will start with small mathematical computations in software. Testing on physical hardware would come later.
 
+Read [report.md](report.md) for the research results and [DEEP_DIVE.md](DEEP_DIVE.md)
+to inspect the critical source, proof obligations, model exchanges, and evidence
+through exact excerpts and pinned file/line links.
+
 ## Run the experiment
 
 The foundation now has verified naive matrix-vector and matrix-matrix baselines,
