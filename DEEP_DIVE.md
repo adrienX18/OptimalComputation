@@ -16,14 +16,19 @@ An old comment is still copied exactly when it says something historical. The ac
 | Every important machine rule | [2. Machine](#machine) |
 | Exactly what a task means | [3. Tasks](#tasks) |
 | What the comparison baselines actually do | [4. Baselines](#baselines) |
+| How a hand-written proof establishes every row | [4.6. Proof walkthrough](#proof-walkthrough) |
 | The all-input proof and its assumptions | [5. Certification](#certification) |
+| A concrete arithmetic failure versus a conservative rejection | [5.10. Failure walkthrough](#failure-walkthrough) |
 | How a certified execution gets a score | [6. Objectives](#objectives) |
+| Calculate a latency/energy tradeoff by hand | [6.4. Energy walkthrough](#energy-walkthrough) |
 | What the LLM sees, returns, and learns from | [7. Search loop](#search) |
 | One real request → code → schedule → feedback | [8. Polynomial walkthrough](#walkthrough) |
+| How the winning scheduler chooses instructions and registers | [8.7. Scheduler walkthrough](#scheduler-walkthrough) |
 | The other three reported winning programs | [9. Matrix, Gram, two-stage](#other-winners) |
 | Where each reported number comes from | [10. Experiments and evidence](#experiments) |
 | Every source module and the artifact families | [11. Repository atlas](#atlas) |
 | Commands for independent inspection and checks actually run | [12. Reproduce](#reproduce) |
+| Replay the saved generator into the exact candidate | [12.4. Generator replay](#replay-walkthrough) |
 
 For a first pass, follow the tiny six-cycle example in §2, read the task table in §3, then the proof contract in §5 and the real polynomial attempt in §8. Return to the lower-level proof excerpts when you want to challenge a particular implication.
 
@@ -1344,6 +1349,229 @@ def configurationArtifacts (c : Hardware.ValidConfig) : List VerifiedArtifact :=
 
 This gives all 16 configurations a proved matmul-v2, Gram-naive, two-stage-naive, and polynomial-naive artifact. The main `objectiveCatalog` adds the default matrix baselines and toy comparisons. Do not generalize this to every version/configuration of every task: matvec’s catalog entries here are its default proved artifacts. The search task menu accepting a configuration is not itself proof that initialization can export that particular baseline.
 
+<a id="proof-walkthrough"></a>
+
+### 4.6 Follow a baseline proof from three instructions to all matrix rows
+
+The baseline has a direct proof as well as being checkable automatically. Follow matvec from one load/load/MAC block to a whole row, then sixteen rows, and finally the timed machine. Matrix multiplication composes output dot products similarly.
+
+**The invariant:** after `k` terms, the accumulator contains `Σ(j<k) A[i,j]*x[j]`, input memory is unchanged, and pending effects have completed. Previously computed output rows remain stored. These storage conditions matter as much as the sum identity.
+
+#### First, understand the proof relation
+
+`Serial.Quiet` means every lane's pending list is empty. `Executes` relates a list of instructions to its starting and final concrete states. Here is its entire definition:
+
+Source: [OptimalComputation/Evaluation/Serial.lean:310–318](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Evaluation/Serial.lean#L310-L318).
+
+<!-- source-excerpt {"commit": "71c608a2b573c322993264945dbb2be8a9e5006f", "path": "OptimalComputation/Evaluation/Serial.lean", "start": 310, "end": 318} -->
+```lean
+/-- A proof relation for serial instruction lists. Each head premise is a fact
+about the actual issue-time checker, with its actual captured effect. -/
+inductive Executes : List BoundedInstruction → State c → State c → Prop
+  | nil (s : State c) (quiet : Quiet s) : Executes [] s s
+  | cons (i : BoundedInstruction) (is : List BoundedInstruction) (s final : State c) (e : Effect)
+      (quiet : Quiet s)
+      (prepare_ok : ∀ t, prepare t s ⟨lane, i⟩ = .ok ⟨t + latency i, e⟩)
+      (tail : Executes is (applyEffect s lane e) final) : Executes (i :: is) s final
+
+```
+
+`nil` proves that an empty instruction list preserves a quiet state. `cons` proves a nonempty list by providing the head instruction's actual `prepare` equality and a proof for the remaining list after applying the captured effect. The phrase `∀ t` requires the head instruction to prepare successfully at any starting boundary. It does not permit arbitrary simultaneous issues: this relation deliberately describes serial execution with drained effects between instructions.
+
+The relation packages reasoning; it does not execute a second machine. Its bridge to elapsed time is proved using `Hardware.step` and `Evaluation.run`, below. That bridge is essential: a relation named `Executes` would have no special authority without it. Read `prepare_ok` as a required piece of evidence about the concrete issue-time checker, rather than a Boolean supplied by the candidate.
+
+Lean reading key: `apply` selects a theorem and leaves its premises to prove; `exact` supplies an existing proof; `rw` rewrites an equality; `obtain ⟨...⟩` unpacks evidence; `refine` builds a result with remaining obligations. `simp` uses definitions and proved identities; `omega` proves integer/natural-number arithmetic conditions. All construct kernel-checked terms.
+
+#### Prove one load/load/MAC block
+
+The block's premises are unusually useful for inspection. `ha` and `hb` identify the values already stored at two particular addresses; `hv` identifies the current accumulator; `hc` proves that the actual checked arithmetic returns `next`. The conclusion specifies the exact register updates.
+
+Source: [OptimalComputation/Examples/SerialDot.lean:19–39](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Examples/SerialDot.lean#L19-L39).
+
+<!-- source-excerpt {"commit": "71c608a2b573c322993264945dbb2be8a9e5006f", "path": "OptimalComputation/Examples/SerialDot.lean", "start": 19, "end": 39} -->
+```lean
+theorem block_executes (s : State c) (hs : Quiet s) (a b : Address)
+    (av bv v next : Signed48)
+    (ha : s.readMemory a = some (encodeSlot av)) (hb : s.readMemory b = some (encodeSlot bv))
+    (hv : s.readRegister lane acc.val = some v)
+    (hc : checkedMac av.val bv.val v.val = .ok next) :
+    Executes (block a b) s (((s.writeRegister lane r1 av).writeRegister lane r2 bv).writeRegister lane acc next) := by
+  apply Executes.cons (.load r1 a) _ s _ (.register r1 av) hs
+  · intro t; exact prepare_load t s hs r1 a av ha
+  apply Executes.cons (.load r2 b) _ (s.writeRegister lane r1 av) _ (.register r2 bv) hs
+  · intro t; exact prepare_load t (s.writeRegister lane r1 av) hs r2 b bv hb
+  apply Executes.cons (.multiplyAdd acc r1.val r2.val acc.val) _ ((s.writeRegister lane r1 av).writeRegister lane r2 bv) _ (.register acc next) hs
+  · intro t
+    apply prepare_mac t ((s.writeRegister lane r1 av).writeRegister lane r2 bv) hs av bv v next
+    · rw [State.readRegister_write_other_register _ _ r2 r1.val _ (by decide)]
+      exact State.readRegister_write_same _ _ _ _
+    · exact State.readRegister_write_same _ _ _ _
+    · rw [State.readRegister_write_other_register _ _ r2 acc.val _ (by decide),
+        State.readRegister_write_other_register _ _ r1 acc.val _ (by decide)]
+      exact hv
+    · exact hc
+  exact .nil (((s.writeRegister lane r1 av).writeRegister lane r2 bv).writeRegister lane acc next) hs
+```
+
+The first constructor uses `prepare_load` and `ha` to load `av` into `r1`. The second loads `bv` into `r2`. The third prepares the MAC against that updated state.
+
+Its four indented obligations identify the left multiplicand, right multiplicand, accumulator, and arithmetic result. The “write other register” equalities show that writing `r2` did not erase `r1`, and that writing either temporary did not erase `acc`. The “write same” equalities recover the values just loaded. Finally `hc` closes the arithmetic obligation, and `.nil` ends the list. No test vector was substituted: `av`, `bv`, and the starting state are arbitrary values satisfying those premises.
+
+For orientation, `a = [2,-3]` and `b = [4,5]` give accumulator values `8`, then `-7`. The formal proof makes this statement with variables, including every signed16 endpoint.
+
+#### Repeat the block while preserving the invariant
+
+The helper `value` packages `dotPrefix` with a signed48 bound for every prefix of at most sixteen products. The induction uses this bound at each MAC.
+
+Source: [OptimalComputation/Examples/SerialDot.lean:45–72](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Examples/SerialDot.lean#L45-L72).
+
+<!-- source-excerpt {"commit": "71c608a2b573c322993264945dbb2be8a9e5006f", "path": "OptimalComputation/Examples/SerialDot.lean", "start": 45, "end": 72} -->
+```lean
+/-- Every dot prefix executes with the exact signed48 accumulator value, while
+preserving the entire memory. The starting registers other than acc are arbitrary. -/
+theorem executes_prefix {n : Nat} (a b : Fin n → Int)
+    (ha : ∀ i, InSigned16 (a i)) (hb : ∀ i, InSigned16 (b i))
+    (aa ba : Fin n → Address) (s : State c) (hs : Quiet s)
+    (hma : ∀ i, s.readMemory (aa i) = some (encodeSlot ⟨a i, signed16_fits_signed48 (ha i)⟩))
+    (hmb : ∀ i, s.readMemory (ba i) = some (encodeSlot ⟨b i, signed16_fits_signed48 (hb i)⟩))
+    (hz : s.readRegister lane acc.val = some zero48)
+    (k : Nat) (hk : k ≤ n) (h16 : k ≤ 16) :
+    ∃ final, Executes (code aa ba k hk) s final ∧ final.memory = s.memory ∧
+      final.readRegister lane acc.val = some (value a b ha hb k hk h16) := by
+  induction k with
+  | zero => exact ⟨s, .nil s hs, rfl, hz⟩
+  | succ k ih =>
+    obtain ⟨middle, hex, hm, hv⟩ := ih (by omega) (by omega)
+    let i : Fin n := ⟨k, by omega⟩
+    let av : Signed48 := ⟨a i, signed16_fits_signed48 (ha i)⟩
+    let bv : Signed48 := ⟨b i, signed16_fits_signed48 (hb i)⟩
+    let next := value a b ha hb (k + 1) hk h16
+    have hma' : middle.readMemory (aa i) = some (encodeSlot av) := by
+      simpa [State.readMemory, hm, av] using hma i
+    have hmb' : middle.readMemory (ba i) = some (encodeSlot bv) := by
+      simpa [State.readMemory, hm, bv] using hmb i
+    have he := block_executes middle (executes_quiet hex) (aa i) (ba i) av bv
+      (value a b ha hb k (by omega) (by omega)) next hma' hmb' hv
+      (dotPrefix_checkedMac a b ha hb hk h16)
+    refine ⟨_, executes_append hex he, hm, ?_⟩
+    simp [next]
+```
+
+Read the conclusion before the tactics. It promises a final state, a proof that the prefix executes, equality of the whole memory before and after, and the exact accumulator value. Those last two facts are the induction invariant.
+
+In the zero case, no instruction executes, memory equality is `rfl`, and `hz` supplies the initial zero accumulator. In the successor case, `ih` gives a middle state after `k` terms. `hm` says its memory still equals the original memory; consequently `hma'` and `hmb'` recover the next operands from the same addresses. `hv` supplies the current partial sum. `block_executes` adds one term, and `executes_append` composes the two executions.
+
+The arithmetic premise comes from [dotPrefix_checkedMac](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Workloads/DotProduct.lean#L50-L59). It proves that the concrete checked MAC returns the next mathematical prefix. Its proof calls `checkedMac_accepts` with signed16 operand evidence and the signed48 prefix bound. This is the step connecting “the intended next sum” to “the machine instruction is allowed to compute it.”
+
+#### Add the reset and store for one matrix row
+
+The row proof receives `Inputs x hx s`, which says that every matrix/vector input is present at its designated address. A mathematical input assumption alone would not establish this memory fact. Initialization proves it, and subsequent row proofs preserve it.
+
+Source: [OptimalComputation/Examples/MatVecProof.lean:19–38](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Examples/MatVecProof.lean#L19-L38).
+
+<!-- source-excerpt {"commit": "71c608a2b573c322993264945dbb2be8a9e5006f", "path": "OptimalComputation/Examples/MatVecProof.lean", "start": 19, "end": 38} -->
+```lean
+theorem row_executes (x : MatVec.Input) (hx : MatVec.AllowedInput x)
+    (i : Index16) (s : State C) (hs : Quiet s) (hi : Inputs x hx s) :
+    ∃ final, Executes (rowCode i) s final ∧
+      final.memory = (s.writeMemory (outputAddress i) (encodeSlot (resultValue x hx i))).memory := by
+  let reset := s.writeRegister lane acc zero48
+  have hr : Executes [.add acc r0 r0] s reset :=
+    .cons _ _ _ _ (.register acc zero48) hs (fun t => prepare_reset t s hs) (.nil reset hs)
+  have hm : Inputs x hx reset := hi
+  obtain ⟨middle, hd, hmem, hv⟩ := SerialDot.executes_prefix (x.matrix i) x.vector (hx.1 i) hx.2
+    (matrixAddress i) vectorAddress reset hs (hm.1 i) hm.2
+    (State.readRegister_write_same s lane acc zero48) 16 (by omega) (by omega)
+  have hv' : middle.readRegister lane acc.val = some (resultValue x hx i) := hv
+  let final := middle.writeMemory (outputAddress i) (encodeSlot (resultValue x hx i))
+  have hq := executes_quiet hd
+  have he : Executes [.store acc.val (outputAddress i)] middle final :=
+    .cons _ _ _ _ (.memory (outputAddress i) (encodeSlot (resultValue x hx i))) hq
+      (fun t => prepare_store t middle hq acc.val (outputAddress i) _ hv') (.nil final hq)
+  refine ⟨final, executes_append (executes_append hr hd) he, ?_⟩
+  simp only [final, State.writeMemory, hmem]
+  rfl
+```
+
+`hr` executes the explicit zeroing add. The call to `executes_prefix` chooses row `i`, the runtime vector, and their actual address functions, then instantiates the prefix length with sixteen. `hv'` names the completed dot-product value. `he` executes the explicit output store. Two applications of `executes_append` combine reset, dot product, and store.
+
+Notice the conclusion's memory equality: the final memory is precisely the old memory with this output address written. That is stronger than saying this row's answer can be found somewhere. It lets the next proof establish that all input addresses and already completed rows survive.
+
+The [row-induction proof](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Examples/MatVecProof.lean#L70-L94) then maintains three facts after `n` rows: the accumulated code executes, `Inputs` still holds, and every output index below `n` contains its reference answer. For the next row it applies `row_executes`. The address-separation lemmas prove that the new output slot is not an input slot. Output-address injectivity proves that writing row `n` preserves any earlier row `j`. The proof explicitly splits “this is the newly written row” from “this is an earlier row.” This is where layout correctness becomes part of the whole-program argument.
+
+#### Recover the actual cycle count and the final certificate
+
+The v2 schedule issues each instruction at the predecessor's completion boundary. `tightDuration` adds the instruction latencies; it does not insert the extra boundaries of v1. The timed bridge has this statement and proof:
+
+Source: [OptimalComputation/Evaluation/Serial.lean:548–563](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Evaluation/Serial.lean#L548-L563).
+
+<!-- source-excerpt {"commit": "71c608a2b573c322993264945dbb2be8a9e5006f", "path": "OptimalComputation/Evaluation/Serial.lean", "start": 548, "end": 563} -->
+```lean
+/-- A whole tight program from boundary zero. The final effect commits at
+boundary `ticks`, which is therefore the elapsed cycle count. -/
+theorem run_tight_complete {instructions : List BoundedInstruction} {s final : State c}
+    (hex : Executes instructions s final) (ticks : Nat) (ht : tightDuration instructions = ticks)
+    (hpos : 0 < ticks) :
+    ∃ counts, run false (ticks + 1) 0 (tightTimed 0 instructions) s (Counters.empty c) [] =
+      .finished ⟨ticks, final, counts, []⟩ := by
+  have hne : instructions ≠ [] := by
+    intro h; subst h; simp [tightDuration] at ht; omega
+  obtain ⟨counts, hr⟩ := run_tight hex hne 0 0 (Counters.empty c)
+  refine ⟨counts, ?_⟩
+  rw [ht] at hr
+  simp only [Nat.add_zero, Nat.zero_add] at hr
+  rw [hr, run_finished false 0 (ticks + 1) final counts [] (quiet_drained (executes_quiet hex))]
+  rfl
+
+```
+
+Its result is an equality about `run`, starting at boundary zero with empty counters. `run_tight` supplies the concrete transitions, and `run_finished` recognizes the drained final state. The positive-duration condition excludes the empty-program corner case. The `ticks + 1` budget includes processing the final completion boundary; it is not an extra elapsed cycle.
+
+For matvec, the reset costs three cycles, sixteen load/load/MAC blocks cost `16*5`, and the store costs one: `84` cycles per row, `1,344` for sixteen rows. The final proof connects the abstract instruction list to the exact candidate's sorted program, collects the designated output slots, and packages the result:
+
+Source: [OptimalComputation/Examples/MatVecProof.lean:252–282](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Examples/MatVecProof.lean#L252-L282).
+
+<!-- source-excerpt {"commit": "71c608a2b573c322993264945dbb2be8a9e5006f", "path": "OptimalComputation/Examples/MatVecProof.lean", "start": 252, "end": 282} -->
+```lean
+/-- All-input execution of the exact v2 artifact: 1,344 elapsed cycles. -/
+theorem execution_correct_v2 (x : MatVec.Input) (hx : MatVec.AllowedInput x) :
+    ∃ record, executeValues candidateV2 (MatVec.adapter.encode x hx) 1345 false = .success record ∧
+      record.outputs = (MatVec.adapter.outputScalars (MatVec.reference x)).toList ∧
+      record.cycles = 1344 := by
+  let initial := initialState C layout (MatVec.adapter.encode x hx)
+  obtain ⟨final, hex, _, ho⟩ := rows_executes x hx initial (initial_quiet _) (initial_inputs x hx) 16 (by omega)
+  obtain ⟨counts, hr⟩ := run_tight_complete hex 1344 (rows_tightDuration 16 (by omega)) (by decide)
+  have hrun : run false 1345 0 (program candidateV2) initial (Counters.empty C) [] =
+      .finished ⟨1344, final, counts, []⟩ := by
+    rw [candidateV2_program]
+    exact hr
+  obtain ⟨record, hf, hout, ht⟩ := finish_correct_v2 x hx final counts 1344 (fun i => ho i i.isLt)
+  refine ⟨record, ?_, hout, ht⟩
+  unfold executeValues
+  erw [hrun]
+  exact hf
+
+def verifiedV2 : VerifiedCandidate MatVec.adapter where
+  candidate := candidateV2
+  sufficientBoundaries := 1345
+  safety := by
+    intro x hx
+    obtain ⟨record, he, _, _⟩ := execution_correct_v2 x hx
+    exact ⟨record, he⟩
+  correctness := by
+    intro x hx record he
+    obtain ⟨expected, hh, ho, _⟩ := execution_correct_v2 x hx
+    have hr : expected = record := ExecutionOutcome.success.inj (hh.symm.trans he)
+    subst record
+    exact ho
+```
+
+Follow the evidence names: `hex` is the row-composed execution; `hr` turns it into a timed run; `candidateV2_program` identifies that timed list with the candidate's real schedule; `finish_correct_v2` reads the output memory and constructs the final record. `execution_correct_v2` therefore states both the answer and the 1,344-cycle duration for every allowed input.
+
+The final `verifiedV2` definition selects the fields needed by the public interface. `safety` keeps the successful execution witness. `correctness` compares a supplied successful record with the theorem's successful record: both are results of the same function call, so constructor injectivity makes them equal. It then transfers the proved output equality. A proof of correctness for some convenient execution would not be enough; this equality is what identifies the actual one.
+
+These lemmas exploit serial execution and cannot directly certify the overlapped winner. Both proof routes reach `VerifiedCandidate`, supplying the same scoring obligations. Inspect this route with `lake env lean scripts/audit-matvec.lean` and `lake env lean scripts/audit-naive-v2.lean`; view the small concrete trace with `lake env lean scripts/reproduce-serial-dot-trace.lean`.
+
 <a id="certification"></a>
 
 ## 5. Lean certification: the complete implication and its assumptions
@@ -2082,6 +2310,151 @@ def Diagnostic.toJson : Diagnostic → Json
         ("actualTerms", Lean.toJson actual.length), ("firstDifference", firstDifference 0 expected actual)])
 ```
 
+<a id="failure-walkthrough"></a>
+
+### 5.10 Two failures that require different conclusions
+
+The failure vocabulary in §5.9 matters because a rejection can mean different things. Here are two executable examples using the existing polynomial task. The first supplies a concrete counterexample to a candidate. The second exposes an approximation in the certifier. Both retain the original input domain; neither changes the arithmetic rules to make an example pass.
+
+#### Full Horner: a mathematically valid identity with an illegal instruction
+
+The repository contains a full-Horner generator used in the earlier experiment:
+
+Source: [scripts/experiment.py:295–308](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/scripts/experiment.py#L295-L308).
+
+<!-- source-excerpt {"commit": "71c608a2b573c322993264945dbb2be8a9e5006f", "path": "scripts/experiment.py", "start": 295, "end": 308} -->
+```python
+def horner(config):
+    lanes, banks = config
+    streams = [[] for _ in range(lanes)]
+    for p in range(16):
+        stream = streams[p % lanes]
+        stream += [load(1, 8+p), load(3, 7)]
+        for k in reversed(range(7)):
+            stream += [load(2, k), mac(3, 3, 1, 2)]
+        stream += [store(3, 24+p)]
+    schedule, _ = schedule_streams(streams, banks)
+    result = hand_reference('polynomial', config)
+    result.update(identifier=f'polynomial-horner-l{lanes}-b{banks}-v1', schedule=schedule)
+    return result
+
+```
+
+At each point it starts with `c7` and repeatedly computes `acc*x + ck`. Register `r3` is both the old multiplicand and the destination, which is allowed when ready. The problem is its numeric width. A MAC permits a signed48 accumulator input, but the previous Horner result is passed as the **left multiplicand**, which must be signed16.
+
+The saved [held-out vector](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/docs/results/section9-v1/held-out-polynomial.json) has coefficients `[7,-8,7,-8,7,-8,7,-8]` and sixteen points equal to `-4`. Every scalar satisfies the task's allowed-input predicate. For lane zero's first point, the generated `(8,8)` schedule gives this calculation. “Result” is the value at completion; the final row is only the mathematical result because the instruction is rejected at issue.
+
+<!-- derived-table horner-values -->
+| Coefficient added | MAC issue | Left multiplicand | Mathematical result |
+| --- | ---: | ---: | ---: |
+| `c6 = 7` | 3 | -8 | 39 |
+| `c5 = -8` | 6 | 39 | -164 |
+| `c4 = 7` | 9 | -164 | 663 |
+| `c3 = -8` | 12 | 663 | -2,660 |
+| `c2 = 7` | 15 | -2,660 | 10,647 |
+| `c1 = -8` | 18 | 10,647 | -42,596 |
+| `c0 = 7` | 21 | -42,596 | 170,391 |
+
+The result `-42,596` is a valid signed48 destination of the MAC issued at 18. It commits at 21, just before the next issue. Reading it is therefore not a readiness failure. Using it as a signed16 multiplicand is illegal, and the concrete simulator reports `arithmetic-failure`, cycle `21`, lane `0`, `operandOutOfRange`, operand `left`, bits `16`, value `-42596`.
+
+The final mathematical answer `170,391` fits signed48, so checking only final output bounds would miss the error. The five public fixtures still pass this generator. Their success and the held-out failure can coexist because fixtures sample the input domain; the all-input obligation includes this vector as well. The split-Horner winner avoids the oversized multiplicand by stopping the Horner chain earlier and combining it with `x²` (§8.3).
+
+#### A safe expression that the interval checker cannot admit
+
+Start with the saved, certified 30-cycle winner and append the following ordinary instructions on lane zero after it has drained. `c0` and `x0` are loaded from their declared input addresses. There are no additional stores, so the prefix's output values remain intact.
+
+<!-- derived-table conservative-suffix -->
+| Issue | Destination / operation | Value after completion |
+| ---: | --- | --- |
+| 40 | `r1 ← load c0` | `c0` |
+| 44 | `r2 ← load x0` | `x0` |
+| 48 | `r3 ← r2*r2` | `x0²` |
+| 52 | `r4 ← r3*r3` | `x0⁴` |
+| 56 | `r5 ← r4*r2` | `x0⁵` |
+| 60 | `r6 ← r4*r3` | `x0⁶` |
+| 64 | `r7 ← r5+r6` | `x0⁵+x0⁶` |
+| 68 | `r8 ← r1*r7` | `c0*(x0⁵+x0⁶)` |
+| 72 | `r9 ← r8*r0` | `0` |
+
+Every operation has completed before the next issue. One lane uses one instruction and at most one memory port at a time. For integer `x0 ∈ [-4,3]`, the eight values of `x0⁵+x0⁶` are `[3072,486,32,0,0,2,96,972]`. Thus `r7 ∈ [0,3072]`, and with `c0 ∈ [-8,7]`, `r8 ∈ [-24576,21504]`. Both fit signed16. Earlier powers have magnitude at most 4,096, and every result fits signed48. The final multiply by zero is consequently legal, although it contributes no useful work.
+
+This is a small human safety argument for the appended suffix, combined with the existing prefix certificate. The recipe exhaustively checks the 128 relevant `(c0,x0)` pairs for the displayed range. It does not claim that five whole-program simulations are a new universal proof, or that Lean has certified this modified program.
+
+The automatic checker normalizes `r8` to `c0*x0⁵ + c0*x0⁶`. Bounding these monomials separately gives `[-7168,8192]` and `[-32768,28672]`; interval addition yields `[-39936,36864]`. These separate bounds forget that the same `x0` and `c0` appear in both terms. The derived range fits signed48, so the instruction at 68 succeeds symbolically. At 72, `Value.require16` rejects `r8` as the left operand before the checker simplifies the multiplication by zero.
+
+Observed diagnostic: `range-not-proved`, cycle `72`, lane `0`, left operand, bounds `[-39936,36864]`. It is not evidence that any allowed input reaches either extreme. The exact range above proves those extremes cannot occur in this expression. Increasing the time or term budget cannot recover the lost correlation; the range method itself would need a stronger argument, or the program could remove this unnecessary suffix.
+
+#### Reproduce both outcomes
+
+Run from the repository root after `lake build`. This **new inspection recipe** writes derived candidates and diagnostic JSON to a fresh temporary directory. It imports the repository's hand-written experiment generator; it does not call a model or execute model-written Python. The second candidate is a deliberately inefficient teaching example, not a new search result.
+
+<!-- inspection-recipe failures -->
+```sh
+python3 -B - <<'PY'
+from pathlib import Path
+import json
+import subprocess
+import sys
+import tempfile
+
+sys.path.insert(0, 'scripts')
+import experiment
+
+work = Path(tempfile.mkdtemp(prefix='optimal-failure-walkthrough-'))
+binary = '.lake/build/bin/optimal_computation'
+checker = '.lake/build/bin/certification_check'
+fixtures = ['zeros', 'mixed-signs', 'negative-endpoints', 'positive-endpoints', 'generated-23']
+def simulate(path, *args):
+    result = subprocess.run([binary, 'simulate', str(path), *args, '--json'],
+                            text=True, capture_output=True, timeout=30)
+    return result.returncode, json.loads(result.stdout)
+
+horner = work / 'horner.json'
+horner.write_text(json.dumps(experiment.horner((8, 8))))
+for fixture in fixtures:
+    status, _ = simulate(horner, '--fixture', fixture)
+    if status != 0:
+        raise SystemExit('Unexpected public-fixture failure: ' + fixture)
+status, failure = simulate(horner, '--input', 'docs/results/section9-v1/held-out-polynomial.json')
+(work / 'horner-failure.json').write_text(json.dumps(failure, indent=2))
+if status == 0 or failure['details']['violation']['value'] != -42596:
+    raise SystemExit('Expected the concrete Horner failure')
+print('Horner: public fixtures pass; held-out failure:', failure['details'])
+
+walk = Path('analysis/2026-11-23-five-model-search/walkthrough')
+raw = json.loads((walk / 'winner/candidate.json').read_text())
+raw['identifier'] = 'deep-dive-conservative-range'
+load = experiment.load
+mul = experiment.mul
+operations = [load(1, raw['layout']['inputs'][0]), load(2, raw['layout']['inputs'][8]),
+    mul(3, 2, 2), mul(4, 3, 3), mul(5, 4, 2), mul(6, 4, 3),
+    dict(kind='add', destination=7, left=5, right=6), mul(8, 1, 7), mul(9, 8, 0)]
+for i, instruction in enumerate(operations):
+    raw['schedule'].append(dict(cycle=40+4*i, lane=0, instruction=instruction))
+path = work / 'conservative.json'
+path.write_text(json.dumps(raw))
+values = [c*(x**5+x**6) for c in range(-8, 8) for x in range(-4, 4)]
+if (min(values), max(values)) != (-24576, 21504):
+    raise SystemExit('Unexpected exact range')
+for fixture in fixtures:
+    status, _ = simulate(path, '--fixture', fixture)
+    if status != 0:
+        raise SystemExit('Unexpected conservative-example execution failure')
+result = subprocess.run([checker, str(path), '200', '4096'],
+                        text=True, capture_output=True, check=True, timeout=30)
+report = json.loads(result.stdout)
+(work / 'conservative-failure.json').write_text(json.dumps(report, indent=2))
+if report['category'] != 'range-not-proved' or report['details'] != dict(
+        bits=16, cycle=72, lane=0, lowerBound=-39936, operand='left', upperBound=36864):
+    raise SystemExit('Unexpected symbolic result')
+print('Conservative example:', report['message'])
+print('Exact range:', min(values), max(values), 'over all 128 relevant input pairs')
+print('Inspection directory:', work)
+PY
+```
+
+For a further negative check, inspect the existing [certificate-tampering regression](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/scripts/check-certification.py#L152-L164). It changes a tiny candidate's claimed six-cycle checker result to five and expects kernel rejection; it also changes the emitted candidate identifier and expects `exactBinding` to fail. Those tests address another boundary: an accepted compiled precheck or a mathematically equivalent replacement does not authorize a false closed equality. The examples here keep “a bad execution,” “an incomplete analysis,” and “a tampered proof claim” separate because their remedies differ.
+
 <a id="objectives"></a>
 
 ## 6. Objectives: what is actually minimized
@@ -2290,6 +2663,79 @@ def printScore (artifact : VerifiedArtifact) (objectiveId fixture : String) : IO
 ```
 
 For a new candidate, `printScore` uses a singleton catalog containing the newly proved artifact. The chosen fixture supplies concrete output values for the record. For a successful fixed schedule, timing and issued instruction counts are determined by the schedule and configuration, so this is not an average or best-of-fixtures latency benchmark. The numeric printed score remains a computed output of the Lean runtime; the certificate itself establishes the candidate’s all-input semantics.
+
+<a id="energy-walkthrough"></a>
+
+### 6.4 Calculate both objectives for the same two products
+
+The small product-pair workload computes `[a*b, c*d]` from four runtime signed16 inputs. Its serial and parallel candidates perform the same eight instructions and produce the same two outputs. They make the energy formula inspectable without a large matrix schedule. The serial configuration is `(1,1)`; the parallel candidate uses the default `(8,8)` and activates only lanes zero and one.
+
+Source: [OptimalComputation/Examples/ProductPair.lean:39–54](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Examples/ProductPair.lean#L39-L54).
+
+<!-- source-excerpt {"commit": "71c608a2b573c322993264945dbb2be8a9e5006f", "path": "OptimalComputation/Examples/ProductPair.lean", "start": 39, "end": 54} -->
+```lean
+def candidate (p : Bool) : Candidate shape := {
+  identifier := if p then "product-pair-parallel-v1" else "product-pair-serial-v1"
+  identifier_nonempty := by cases p <;> decide
+  configuration := configuration p
+  layout := layout
+  schedule := [
+    ⟨0, lane0 p, .load r1 (address 0), by decide⟩,
+    ⟨1, lane0 p, .load r2 (address 1), by decide⟩,
+    ⟨2, lane0 p, .multiply r3 r1.val r2.val, trivial⟩,
+    ⟨5, lane0 p, .store r3.val (address 4), by decide⟩,
+    ⟨if p then 0 else 6, laneSecond p, .load r1 (address 2), by decide⟩,
+    ⟨if p then 1 else 7, laneSecond p, .load r2 (address 3), by decide⟩,
+    ⟨if p then 2 else 8, laneSecond p, .multiply r3 r1.val r2.val, trivial⟩,
+    ⟨if p then 5 else 11, laneSecond p, .store r3.val (address 5), by decide⟩
+  ]
+}
+```
+
+Substitute `p = false`: the first product loads at 0/1, multiplies at 2, and stores at 5; the second follows at 6/7, 8, and 11 on the same lane. The final store commits at 12. Substitute `p = true`: the second product uses lane one at the same cycles as the first, so both final stores commit at 6. The distinct addresses make the parallel memory accesses legal in this layout.
+
+The workload example evaluates `[-7,6,5,-3]` and obtains `[-42,-15]`. The candidates have all-input proofs; these particular inputs identify the concrete scored records. The saved [four objective records](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/docs/results/product-pair-v1-objectives.json) contain each candidate scored once under latency and once under energy. The [both helper](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Examples/ObjectiveResults.lean#L8-L14) evaluates a certified execution and then calls `rescore` on that same record, so this comparison does not quietly change the input or execution between objectives.
+
+#### Derive the event costs
+
+Each product has two loads, one multiply, and one store. A load writes a register but reads no source register; a multiply reads two and writes one; a store reads one and writes none. Across two products that gives four loads, two multiplies, two stores, six register reads, and six writes. There are no adds, MACs, or scratch accesses. The instruction-related cost is therefore `4*4 + 2*8 + 2*4 + 6 + 6 = 52` in either candidate.
+
+The remaining cost is duration multiplied by provisioned resources. One bank allocates eight BRAM36 blocks; eight banks allocate sixteen. This difference follows the fixed full-memory allocation rule in §2.2, even though this program uses only six declared slots. Declaring fewer slots does not shrink that physical-resource proxy.
+
+<!-- derived-table pair-energy -->
+| Energy term | Serial `(1,1)` | Parallel `(8,8)` |
+| --- | ---: | ---: |
+| Base duration | `12*1 = 12` | `6*1 = 6` |
+| Provisioned lane duration | `12*1 = 12` | `6*8 = 48` |
+| Allocated BRAM36 duration | `12*8 = 96` | `6*16 = 96` |
+| Four loads | 16 | 16 |
+| Two stores | 8 | 8 |
+| Two multiplies | 16 | 16 |
+| Six register reads | 6 | 6 |
+| Six register writes | 6 | 6 |
+| **Total energy proxy** | **172** | **202** |
+| **Latency** | **12 cycles** | **6 cycles** |
+
+The six inactive lanes in the parallel candidate still contribute to provisioned lane duration. Activity counters describe their inactivity, but the frozen formula does not use those counters to provide clock-gating credit. The winner under latency is therefore the parallel program; the winner under energy among these two is the serial program.
+
+With these exact event counts, the serial duration multiplier is `1+1+8 = 10`, and the parallel multiplier is `1+8+16 = 25`. Parallelism would need a speedup greater than `25/10 = 2.5` to offset the larger duration charge. Here it achieves only two. This is a calculation about two specified artifacts, not an optimality proof for either one. A differently provisioned parallel candidate could have a better tradeoff and would need its own exact candidate certificate.
+
+#### Connect the example to actual energy search
+
+The smoke study's polynomial energy loops chose the following incumbents. These rows are taken from [the loop summary table](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/analysis/2026-11-23-suite-smoke/runs.csv), rather than inferred from latency winners:
+
+<!-- derived-table polynomial-energy -->
+| Model | Selected lanes | Selected banks | Best energy proxy |
+| --- | ---: | ---: | ---: |
+| fable | 4 | 4 | 2,576 |
+| opus | 4 | 4 | 2,576 |
+| sonnet | 8 | 4 | 3,087 |
+| astra | 4 | 4 | 2,576 |
+| sol | 4 | 4 | 2,576 |
+
+Four banks still allocate eight BRAM36 blocks, while eight banks allocate sixteen. This explains an incentive supplied by the objective; the selected configurations alone do not prove which schedule change caused each improvement. Free hardware choice is part of the energy search, whereas latency cases hold lane/bank counts fixed. Comparing an energy incumbent with an eight-lane latency incumbent therefore requires inspecting both schedule and provisioned resources.
+
+To reproduce the small example, run `lake env lean scripts/reproduce-product-pair-objectives.lean`. It prints all four records, including the breakdown above. `python3 docs/check-deep-dive.py` independently recomputes these totals from the stored counters and verifies the displayed smoke rows. Energy remains an abstract coefficient-based score throughout this calculation; none of these numbers is a measurement in joules.
 
 <a id="search"></a>
 
@@ -3389,6 +3835,114 @@ For a visual overview of the two actual schedules and their computation graphs:
 
 The two schedule panels use different time scales. The count of drawn issue events is not their duration; arithmetic remains pending for three cycles. The source figure and provenance are linked in the atlas. The new independent certification performed for this guide is recorded in §12.
 
+<a id="scheduler-walkthrough"></a>
+
+### 8.7 Follow the winning scheduler's decisions and register lifetimes
+
+The generator in §8.2 searches for a static program. Its Python variables are separate from the accelerator registers. Follow its internal representation into the lane-zero schedule of §8.5; the successful path does not establish exhaustive search.
+
+#### Name the graph nodes before reading the bit masks
+
+Nodes 0–7 load `c0` through `c7`. For the first point, node 8 loads the point, nodes 9–13 are the five Horner MACs ending at `c2`, node 14 squares the point, node 15 computes `c1*x+c0`, and node 16 combines the pieces. The second point repeats that structure at nodes 17–25. In lane zero those points are logical `x0` and `x8`; the physical addresses are chosen later.
+
+`deps[i]` lists the nodes read by node `i`. `pre[i]` is a bit set of its distinct prerequisites; repeating an operand does not create a second prerequisite bit. In contrast, `use[i]` counts every source occurrence, including both reads in a square. That count is for register lifetime management. The two concepts answer different questions: whether a value exists, and how many future reads still need it.
+
+For example, node 14 has dependencies `(8,8)` but one prerequisite bit. Once node 8 is ready, the square can issue. Its register must remain allocated until all reads by that square and the other consumers have captured the value. Each final result has an extra use reserved for its output store.
+
+#### What one DFS state means
+
+`dfs(t, mask, a, b, left)` schedules the next boundary `t`. `mask` contains nodes already issued. `a` contains an arithmetic node issued at `t-1`, and `b` one issued at `t-2`; each is zero if that boundary did not issue arithmetic. These results are still pending. A three-cycle arithmetic instruction issued at `t-3` is ready now because completion precedes issue. Consequently `ready = mask & ~(a | b)` is the set of issued nodes whose operands may be read.
+
+The following is the decision point in the original generator. Read `kinds[i] == 0` as a load and a nonzero kind as multiply or MAC.
+
+Source: [analysis/2026-11-23-five-model-search/walkthrough/winner/generator.py:57–74](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/analysis/2026-11-23-five-model-search/walkthrough/winner/generator.py#L57-L74).
+
+<!-- source-excerpt {"commit": "71c608a2b573c322993264945dbb2be8a9e5006f", "path": "analysis/2026-11-23-five-model-search/walkthrough/winner/generator.py", "start": 57, "end": 74} -->
+```python
+                return True
+            if budget <= 0 or t >= end or end-t < left or overdue[t] & ~mask:
+                return False
+            key = (t, mask, a, b)
+            if key in dead:
+                return False
+            budget -= 1
+            avail = masks[t] & ~mask
+            ready = mask & ~(a | b)
+            for i in order:
+                bit = bits[i]
+                if not avail & bit or pre[i] & ~ready or (not kinds[i] and b):
+                    continue
+                path.append((t, i))
+                if dfs(t+1, mask | bit, bit if kinds[i] else 0, a, left-1):
+                    return True
+                path.pop()
+                if budget <= 0:
+```
+
+`pre[i] & ~ready` rejects a node with an unavailable prerequisite. The final condition, `(not kinds[i] and b)`, prevents a load at `t` from writing back at `t+1` when arithmetic issued at `t-2` will also write back. A new arithmetic instruction writes at `t+3`, which cannot collide with an earlier instruction in this one-issue-per-cycle model. Thus this tiny state carries both data readiness and mixed-latency writeback information.
+
+The recursive call advances the recent-arithmetic window. Issuing arithmetic places its bit in the new `a`; the old `a` becomes `b`. Issuing a load or an idle boundary places zero in the new `a`. An idle branch is tried only when enough schedule positions remain. `mask` keeps a load immediately after issue, but it becomes readable only in the next DFS call, exactly one boundary later.
+
+The rest of `template()` supplies pruning and search order: backward deadlines ensure every node can feed the fixed final-store positions; `overdue[t]` detects missed deadlines; `end-t < left` detects too few remaining issue slots; `budget` caps recursive exploration. `dead` remembers failed scheduling states for this template. Randomized node order chooses which legal branch to try first. This is bounded proposal generation, so failing to find a 29-cycle template is not proof that none exists.
+
+#### Read several real choices against machine time
+
+The archived lane-zero schedule starts by loading coefficients, then deliberately loads the **second** point before the first. A reading that assumes node order is issue order would misidentify its registers. Use the candidate layout to translate the addresses: `inputs[16] = 8` holds `x8`, while `inputs[8] = 16` holds `x0`.
+
+<!-- derived-table scheduler-early -->
+| Issue | Graph node | Captured operation | Due | Why this matters |
+| ---: | ---: | --- | ---: | --- |
+| 4 | 17 | `r5 ← load x8` | 5 | The second point becomes available first. |
+| 5 | 18 | `r6 ← c7*x8+c6` | 8 | Its result is pending at 6 and 7. |
+| 6 | 8 | `r7 ← load x0` | 7 | This load completes before that pending MAC. |
+| 7 | 9 | `r1 ← c7*x0+c6` | 10 | Uses old coefficient values captured at issue. |
+| 8 | 3 | `r4 ← load c3` | 9 | Reuses a coefficient register after its final read. |
+| 9 | 19 | `r6 ← r6*x8+c5` | 12 | The prior `r6` value has been ready since 8. |
+
+At boundary 7, moving an unrelated load into the selected MAC's slot would create a writeback collision at 8 with the MAC from 5. Moving the second `x8` MAC there would instead read pending `r6`. These are separate reasons for rejection. At boundary 8 the older MAC has committed, but the generator chooses a coefficient load before continuing that chain at 9. Legal scheduling is not the same as greedily issuing every newly ready arithmetic operation.
+
+#### How a value's last read releases its register
+
+The generator walks the chosen schedule with `refs = use[:]`, a node-to-register array `regs`, and a set of free writable registers. For each instruction, it first records the registers holding all source nodes. It then decrements their remaining-use counts and releases a register when its count reaches zero. Only after capturing those source register numbers does it select the lowest free destination register.
+
+That ordering permits legal in-place arithmetic. At cycle 7, `c7` in `r1` and `c6` in `r4` are used by their second point's first MAC. Their earlier uses were captured at cycle 5. Both coefficient lifetimes now end. The new MAC chooses freed `r1` as its destination, while `r4` is available for `c3` at cycle 8. The pending result in `r1` completes at 10; freeing the old coefficient does not mean that this new result is immediately readable.
+
+The same pattern explains the end of the schedule. The linear term for `x8` overwrites `r2` at cycle 23 after the last read of its old `c1`. It completes at 26. The final MAC for `x8` also issues at 26 and writes its result into `r2`, capturing that just-completed linear term first. Commit-before-issue is what makes this legal.
+
+#### Why four lane pairs and a late memory layout
+
+Each template is copied to two lanes. A coefficient load consequently requests two ports of the same bank in the same cycle, exhausting that bank's capacity. `bans[coefficient]` prevents subsequent pairs from requesting that coefficient at the same time. In this saved program the `c7` loads are:
+
+<!-- derived-table coefficient-pairs -->
+| Lanes | `c7` load cycle | Address / bank | Simultaneous accesses |
+| --- | ---: | --- | ---: |
+| 0 and 1 | 0 | `7 / 7` | 2 |
+| 2 and 3 | 1 | `7 / 7` | 2 |
+| 4 and 5 | 3 | `7 / 7` | 2 |
+| 6 and 7 | 2 | `7 / 7` | 2 |
+
+All coefficient addresses are fixed first. The generator then counts those accesses in `bank_use`. For each point load and output store, `alloc(t)` selects an available bank and takes a fresh row in it. Thus the scheduling of point accesses precedes their physical address assignment. It can avoid a conflict by changing where an input is placed, without changing which logical input that instruction reads.
+
+The point addresses 8 and 16 above both use bank zero, but are loaded at different cycles. At the two final store boundaries, 28 and 29, the eight lanes use all eight banks once each. The candidate's layout lists tie these addresses back to the required output indices. Layout freedom does not let the generator relabel a result arbitrarily: the output polynomial checks still compare against the corresponding logical point.
+
+#### Read the final dependency chain
+
+<!-- derived-table scheduler-tail -->
+| Issue | Captured operation on lane zero | Due |
+| ---: | --- | ---: |
+| 20 | `r4 ← c1*x0+c0` | 23 |
+| 21 | `r6 ← q8*x8+c2` (finishes the short Horner chain) | 24 |
+| 22 | `r1 ← q0*x0+c2` (finishes the short Horner chain) | 25 |
+| 23 | `r2 ← c1*x8+c0` | 26 |
+| 25 | `r1 ← r1*x0²+r4` | 28 |
+| 26 | `r2 ← r6*x8²+r2` | 29 |
+| 28 | `mem[24] ← r1` (`y0`) | 29 |
+| 29 | `mem[32] ← r2` (`y8`) | 30 |
+
+Here `q0`/`q8` in the rows at 21/22 denote the partial Horner values before adding `c2`. Boundaries 24 and 27 are idle on this lane. The store at 28 can use the result that commits at 28, and similarly at 29. Completion of the last store establishes the observed 30-cycle duration.
+
+This reconstruction lets a reader check readiness, reuse, and bank decisions against the concrete program. It does not turn the Python scheduler into a trusted compiler. The Lean machine and symbolic checker still validate the returned layout and every instruction, including constraints the generator did not model explicitly. The documentation check additionally follows node identities and last-use allocation through all 26 computation nodes on this lane, and checks the displayed coefficient-pair timings against the saved candidate.
+
 <a id="other-winners"></a>
 
 ## 9. The other three reported winners: where the speed comes from
@@ -4007,7 +4561,7 @@ The root library also contains [OptimalComputation/Versions.lean](https://github
 | [check-search-suite.py](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/scripts/check-search-suite.py) | All sixteen cases through real Docker/Lean using known designs; no live model calls. |
 | [audit-search-batch.py](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/scripts/audit-search-batch.py) | Read-only full archive consistency audit; writes its report outside the archive. |
 
-The new [docs/check-deep-dive.py](docs/check-deep-dive.py) is a documentation/evidence check added with this guide. It is not part of the historical harness or certificate trusted base. It requires only Python’s standard library and Git, and makes no model calls.
+The new [docs/check-deep-dive.py](docs/check-deep-dive.py) is a documentation/evidence check added with this guide. It is not part of the historical harness or certificate trusted base. It requires only Python’s standard library and Git, and makes no model calls. It also checks the failure calculations, energy tables, and scheduler node/register reconstruction; the executable recipes are checked separately as recorded in §12.5.
 
 | File | Responsibility / what to inspect |
 | --- | --- |
@@ -4221,7 +4775,113 @@ print('PASS: all emitted candidate fields match the snapshot.')
 PY
 ```
 
-### 12.4 Checks completed while preparing this guide
+<a id="replay-walkthrough"></a>
+
+### 12.4 Replay the saved response into the exact certified candidate
+
+Re-certifying a saved `candidate.json` establishes something about that candidate. It does not by itself show that running the saved model-written generator produces that file. This recipe checks that extra link for Sol's seed-11, attempt-2 polynomial winner, then sends the reproduced program through certification again.
+
+There are three distinct equalities to inspect. First, the `code` string parsed from the saved response must equal `generator.py`. Second, running that code must produce the saved candidate: semantic equality compares all parsed JSON fields, while byte equality additionally requires identical serialization. Third, the new certificate must bind the generated candidate and report the expected 30-cycle execution. Successful replay strengthens the executable provenance chain; it does not establish the provider's authorship independently of the archived transport records.
+
+#### Reconstruct the generator's actual inputs
+
+The original generator environment consists of the Python source, original baseline, helper module, container entry point, attempt seed, and Python container image. The latest incumbent is present in the model's prompt, but `baseline()` inside generated code still reads the original baseline file. Substituting the 35-cycle incumbent here would change the environment even though the code mostly replaces its schedule.
+
+For this attempt the recorded seed is `1162763546`, and the image ID is `sha256:a0938838407c79b6ff4ea2635398c61b68a3bf58d9d71d0604ab7825086d506a`. The [run manifest](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/analysis/2026-11-23-five-model-search/walkthrough/run-manifest.json) identifies the original source revision and expected helper hashes. The recipe reads the helper and entry point from that Git revision and verifies their hashes, rather than assuming today's files have the same behavior. For this particular snapshot those two files do match today's source; the surrounding harness has changed.
+
+The image's immutable ID matters more than the human-readable `python:3.12-slim-bookworm` tag. If that ID is unavailable locally, the recipe stops. Obtaining a different image under the same tag would be a reproduction in a changed environment, not this exact replay. The recorded image is the local image/configuration identity, so it is not necessarily a registry digest that can be passed directly to `docker pull`.
+
+Run `python3 docs/check-deep-dive.py` first to check the frozen walkthrough's file hashes and response/proposal bindings. The following **new inspection recipe** then requires Docker, the recorded image, the original Git commit objects, and a built Lean project. All model-written Python runs inside the constrained container. It receives no provider credentials and makes no model request. The recipe retains its inputs, generated candidate, stderr, and certification archive in a fresh temporary directory printed at the end.
+
+<!-- inspection-recipe generator-replay -->
+```sh
+python3 -B - <<'PY'
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import tempfile
+import uuid
+
+walk = Path('analysis/2026-11-23-five-model-search/walkthrough')
+manifest = json.loads((walk / 'run-manifest.json').read_text())
+randomness = json.loads((walk / 'winner/randomness.json').read_text())
+proposal = json.loads((walk / 'winner/proposal.json').read_text())
+response = json.loads((walk / 'winner/response.json').read_text())
+if json.loads(response['choices'][0]['message']['content']) != proposal:
+    raise SystemExit('Response/proposal mismatch')
+code = proposal['code'].encode()
+if code != (walk / 'winner/generator.py').read_bytes():
+    raise SystemExit('Response/generator mismatch')
+
+work = Path(tempfile.mkdtemp(prefix='optimal-generator-replay-'))
+inputs = work / 'input'
+inputs.mkdir(mode=0o755)
+for name in ('candidate_tools.py', 'container_entry.py'):
+    source = 'scripts/harness/' + name
+    data = subprocess.check_output(['git', 'show', manifest['revision'] + ':' + source])
+    if hashlib.sha256(data).hexdigest() != manifest['sourceHashes'][source]:
+        raise SystemExit('Historical source hash mismatch: ' + source)
+    (inputs / name).write_bytes(data)
+(inputs / 'generator.py').write_bytes(code)
+(inputs / 'baseline.json').write_bytes((walk / 'baseline/candidate.json').read_bytes())
+(inputs / 'randomness.json').write_text(json.dumps({'attemptSeed': randomness['attemptSeed']}))
+for path in inputs.iterdir():
+    path.chmod(0o644)
+
+image = manifest['imageId']
+actual = subprocess.check_output(['docker', 'image', 'inspect', image, '--format', '{{.Id}}'], text=True).strip()
+if actual != image:
+    raise SystemExit('Recorded image is unavailable')
+name = 'optimal-replay-' + uuid.uuid4().hex
+args = ['docker', 'run', '--rm', '--name', name, '--pull=never', '--init',
+        '--network=none', '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges',
+        '--pids-limit=64', '--memory=256m', '--cpus=1', '--user=65534:65534',
+        '--tmpfs', '/tmp:rw,nosuid,nodev,size=16777216', '--workdir', '/tmp',
+        '--env', 'PYTHONHASHSEED=' + str(randomness['attemptSeed']),
+        '--mount', 'type=bind,src=' + str(inputs.resolve()) + ',dst=/input,readonly',
+        image, 'python', '-P', '-s', '-B', '/input/container_entry.py']
+try:
+    result = subprocess.run(args, capture_output=True, timeout=manifest['config']['generator_timeout'])
+    (work / 'generator.stderr').write_bytes(result.stderr)
+    result.check_returncode()
+finally:
+    subprocess.run(['docker', 'rm', '-f', name], capture_output=True, timeout=30)
+
+candidate = work / 'candidate.json'
+candidate.write_bytes(result.stdout)
+expected = (walk / 'winner/candidate.json').read_bytes()
+semantic_equal = json.loads(result.stdout) == json.loads(expected)
+byte_equal = result.stdout == expected
+print('semantic equality:', semantic_equal)
+print('byte equality:', byte_equal)
+print('candidate SHA-256:', hashlib.sha256(result.stdout).hexdigest())
+print('inspection directory:', work)
+if not semantic_equal:
+    raise SystemExit('Generated program differs; stop before attributing the archived result to this replay')
+certificate = subprocess.run(['python3', 'scripts/certify.py', str(candidate),
+    '--archive', str(work / 'certification'), '--objective', 'latency-v1',
+    '--timeout', '120', '--json'], capture_output=True, text=True, check=True)
+report = json.loads(certificate.stdout)
+if not report['accepted'] or report['cycles'] != 30:
+    raise SystemExit('Replay did not re-certify at 30 cycles')
+print('kernel accepted:', report['accepted'], 'cycles:', report['cycles'])
+PY
+```
+
+The container options mirror the documented generator boundary: one CPU, 256 MiB, read-only filesystem/input mount, no network, unprivileged UID, limited temporary storage, and the recorded generation timeout. The `finally` clause removes the named replay container even if the client times out. It does not remove other containers. The captured output is compared only after a successful process exit; an exception or timeout is not interpreted as a different but valid candidate.
+
+This compact recipe is for the one already archived, bounded generator. The general live harness also enforces an output-size limit while capturing processes. Use that harness for arbitrary new proposals; this inspection recipe does not replace its input and resource admission checks.
+
+#### Observed replay result
+
+On 25 November 2026, the recipe reproduced **all 24,743 bytes** of the saved candidate, with both semantic equality and byte equality true. Its SHA-256 was `262fc34b8f94d64ec61e73630018aa03c98900fd0f3dcd7d4df971b3e60d7d67`. The subsequent current-source Lean check accepted it at **30 cycles**, with 224 instructions and no scratch. These are observations from this replay, not a promise that every archived generator is deterministic.
+
+If semantic equality succeeds but byte equality fails, inspect serialization before drawing a conclusion: whitespace or object-key order can change bytes without changing the program. Schedule-list order and all numeric fields are still compared in the semantic check. If semantic equality fails, retain both programs and inspect seed, baseline, helpers, image, and any generator-selected randomness. Do not silently replace the archive or attribute its score to the new output. A different output could be separately certified, but it would be another artifact.
+
+This selected replay does not reconstruct a historical provider service or host operating system. An unavailable old environment would limit reproducibility without refuting an independently rechecked candidate certificate.
+
+### 12.5 Checks completed while preparing this guide
 
 On 25 November 2026, against the source snapshot named above:
 
@@ -4234,7 +4894,12 @@ On 25 November 2026, against the source snapshot named above:
 | Re-serialize the newly emitted raw Lean term and compare to input JSON | Passed; all parsed candidate fields equal the submitted snapshot. |
 | `python3 docs/check-deep-dive.py` | Passed exact-excerpt, link, coverage, frozen walkthrough and aggregate-table checks. |
 | `git diff --check` | Passed. |
+| Failure walkthrough: public fixtures and held-out Horner input | All five public fixtures pass; held-out execution fails at cycle 21 with left multiplicand −42,596. |
+| Failure walkthrough: conservative suffix | All five public simulations pass; exact relevant range is [−24,576, 21,504]; symbolic analysis rejects at cycle 72 with [−39,936, 36,864]. |
+| Saved generator replay with original helpers, seed, and image | Semantic and byte equality; 24,743-byte candidate with the original hash, re-certified at 30 cycles. |
+| Product-pair objective reproduction | Four records match the frozen result file; hand totals 172/202 and durations 12/6 agree. |
+| Direct baseline proof audits and serial-dot trace reproduction | Matvec's 65 and naive-v2's 32 audited declarations use only the allowed standard axioms; the serial-dot trace matches its frozen file byte for byte. |
 
 The audited candidate’s SHA-256 is `262fc34b8f94d64ec61e73630018aa03c98900fd0f3dcd7d4df971b3e60d7d67`. The newly generated proof source hash was `1ee50415d401d10e314ac202aa9275afc4a149d33ca47ae7b7980251bc6e76c5`, with declaration `Certificate_c70881073b615e01e73756cc4e8b21d4f727634f2f1b90be2b6d0e0771e96c5c.artifact`. These identify the new check, not the differently named historical certificate in the frozen feedback. Temporary logs were kept locally; the recipes above regenerate inspectable logs from the tracked candidate.
 
-No paid search was launched, no experiment was rerun to obtain new model responses, and no full 1,250/240-slot archive re-audit or physical hardware measurement is claimed here. The machine and certification implementation were not changed to write this guide. For any disputed conclusion, follow its source link, inspect the complete definition/proof, and re-run the relevant smallest check above.
+The five added walkthroughs deepen the original source snapshot without changing its implementation. No paid search was launched, no experiment was rerun to obtain new model responses, and no full 1,250/240-slot archive re-audit or physical hardware measurement is claimed here. The machine and certification implementation were not changed to write this guide. For any disputed conclusion, follow its source link, inspect the complete definition/proof, and re-run the relevant smallest check above.

@@ -238,6 +238,181 @@ def check_lane_table(text):
         require(expression == expected, f"Lane 0 operands differ: {row}")
 
 
+def marked_table(text, name):
+    marker = f'<!-- derived-table {name} -->\n'
+    require(text.count(marker) == 1, f'Missing/duplicate derived table: {name}')
+    return text.split(marker, 1)[1].split('\n\n', 1)[0]
+
+
+def check_failure_walkthrough(text):
+    values = saved('docs/results/section9-v1/held-out-polynomial.json')
+    coefficients, points = values[:8], values[8:]
+    require(points == [-4] * 16, 'Changed Horner counterexample')
+    accumulator = coefficients[-1]
+    rows = marked_table(text, 'horner-values')
+    tick = chr(96)
+    for step, k in enumerate(range(6, -1, -1)):
+        result = accumulator * points[0] + coefficients[k]
+        row = f'| {tick}c{k} = {coefficients[k]}{tick} | {3+3*step} | {accumulator:,} | {result:,} |'
+        require(row in rows, f'Horner calculation differs: {row}')
+        if k > 0:
+            require(-32768 <= accumulator <= 32767, 'Earlier Horner multiplicand is invalid')
+        else:
+            require(accumulator == -42596, 'Final Horner counterexample differs')
+        accumulator = result
+    powers = [x**5+x**6 for x in range(-4, 4)]
+    exact = [c * v for c in range(-8, 8) for v in powers]
+    require(powers == [3072, 486, 32, 0, 0, 2, 96, 972], 'Power table differs')
+    require((min(exact), max(exact)) == (-24576, 21504), 'Exact safe range differs')
+    require('[3072,486,32,0,0,2,96,972]' in text and '[-24576,21504]' in text,
+            'Guide exact-range explanation differs')
+    def multiply(a, b):
+        endpoints = [x*y for x in a for y in b]
+        return min(endpoints), max(endpoints)
+    first = multiply((-8, 7), (-1024, 768))
+    second = multiply((-8, 7), (0, 4096))
+    bound = (first[0]+second[0], first[1]+second[1])
+    require(bound == (-39936, 36864) and '[-39936,36864]' in text, 'Conservative range differs')
+    rows = marked_table(text, 'conservative-suffix')
+    operations = [('r1 ← load c0', 'c0'), ('r2 ← load x0', 'x0'),
+                  ('r3 ← r2*r2', 'x0²'), ('r4 ← r3*r3', 'x0⁴'),
+                  ('r5 ← r4*r2', 'x0⁵'), ('r6 ← r4*r3', 'x0⁶'),
+                  ('r7 ← r5+r6', 'x0⁵+x0⁶'), ('r8 ← r1*r7', 'c0*(x0⁵+x0⁶)'),
+                  ('r9 ← r8*r0', '0')]
+    for i, (operation, value) in enumerate(operations):
+        require(f'| {40+4*i} | {tick}{operation}{tick} | {tick}{value}{tick} |' in rows,
+                f'Conservative suffix row differs: {i}')
+
+
+def check_energy_walkthrough(text):
+    records = saved('docs/results/product-pair-v1-objectives.json')
+    energy = [r for r in records if r['objective']['identifier'] == 'energy-proxy-v1']
+    require(len(energy) == 2, 'Missing pair energy records')
+    results = []
+    for record in energy:
+        execution, config = record['execution'], record['configuration']
+        counters, resources = execution['counters'], execution['resources']
+        terms = [execution['cycles'], execution['cycles']*config['lanes'],
+                 execution['cycles']*resources['bram36Blocks'], 4*counters['loads'],
+                 4*counters['stores'], 8*counters['multiplications'],
+                 counters['registerReads'], counters['registerWrites']]
+        require(counters['additions'] == counters['multiplyAdds'] == 0, 'Unexpected pair operations')
+        require(sum(terms) == record['objective']['score'], 'Pair energy formula differs')
+        require(execution['outputs'] == [-42, -15], 'Pair outputs differ')
+        results.append(terms)
+    require(results == [[12,12,96,16,8,16,6,6], [6,48,96,16,8,16,6,6]], 'Pair breakdown differs')
+    rows = marked_table(text, 'pair-energy')
+    for row in ['| Base duration | `12*1 = 12` | `6*1 = 6` |',
+                '| Provisioned lane duration | `12*1 = 12` | `6*8 = 48` |',
+                '| Allocated BRAM36 duration | `12*8 = 96` | `6*16 = 96` |',
+                '| Four loads | 16 | 16 |', '| Two stores | 8 | 8 |',
+                '| Two multiplies | 16 | 16 |', '| Six register reads | 6 | 6 |',
+                '| Six register writes | 6 | 6 |', '| **Total energy proxy** | **172** | **202** |',
+                '| **Latency** | **12 cycles** | **6 cycles** |']:
+        require(row in rows, f'Pair energy table differs: {row}')
+    rows = marked_table(text, 'polynomial-energy')
+    runs = [r for r in table('analysis/2026-11-23-suite-smoke/runs.csv')
+            if r['task'] == 'polynomial' and r['objective'] == 'energy-proxy-v1']
+    require(len(runs) == 5, 'Unexpected polynomial energy loops')
+    for run in runs:
+        row = f"| {run['model']} | {run['winner_lanes']} | {run['winner_banks']} | {int(run['best_score']):,} |"
+        require(row in rows, f'Smoke energy row differs: {row}')
+
+
+def check_scheduler_walkthrough(text):
+    raw = saved('analysis/2026-11-23-five-model-search/walkthrough/winner/candidate.json')
+    nodes = [('load', ()) for _ in range(8)]
+    def node(kind, *deps):
+        index = len(nodes)
+        nodes.append((kind, deps))
+        return index
+    input_nodes = dict(enumerate(range(8)))
+    outputs = {}
+    for logical in (0, 8):
+        x = node('load')
+        input_nodes[8+logical] = x
+        q = 7
+        for k in range(6, 1, -1):
+            q = node('multiplyAdd', q, x, k)
+        square = node('multiply', x, x)
+        low = node('multiplyAdd', 1, x, 0)
+        outputs[logical] = node('multiplyAdd', q, square, low)
+    uses = Counter(dep for _, deps in nodes for dep in deps)
+    uses.update(outputs.values())
+    registers, node_registers, ready, found = {}, {}, {}, {}
+    free = set(range(1, 16))
+    for entry in raw['schedule']:
+        if entry['lane'] != 0:
+            continue
+        t, op = entry['cycle'], entry['instruction']
+        if op['kind'] == 'store':
+            logical = raw['layout']['outputs'].index(op['address'])
+            value = registers[op['source']]
+            require(value == outputs[logical] and ready[value] <= t, 'Output node/store differs')
+            uses[value] -= 1
+            found[t] = ('store', logical, op['source'], op['address'])
+            continue
+        if op['kind'] == 'load':
+            logical = raw['layout']['inputs'].index(op['address'])
+            current = input_nodes[logical]
+            deps = ()
+        else:
+            operands = [op['left'], op['right']]
+            if op['kind'] == 'multiplyAdd':
+                operands.append(op['accumulator'])
+            deps = tuple(registers[r] for r in operands)
+            matches = [i for i, n in enumerate(nodes) if n == (op['kind'], deps)]
+            require(len(matches) == 1, 'Ambiguous/missing graph node')
+            current = matches[0]
+        require(current not in ready, 'Node emitted more than once')
+        for dependency in deps:
+            require(ready[dependency] <= t, 'Scheduler explanation reads a pending node')
+            uses[dependency] -= 1
+            if uses[dependency] == 0:
+                free.add(node_registers[dependency])
+        destination = op['destination']
+        require(destination == min(free), 'Last-use register allocation differs')
+        free.remove(destination)
+        registers[destination] = current
+        node_registers[current] = destination
+        ready[current] = t + (1 if op['kind'] == 'load' else 3)
+        found[t] = (current, destination, ready[current])
+    require(len(ready) == 26 and not any(uses.values()), 'Graph/last-use coverage differs')
+    early = marked_table(text, 'scheduler-early')
+    descriptions = {4:'r5 ← load x8', 5:'r6 ← c7*x8+c6', 6:'r7 ← load x0',
+                    7:'r1 ← c7*x0+c6', 8:'r4 ← load c3', 9:'r6 ← r6*x8+c5'}
+    tick = chr(96)
+    for t, description in descriptions.items():
+        current, _, due = found[t]
+        require(f'| {t} | {current} | {tick}{description}{tick} | {due} |' in early,
+                f'Scheduler early row differs: {t}')
+    require({t:found[t] for t in (20,21,22,23,25,26,28,29)} == {
+        20:(15,4,23), 21:(22,6,24), 22:(13,1,25), 23:(24,2,26),
+        25:(16,1,28), 26:(25,2,29), 28:('store',0,1,24), 29:('store',8,2,32)},
+        'Tail dependencies/registers differ')
+    tail = marked_table(text, 'scheduler-tail')
+    tail_ops = {20:'`r4 ← c1*x0+c0`',
+                21:'`r6 ← q8*x8+c2` (finishes the short Horner chain)',
+                22:'`r1 ← q0*x0+c2` (finishes the short Horner chain)',
+                23:'`r2 ← c1*x8+c0`', 25:'`r1 ← r1*x0²+r4`',
+                26:'`r2 ← r6*x8²+r2`', 28:'`mem[24] ← r1` (`y0`)',
+                29:'`mem[32] ← r2` (`y8`)'}
+    for t, description in tail_ops.items():
+        due = t+(1 if t >= 28 else 3)
+        require(f'| {t} | {description} | {due} |' in tail, f'Scheduler tail row differs: {t}')
+    rows = marked_table(text, 'coefficient-pairs')
+    for lane in range(0, 8, 2):
+        loads = [e for e in raw['schedule'] if e['lane'] in (lane,lane+1)
+                 and e['instruction']['kind'] == 'load' and e['instruction']['address'] == 7]
+        require(len(loads) == 2 and loads[0]['cycle'] == loads[1]['cycle'], 'Coefficient pair differs')
+        require(f"| {lane} and {lane+1} | {loads[0]['cycle']} | `7 / 7` | 2 |" in rows,
+                'Coefficient-pair table differs')
+    for t in (28,29):
+        stores = [e for e in raw['schedule'] if e['cycle'] == t and e['instruction']['kind'] == 'store']
+        require(sorted(e['instruction']['address'] % 8 for e in stores) == list(range(8)),
+                'Final stores do not use each bank once')
+
+
 def main():
     text = GUIDE.read_text()
     counts = check_excerpts(text)
@@ -249,9 +424,13 @@ def main():
         check_walkthrough(path, text)
     check_aggregates(text)
     check_lane_table(text)
+    check_failure_walkthrough(text)
+    check_energy_walkthrough(text)
+    check_scheduler_walkthrough(text)
     print(f"PASS: {counts['source-excerpt']} exact source excerpts and {counts['json-string']} decoded JSON strings")
     print(f"PASS: {links} links and complete coverage of {core} core source/config/root files")
     print("PASS: four frozen walkthroughs, response/code/hash/count bindings, lane 0 table, and both aggregate studies")
+    print("PASS: failure calculations, energy breakdowns, and scheduler node/register explanations")
     print("This is an offline documentation/data check, not a new Lean certificate or full raw-archive audit.")
 
 
