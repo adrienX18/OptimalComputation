@@ -1,0 +1,193 @@
+{
+  "description": "Separate 2026-11-25 source rechecks and axiom audit of generic soundness proofs. Not an experiment timing measurement.",
+  "revision": "0baf629afaf7fca0414dd3fa711c12f38ab01d3e",
+  "toolchain": "leanprover/lean4:v4.35.0",
+  "checks": [
+    {
+      "source": "OptimalComputation/Certification/Polynomial.lean",
+      "sourceSha256": "5447b0fecc323149e5be2104ff342042c9d4236bd972229df466571b8b41a65e",
+      "args": [
+        "lake",
+        "env",
+        "lean",
+        "OptimalComputation/Certification/Polynomial.lean"
+      ],
+      "exitCode": 0,
+      "seconds": 3.5131722500082105
+    },
+    {
+      "source": "OptimalComputation/Certification/Value.lean",
+      "sourceSha256": "7e846e48597a6407ca157ab6c0c52fb70350eb4f5b5d002b34ddcfbb1e5587ec",
+      "args": [
+        "lake",
+        "env",
+        "lean",
+        "OptimalComputation/Certification/Value.lean"
+      ],
+      "exitCode": 0,
+      "seconds": 0.4587305420136545
+    },
+    {
+      "source": "OptimalComputation/Certification/Machine.lean",
+      "sourceSha256": "54969e29e6c0f9269fa8cbd6a703bbed367a733a7a68eb802788f97c89b79714",
+      "args": [
+        "lake",
+        "env",
+        "lean",
+        "OptimalComputation/Certification/Machine.lean"
+      ],
+      "exitCode": 0,
+      "seconds": 0.7586514999857172
+    },
+    {
+      "source": "OptimalComputation/Certification/Soundness.lean",
+      "sourceSha256": "12af9314aba9204585df4684a245f2395830da0496b438c60abbb9f59a6ea98c",
+      "args": [
+        "lake",
+        "env",
+        "lean",
+        "OptimalComputation/Certification/Soundness.lean"
+      ],
+      "exitCode": 0,
+      "seconds": 0.4705770419968758
+    },
+    {
+      "source": "OptimalComputation/Certification/Runner.lean",
+      "sourceSha256": "ff635e4f1d9f8768444c4137f9acbd9a6fae1b5ad8f4e96c53721bcdae9960a6",
+      "args": [
+        "lake",
+        "env",
+        "lean",
+        "OptimalComputation/Certification/Runner.lean"
+      ],
+      "exitCode": 0,
+      "seconds": 0.5143073330109473
+    },
+    {
+      "source": "OptimalComputation/Certification/Checker.lean",
+      "sourceSha256": "3356853fe1c09ecf3bdba39b3773eca37c975903682f23c2d5d0ba6608bb3834",
+      "args": [
+        "lake",
+        "env",
+        "lean",
+        "OptimalComputation/Certification/Checker.lean"
+      ],
+      "exitCode": 0,
+      "seconds": 0.4433068750076927
+    },
+    {
+      "source": "OptimalComputation/Certification/WorkloadInstances.lean",
+      "sourceSha256": "85375a348f51c4dc6586913ced1a00b535781a3ebb98e343cef8650322d1748d",
+      "args": [
+        "lake",
+        "env",
+        "lean",
+        "OptimalComputation/Certification/WorkloadInstances.lean"
+      ],
+      "exitCode": 0,
+      "seconds": 0.48503745801281184
+    },
+    {
+      "source": "OptimalComputation/Certification/Catalog.lean",
+      "sourceSha256": "71a2e162480a28aff09684a0397c700fb614c37a4738cf4599cb79c7bca4877c",
+      "args": [
+        "lake",
+        "env",
+        "lean",
+        "OptimalComputation/Certification/Catalog.lean"
+      ],
+      "exitCode": 0,
+      "seconds": 0.36524045799160376
+    },
+    {
+      "source": "docs/evidence/deep-dive-2-proof-audit/Axioms.lean",
+      "sourceSha256": "261cdbd098e3446d4f103b16ace9a3fb485c7fdd907746a606c19f4f4d6b94b4",
+      "args": [
+        "lake",
+        "env",
+        "lean",
+        "docs/evidence/deep-dive-2-proof-audit/Axioms.lean"
+      ],
+      "exitCode": 0,
+      "seconds": 0.360207833989989
+    }
+  ],
+  "files": [
+    {
+      "path": "Axioms.lean",
+      "sha256": "261cdbd098e3446d4f103b16ace9a3fb485c7fdd907746a606c19f4f4d6b94b4"
+    },
+    {
+      "path": "Catalog.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "Catalog.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "Checker.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "Checker.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "Machine.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "Machine.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "Polynomial.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "Polynomial.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "Runner.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "Runner.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "Soundness.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "Soundness.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "Value.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "Value.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WorkloadInstances.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WorkloadInstances.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "axioms.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "axioms.stdout.txt",
+      "sha256": "715ac35b2b33d486803a66f5f7b6e2d908f12e44b3c8c968a7e493c3f5a27e4e"
+    }
+  ]
+}

@@ -158,9 +158,43 @@ def main():
     require(driver['audit_kernel_output']((EVIDENCE / 'current-polynomial/kernel/stdout.txt').read_text(),
             current['certificateDeclaration'].removesuffix('.artifact')), 'Current axiom report')
     require(read(EVIDENCE / 'current-polynomial/kernel/result.json')['exitCode'] == 0, 'Current kernel exit')
+
+    census = runpy.run_path(str(ROOT / 'docs/build-feedback-census.py'))
+    census['check']()
+    census_summary = read(ROOT / 'docs/evidence/deep-dive-2-census/summary.json')
+    for label, key in [
+        ('Main polynomial study', 'nightly-five-models-20261123/polynomial'),
+        ('Suite smoke: polynomial', 'suite-smoke-20261123/polynomial'),
+        ('Suite smoke: matrix multiplication', 'suite-smoke-20261123/matmul'),
+        ('Suite smoke: Gram', 'suite-smoke-20261123/gram'),
+        ('Suite smoke: two-stage', 'suite-smoke-20261123/two-stage'),
+    ]:
+        values = census_summary['timing'][key]['statistics']
+        pre, kernel, total = (values[k] for k in ('precheck', 'kernel', 'acceptedCertificationTotal'))
+        queue = f"{values['queue']['median']:.3f}" if 'queue' in values else 'not recorded'
+        expected = (f"| {label} | {pre['n']:,} / {kernel['n']:,} | {pre['median']:.3f} / {pre['p90']:.3f} | "
+                    f"{kernel['median']:.3f} / {kernel['p90']:.3f} | {queue} | {total['median']:.3f} / {total['p90']:.3f} |")
+        require(expected in guide, f'Timing census table differs: {key}')
+
+    audit_path = ROOT / 'docs/evidence/deep-dive-2-proof-audit'
+    proof_audit = read(audit_path / 'result.json')
+    for record in proof_audit['checks']:
+        require(record['exitCode'] == 0, f'Shared proof recheck failed: {record["source"]}')
+        require(sha((ROOT / record['source']).read_bytes()) == record['sourceSha256'],
+                f'Shared proof source changed: {record["source"]}')
+    for record in proof_audit['files']:
+        require(sha((audit_path / record['path']).read_bytes()) == record['sha256'], 'Shared proof audit file changed')
+    declarations = re.findall(r'^#print axioms (.+)$', (audit_path / 'Axioms.lean').read_text(), re.M)
+    reports = re.findall(r"'([^']+)' depends on axioms:\s*\[([^]]*)\]", (audit_path / 'axioms.stdout.txt').read_text())
+    require(len(reports) == len(declarations) == 13, 'Incomplete shared proof axiom audit')
+    require({name.removeprefix('OptimalComputation.Certification.') for name, _ in reports} == set(declarations),
+            'Shared proof axiom declarations differ')
+    require(all(set(re.sub(r'\s+', '', axioms).split(',')) <= driver['ALLOWED_AXIOMS'] for _, axioms in reports),
+            'Unauthorized shared proof axiom')
     print(f"PASS: {excerpts['source-excerpt']} pinned source excerpts, {evidence_count} evidence excerpts, {len(links)} links")
     print(f"PASS: {len(provenance['files'])} exported files, four certificate/score bindings, all timing and source-size rows")
     print('PASS: 1,247-response census, exact next-prompt error feedback, and separate current-certificate record')
+    print('PASS: all-attempt timing table, eight shared proof source rechecks, and thirteen axiom reports')
     print('This is an offline evidence check; external documentation URLs were not network-tested.')
 
 

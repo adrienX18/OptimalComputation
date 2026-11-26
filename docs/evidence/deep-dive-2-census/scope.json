@@ -1,0 +1,96 @@
+{
+  "nightly-five-models-20261123": {
+    "live": 1250,
+    "replay": 0,
+    "categories": {
+      "certified": 1033,
+      "simulation-failed": 30,
+      "range-not-proved": 14,
+      "generator-failed": 16,
+      "proposal-error": 154,
+      "api-error": 3
+    }
+  },
+  "smoke-five-models-20261123": {
+    "live": 10,
+    "replay": 0,
+    "categories": {
+      "certified": 6,
+      "proposal-error": 1,
+      "simulation-failed": 2,
+      "range-not-proved": 1
+    }
+  },
+  "smoke-opus55-astra62-20261122": {
+    "live": 6,
+    "replay": 0,
+    "categories": {
+      "certified": 5,
+      "proposal-error": 1
+    }
+  },
+  "suite-direct-matrix-20261123": {
+    "live": 0,
+    "replay": 2,
+    "categories": {
+      "kernel-timeout": 2
+    }
+  },
+  "suite-integration-20261123": {
+    "live": 0,
+    "replay": 2,
+    "categories": {
+      "kernel-timeout": 2
+    }
+  },
+  "suite-integration-direct-bounds-20261123": {
+    "live": 0,
+    "replay": 1,
+    "categories": {
+      "kernel-timeout": 1
+    }
+  },
+  "suite-integration-indexed-20261123": {
+    "live": 0,
+    "replay": 6,
+    "categories": {
+      "certified": 4,
+      "kernel-timeout": 2
+    }
+  },
+  "suite-integration-ready-20261123": {
+    "live": 0,
+    "replay": 16,
+    "categories": {
+      "certified": 12,
+      "kernel-timeout": 4
+    }
+  },
+  "suite-other-cases-ready-20261123": {
+    "live": 0,
+    "replay": 12,
+    "categories": {
+      "certified": 12
+    }
+  },
+  "suite-serial-kernel-20261123": {
+    "live": 0,
+    "replay": 4,
+    "categories": {
+      "certified": 4
+    }
+  },
+  "suite-smoke-20261123": {
+    "live": 240,
+    "replay": 0,
+    "categories": {
+      "certified": 182,
+      "proposal-error": 30,
+      "simulation-failed": 14,
+      "api-error": 3,
+      "kernel-timeout": 1,
+      "range-not-proved": 6,
+      "interrupted": 4
+    }
+  }
+}

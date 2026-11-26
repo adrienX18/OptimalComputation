@@ -1,0 +1,881 @@
+{
+  "liveAttempts": 1506,
+  "accepted": 1226,
+  "unaccepted": 280,
+  "mainStudyAttempts": 1490,
+  "mainStudyUnaccepted": 275,
+  "delivered": 258,
+  "noNextRequest": 22,
+  "clippedDeliveries": 1,
+  "uniqueNonemptyMessageStrings": 69,
+  "uniqueMessagesFullyPresentInNextPrompt": 63,
+  "byArchive": {
+    "nightly-five-models-20261123": {
+      "certified": 1033,
+      "simulation-failed": 30,
+      "range-not-proved": 14,
+      "generator-failed": 16,
+      "proposal-error": 154,
+      "api-error": 3
+    },
+    "smoke-five-models-20261123": {
+      "certified": 6,
+      "proposal-error": 1,
+      "simulation-failed": 2,
+      "range-not-proved": 1
+    },
+    "smoke-opus55-astra62-20261122": {
+      "certified": 5,
+      "proposal-error": 1
+    },
+    "suite-smoke-20261123": {
+      "certified": 182,
+      "proposal-error": 30,
+      "simulation-failed": 14,
+      "api-error": 3,
+      "kernel-timeout": 1,
+      "range-not-proved": 6,
+      "interrupted": 4
+    }
+  },
+  "families": {
+    "api-error/litellm.BadGatewayError": {
+      "recorded": 1,
+      "sent": 0,
+      "cases": [
+        "runs/suite-smoke-20261123/runs/two-stage-energy/opus/seed-11/attempts/0003"
+      ]
+    },
+    "api-error/litellm.InternalServerError": {
+      "recorded": 3,
+      "sent": 3,
+      "cases": [
+        "runs/nightly-five-models-20261123/runs/fable/seed-37/attempts/0029",
+        "runs/nightly-five-models-20261123/runs/fable/seed-37/attempts/0031",
+        "runs/nightly-five-models-20261123/runs/fable/seed-37/attempts/0032"
+      ]
+    },
+    "api-error/litellm.Timeout": {
+      "recorded": 2,
+      "sent": 2,
+      "cases": [
+        "runs/suite-smoke-20261123/runs/gram-latency-2x8/fable/seed-11/attempts/0002",
+        "runs/suite-smoke-20261123/runs/polynomial-latency-8x8/fable/seed-11/attempts/0001"
+      ]
+    },
+    "generator-failed/AssertionError": {
+      "recorded": 4,
+      "sent": 4,
+      "cases": [
+        "runs/nightly-five-models-20261123/runs/astra/seed-37/attempts/0018",
+        "runs/nightly-five-models-20261123/runs/sol/seed-11/attempts/0003",
+        "runs/nightly-five-models-20261123/runs/sol/seed-23/attempts/0041",
+        "runs/nightly-five-models-20261123/runs/sol/seed-53/attempts/0034"
+      ]
+    },
+    "generator-failed/IndexError": {
+      "recorded": 5,
+      "sent": 5,
+      "cases": [
+        "runs/nightly-five-models-20261123/runs/sol/seed-23/attempts/0004",
+        "runs/nightly-five-models-20261123/runs/sol/seed-23/attempts/0027",
+        "runs/nightly-five-models-20261123/runs/sol/seed-53/attempts/0017",
+        "runs/nightly-five-models-20261123/runs/sol/seed-71/attempts/0029",
+        "runs/nightly-five-models-20261123/runs/sol/seed-71/attempts/0049"
+      ]
+    },
+    "generator-failed/KeyError": {
+      "recorded": 2,
+      "sent": 2,
+      "cases": [
+        "runs/nightly-five-models-20261123/runs/sol/seed-11/attempts/0026",
+        "runs/nightly-five-models-20261123/runs/sol/seed-53/attempts/0039"
+      ]
+    },
+    "generator-failed/RuntimeError": {
+      "recorded": 1,
+      "sent": 1,
+      "cases": [
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0001"
+      ]
+    },
+    "generator-failed/SyntaxError": {
+      "recorded": 2,
+      "sent": 2,
+      "cases": [
+        "runs/nightly-five-models-20261123/runs/astra/seed-23/attempts/0043",
+        "runs/nightly-five-models-20261123/runs/sol/seed-37/attempts/0008"
+      ]
+    },
+    "generator-failed/ValueError": {
+      "recorded": 1,
+      "sent": 1,
+      "cases": [
+        "runs/nightly-five-models-20261123/runs/sol/seed-11/attempts/0037"
+      ]
+    },
+    "generator-failed/timeout": {
+      "recorded": 1,
+      "sent": 1,
+      "cases": [
+        "runs/nightly-five-models-20261123/runs/sol/seed-53/attempts/0035"
+      ]
+    },
+    "interrupted": {
+      "recorded": 4,
+      "sent": 3,
+      "cases": [
+        "runs/suite-smoke-20261123/runs/two-stage-energy/fable/seed-11/attempts/0001",
+        "runs/suite-smoke-20261123/runs/two-stage-latency-2x8/astra/seed-11/attempts/0002",
+        "runs/suite-smoke-20261123/runs/two-stage-latency-2x8/opus/seed-11/attempts/0003",
+        "runs/suite-smoke-20261123/runs/two-stage-latency-2x8/sol/seed-11/attempts/0001"
+      ]
+    },
+    "kernel-timeout": {
+      "recorded": 1,
+      "sent": 1,
+      "cases": [
+        "runs/suite-smoke-20261123/runs/matmul-latency-8x8/sonnet/seed-11/attempts/0002"
+      ]
+    },
+    "proposal-error/code-size": {
+      "recorded": 44,
+      "sent": 38,
+      "cases": [
+        "runs/nightly-five-models-20261123/runs/sol/seed-11/attempts/0012",
+        "runs/nightly-five-models-20261123/runs/sol/seed-11/attempts/0015",
+        "runs/nightly-five-models-20261123/runs/sol/seed-11/attempts/0025",
+        "runs/nightly-five-models-20261123/runs/sol/seed-11/attempts/0030",
+        "runs/nightly-five-models-20261123/runs/sol/seed-11/attempts/0041",
+        "runs/nightly-five-models-20261123/runs/sol/seed-11/attempts/0044",
+        "runs/nightly-five-models-20261123/runs/sol/seed-23/attempts/0008",
+        "runs/nightly-five-models-20261123/runs/sol/seed-23/attempts/0012",
+        "runs/nightly-five-models-20261123/runs/sol/seed-23/attempts/0016",
+        "runs/nightly-five-models-20261123/runs/sol/seed-23/attempts/0019",
+        "runs/nightly-five-models-20261123/runs/sol/seed-23/attempts/0024",
+        "runs/nightly-five-models-20261123/runs/sol/seed-23/attempts/0030",
+        "runs/nightly-five-models-20261123/runs/sol/seed-23/attempts/0031",
+        "runs/nightly-five-models-20261123/runs/sol/seed-23/attempts/0043",
+        "runs/nightly-five-models-20261123/runs/sol/seed-23/attempts/0048",
+        "runs/nightly-five-models-20261123/runs/sol/seed-37/attempts/0028",
+        "runs/nightly-five-models-20261123/runs/sol/seed-37/attempts/0035",
+        "runs/nightly-five-models-20261123/runs/sol/seed-53/attempts/0013",
+        "runs/nightly-five-models-20261123/runs/sol/seed-53/attempts/0019",
+        "runs/nightly-five-models-20261123/runs/sol/seed-53/attempts/0020",
+        "runs/nightly-five-models-20261123/runs/sol/seed-53/attempts/0025",
+        "runs/nightly-five-models-20261123/runs/sol/seed-53/attempts/0030",
+        "runs/nightly-five-models-20261123/runs/sol/seed-53/attempts/0031",
+        "runs/nightly-five-models-20261123/runs/sol/seed-53/attempts/0032",
+        "runs/nightly-five-models-20261123/runs/sol/seed-53/attempts/0033",
+        "runs/nightly-five-models-20261123/runs/sol/seed-53/attempts/0037",
+        "runs/nightly-five-models-20261123/runs/sol/seed-53/attempts/0041",
+        "runs/nightly-five-models-20261123/runs/sol/seed-53/attempts/0043",
+        "runs/nightly-five-models-20261123/runs/sol/seed-53/attempts/0048",
+        "runs/nightly-five-models-20261123/runs/sol/seed-53/attempts/0050",
+        "runs/nightly-five-models-20261123/runs/sol/seed-71/attempts/0022",
+        "runs/nightly-five-models-20261123/runs/sol/seed-71/attempts/0025",
+        "runs/nightly-five-models-20261123/runs/sol/seed-71/attempts/0027",
+        "runs/nightly-five-models-20261123/runs/sol/seed-71/attempts/0040",
+        "runs/suite-smoke-20261123/runs/gram-energy/sol/seed-11/attempts/0003",
+        "runs/suite-smoke-20261123/runs/gram-latency-2x8/sol/seed-11/attempts/0002",
+        "runs/suite-smoke-20261123/runs/gram-latency-8x1/sol/seed-11/attempts/0002",
+        "runs/suite-smoke-20261123/runs/gram-latency-8x1/sol/seed-11/attempts/0003",
+        "runs/suite-smoke-20261123/runs/matmul-energy/sol/seed-11/attempts/0003",
+        "runs/suite-smoke-20261123/runs/matmul-latency-2x8/sol/seed-11/attempts/0002",
+        "runs/suite-smoke-20261123/runs/matmul-latency-2x8/sol/seed-11/attempts/0003",
+        "runs/suite-smoke-20261123/runs/matmul-latency-8x1/sol/seed-11/attempts/0002",
+        "runs/suite-smoke-20261123/runs/polynomial-latency-2x8/sol/seed-11/attempts/0002",
+        "runs/suite-smoke-20261123/runs/polynomial-latency-8x1/sol/seed-11/attempts/0003"
+      ]
+    },
+    "proposal-error/content_filter": {
+      "recorded": 124,
+      "sent": 121,
+      "cases": [
+        "runs/nightly-five-models-20261123/runs/fable/seed-23/attempts/0011",
+        "runs/nightly-five-models-20261123/runs/fable/seed-23/attempts/0017",
+        "runs/nightly-five-models-20261123/runs/fable/seed-23/attempts/0022",
+        "runs/nightly-five-models-20261123/runs/fable/seed-23/attempts/0032",
+        "runs/nightly-five-models-20261123/runs/fable/seed-23/attempts/0037",
+        "runs/nightly-five-models-20261123/runs/fable/seed-23/attempts/0040",
+        "runs/nightly-five-models-20261123/runs/fable/seed-37/attempts/0001",
+        "runs/nightly-five-models-20261123/runs/fable/seed-53/attempts/0047",
+        "runs/nightly-five-models-20261123/runs/opus/seed-11/attempts/0005",
+        "runs/nightly-five-models-20261123/runs/opus/seed-11/attempts/0006",
+        "runs/nightly-five-models-20261123/runs/opus/seed-11/attempts/0007",
+        "runs/nightly-five-models-20261123/runs/opus/seed-11/attempts/0008",
+        "runs/nightly-five-models-20261123/runs/opus/seed-11/attempts/0013",
+        "runs/nightly-five-models-20261123/runs/opus/seed-11/attempts/0019",
+        "runs/nightly-five-models-20261123/runs/opus/seed-11/attempts/0022",
+        "runs/nightly-five-models-20261123/runs/opus/seed-11/attempts/0029",
+        "runs/nightly-five-models-20261123/runs/opus/seed-23/attempts/0004",
+        "runs/nightly-five-models-20261123/runs/opus/seed-23/attempts/0005",
+        "runs/nightly-five-models-20261123/runs/opus/seed-23/attempts/0007",
+        "runs/nightly-five-models-20261123/runs/opus/seed-23/attempts/0010",
+        "runs/nightly-five-models-20261123/runs/opus/seed-23/attempts/0013",
+        "runs/nightly-five-models-20261123/runs/opus/seed-23/attempts/0020",
+        "runs/nightly-five-models-20261123/runs/opus/seed-23/attempts/0021",
+        "runs/nightly-five-models-20261123/runs/opus/seed-23/attempts/0022",
+        "runs/nightly-five-models-20261123/runs/opus/seed-23/attempts/0028",
+        "runs/nightly-five-models-20261123/runs/opus/seed-23/attempts/0030",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0003",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0004",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0005",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0006",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0007",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0010",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0012",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0013",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0014",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0015",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0017",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0019",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0021",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0022",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0023",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0024",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0025",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0026",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0027",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0028",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0029",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0030",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0031",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0032",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0033",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0034",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0039",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0043",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0045",
+        "runs/nightly-five-models-20261123/runs/opus/seed-37/attempts/0047",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0004",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0006",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0007",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0010",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0011",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0013",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0014",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0017",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0018",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0019",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0023",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0027",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0028",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0029",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0030",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0034",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0037",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0045",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0047",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0002",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0003",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0007",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0008",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0011",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0012",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0013",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0014",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0015",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0016",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0018",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0019",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0020",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0021",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0022",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0023",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0024",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0025",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0027",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0028",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0030",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0031",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0032",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0033",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0034",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0035",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0036",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0037",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0038",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0039",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0040",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0041",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0043",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0045",
+        "runs/smoke-five-models-20261123/runs/fable/seed-11/attempts/0001",
+        "runs/suite-smoke-20261123/runs/gram-energy/opus/seed-11/attempts/0002",
+        "runs/suite-smoke-20261123/runs/gram-energy/opus/seed-11/attempts/0003",
+        "runs/suite-smoke-20261123/runs/gram-latency-2x8/opus/seed-11/attempts/0001",
+        "runs/suite-smoke-20261123/runs/gram-latency-2x8/opus/seed-11/attempts/0002",
+        "runs/suite-smoke-20261123/runs/gram-latency-8x8/opus/seed-11/attempts/0002",
+        "runs/suite-smoke-20261123/runs/gram-latency-8x8/opus/seed-11/attempts/0003",
+        "runs/suite-smoke-20261123/runs/matmul-energy/opus/seed-11/attempts/0001",
+        "runs/suite-smoke-20261123/runs/matmul-energy/opus/seed-11/attempts/0002",
+        "runs/suite-smoke-20261123/runs/matmul-energy/opus/seed-11/attempts/0003",
+        "runs/suite-smoke-20261123/runs/matmul-latency-8x8/opus/seed-11/attempts/0001",
+        "runs/suite-smoke-20261123/runs/matmul-latency-8x8/opus/seed-11/attempts/0002",
+        "runs/suite-smoke-20261123/runs/polynomial-latency-8x8/opus/seed-11/attempts/0002",
+        "runs/suite-smoke-20261123/runs/two-stage-latency-2x8/opus/seed-11/attempts/0002",
+        "runs/suite-smoke-20261123/runs/two-stage-latency-8x8/opus/seed-11/attempts/0002"
+      ]
+    },
+    "proposal-error/expected-JSON-value": {
+      "recorded": 13,
+      "sent": 12,
+      "cases": [
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0005",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0015",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0021",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0025",
+        "runs/nightly-five-models-20261123/runs/opus/seed-71/attempts/0004",
+        "runs/nightly-five-models-20261123/runs/sonnet/seed-11/attempts/0001",
+        "runs/nightly-five-models-20261123/runs/sonnet/seed-37/attempts/0004",
+        "runs/nightly-five-models-20261123/runs/sonnet/seed-53/attempts/0001",
+        "runs/nightly-five-models-20261123/runs/sonnet/seed-53/attempts/0002",
+        "runs/suite-smoke-20261123/runs/matmul-latency-2x8/opus/seed-11/attempts/0001",
+        "runs/suite-smoke-20261123/runs/matmul-latency-2x8/opus/seed-11/attempts/0002",
+        "runs/suite-smoke-20261123/runs/polynomial-latency-8x1/opus/seed-11/attempts/0003",
+        "runs/suite-smoke-20261123/runs/two-stage-energy/opus/seed-11/attempts/0001"
+      ]
+    },
+    "proposal-error/extra-JSON-data": {
+      "recorded": 4,
+      "sent": 3,
+      "cases": [
+        "runs/nightly-five-models-20261123/runs/sonnet/seed-23/attempts/0005",
+        "runs/nightly-five-models-20261123/runs/sonnet/seed-37/attempts/0017",
+        "runs/suite-smoke-20261123/runs/matmul-latency-2x8/sonnet/seed-11/attempts/0002",
+        "runs/suite-smoke-20261123/runs/polynomial-latency-8x1/sonnet/seed-11/attempts/0003"
+      ]
+    },
+    "proposal-error/length": {
+      "recorded": 1,
+      "sent": 1,
+      "cases": [
+        "runs/smoke-opus55-astra62-20261122/opus/attempts/0002"
+      ]
+    },
+    "range-not-proved": {
+      "recorded": 21,
+      "sent": 19,
+      "cases": [
+        "runs/nightly-five-models-20261123/runs/astra/seed-23/attempts/0039",
+        "runs/nightly-five-models-20261123/runs/astra/seed-37/attempts/0013",
+        "runs/nightly-five-models-20261123/runs/astra/seed-37/attempts/0037",
+        "runs/nightly-five-models-20261123/runs/astra/seed-71/attempts/0039",
+        "runs/nightly-five-models-20261123/runs/opus/seed-23/attempts/0001",
+        "runs/nightly-five-models-20261123/runs/opus/seed-53/attempts/0031",
+        "runs/nightly-five-models-20261123/runs/sol/seed-37/attempts/0004",
+        "runs/nightly-five-models-20261123/runs/sol/seed-53/attempts/0049",
+        "runs/nightly-five-models-20261123/runs/sol/seed-71/attempts/0041",
+        "runs/nightly-five-models-20261123/runs/sonnet/seed-11/attempts/0003",
+        "runs/nightly-five-models-20261123/runs/sonnet/seed-23/attempts/0001",
+        "runs/nightly-five-models-20261123/runs/sonnet/seed-37/attempts/0002",
+        "runs/nightly-five-models-20261123/runs/sonnet/seed-53/attempts/0004",
+        "runs/nightly-five-models-20261123/runs/sonnet/seed-71/attempts/0001",
+        "runs/smoke-five-models-20261123/runs/sonnet/seed-11/attempts/0002",
+        "runs/suite-smoke-20261123/runs/polynomial-energy/sol/seed-11/attempts/0001",
+        "runs/suite-smoke-20261123/runs/polynomial-energy/sonnet/seed-11/attempts/0001",
+        "runs/suite-smoke-20261123/runs/polynomial-latency-2x8/sonnet/seed-11/attempts/0001",
+        "runs/suite-smoke-20261123/runs/polynomial-latency-8x1/astra/seed-11/attempts/0003",
+        "runs/suite-smoke-20261123/runs/polynomial-latency-8x1/sonnet/seed-11/attempts/0001",
+        "runs/suite-smoke-20261123/runs/polynomial-latency-8x8/sonnet/seed-11/attempts/0001"
+      ]
+    },
+    "simulation-failed/bankCapacity": {
+      "recorded": 9,
+      "sent": 8,
+      "cases": [
+        "runs/nightly-five-models-20261123/runs/sol/seed-37/attempts/0045",
+        "runs/nightly-five-models-20261123/runs/sol/seed-71/attempts/0004",
+        "runs/nightly-five-models-20261123/runs/sol/seed-71/attempts/0006",
+        "runs/nightly-five-models-20261123/runs/sonnet/seed-11/attempts/0002",
+        "runs/nightly-five-models-20261123/runs/sonnet/seed-37/attempts/0001",
+        "runs/nightly-five-models-20261123/runs/sonnet/seed-53/attempts/0003",
+        "runs/smoke-five-models-20261123/runs/sonnet/seed-11/attempts/0001",
+        "runs/suite-smoke-20261123/runs/matmul-energy/sonnet/seed-11/attempts/0003",
+        "runs/suite-smoke-20261123/runs/polynomial-latency-8x8/sonnet/seed-11/attempts/0002"
+      ]
+    },
+    "simulation-failed/incomplete-output": {
+      "recorded": 1,
+      "sent": 0,
+      "cases": [
+        "runs/suite-smoke-20261123/runs/gram-latency-2x8/opus/seed-11/attempts/0003"
+      ]
+    },
+    "simulation-failed/invalid-candidate-file": {
+      "recorded": 2,
+      "sent": 0,
+      "cases": [
+        "runs/suite-smoke-20261123/runs/polynomial-energy/sonnet/seed-11/attempts/0003",
+        "runs/suite-smoke-20261123/runs/two-stage-energy/sonnet/seed-11/attempts/0003"
+      ]
+    },
+    "simulation-failed/issueCollision": {
+      "recorded": 2,
+      "sent": 2,
+      "cases": [
+        "runs/suite-smoke-20261123/runs/matmul-latency-8x8/fable/seed-11/attempts/0002",
+        "runs/suite-smoke-20261123/runs/two-stage-latency-8x1/sonnet/seed-11/attempts/0002"
+      ]
+    },
+    "simulation-failed/operandOutOfRange": {
+      "recorded": 8,
+      "sent": 8,
+      "cases": [
+        "runs/nightly-five-models-20261123/runs/astra/seed-23/attempts/0007",
+        "runs/nightly-five-models-20261123/runs/astra/seed-23/attempts/0036",
+        "runs/nightly-five-models-20261123/runs/astra/seed-37/attempts/0003",
+        "runs/nightly-five-models-20261123/runs/astra/seed-53/attempts/0013",
+        "runs/nightly-five-models-20261123/runs/astra/seed-71/attempts/0011",
+        "runs/nightly-five-models-20261123/runs/sol/seed-37/attempts/0018",
+        "runs/nightly-five-models-20261123/runs/sol/seed-53/attempts/0026",
+        "runs/nightly-five-models-20261123/runs/sonnet/seed-23/attempts/0002"
+      ]
+    },
+    "simulation-failed/output-mismatch": {
+      "recorded": 5,
+      "sent": 4,
+      "cases": [
+        "runs/nightly-five-models-20261123/runs/sol/seed-23/attempts/0014",
+        "runs/nightly-five-models-20261123/runs/sol/seed-23/attempts/0040",
+        "runs/nightly-five-models-20261123/runs/sol/seed-37/attempts/0034",
+        "runs/suite-smoke-20261123/runs/gram-latency-8x8/sol/seed-11/attempts/0002",
+        "runs/suite-smoke-20261123/runs/matmul-latency-2x8/opus/seed-11/attempts/0003"
+      ]
+    },
+    "simulation-failed/pendingRead": {
+      "recorded": 14,
+      "sent": 12,
+      "cases": [
+        "runs/nightly-five-models-20261123/runs/astra/seed-11/attempts/0008",
+        "runs/nightly-five-models-20261123/runs/astra/seed-11/attempts/0049",
+        "runs/nightly-five-models-20261123/runs/astra/seed-37/attempts/0020",
+        "runs/nightly-five-models-20261123/runs/astra/seed-37/attempts/0026",
+        "runs/nightly-five-models-20261123/runs/astra/seed-37/attempts/0046",
+        "runs/nightly-five-models-20261123/runs/astra/seed-53/attempts/0007",
+        "runs/nightly-five-models-20261123/runs/astra/seed-53/attempts/0011",
+        "runs/nightly-five-models-20261123/runs/astra/seed-71/attempts/0020",
+        "runs/nightly-five-models-20261123/runs/astra/seed-71/attempts/0041",
+        "runs/nightly-five-models-20261123/runs/sol/seed-23/attempts/0033",
+        "runs/nightly-five-models-20261123/runs/sol/seed-37/attempts/0013",
+        "runs/nightly-five-models-20261123/runs/sol/seed-37/attempts/0040",
+        "runs/smoke-five-models-20261123/runs/sol/seed-11/attempts/0002",
+        "runs/suite-smoke-20261123/runs/polynomial-latency-8x8/sol/seed-11/attempts/0003"
+      ]
+    },
+    "simulation-failed/uninitializedRegister": {
+      "recorded": 2,
+      "sent": 2,
+      "cases": [
+        "runs/suite-smoke-20261123/runs/polynomial-latency-2x8/opus/seed-11/attempts/0001",
+        "runs/suite-smoke-20261123/runs/polynomial-latency-8x8/sol/seed-11/attempts/0002"
+      ]
+    },
+    "simulation-failed/writebackCollision": {
+      "recorded": 3,
+      "sent": 3,
+      "cases": [
+        "runs/nightly-five-models-20261123/runs/sol/seed-37/attempts/0029",
+        "runs/suite-smoke-20261123/runs/gram-energy/sonnet/seed-11/attempts/0001",
+        "runs/suite-smoke-20261123/runs/two-stage-latency-2x8/sonnet/seed-11/attempts/0001"
+      ]
+    }
+  },
+  "timing": {
+    "nightly-five-models-20261123/polynomial": {
+      "statistics": {
+        "precheck": {
+          "n": 1047,
+          "minimum": 0.23384809494018555,
+          "median": 0.2646031379699707,
+          "p90": 0.28185582160949707,
+          "maximum": 0.45714783668518066
+        },
+        "kernel": {
+          "n": 1033,
+          "minimum": 2.765638828277588,
+          "median": 6.327265024185181,
+          "p90": 6.894887924194336,
+          "maximum": 11.962004899978638
+        },
+        "generation": {
+          "n": 1092,
+          "minimum": 0.16220498085021973,
+          "median": 0.2019810676574707,
+          "p90": 0.6636872291564941,
+          "maximum": 24.16546630859375
+        },
+        "acceptedCertificationTotal": {
+          "n": 1033,
+          "minimum": 3.028,
+          "median": 6.589,
+          "p90": 7.167,
+          "maximum": 12.362
+        },
+        "simulationProcessSum": {
+          "n": 1077,
+          "minimum": 1.2318470478057861,
+          "median": 1.3402502536773682,
+          "p90": 1.384223461151123,
+          "maximum": 1.541701078414917
+        }
+      },
+      "processStatuses": {
+        "precheck": {
+          "completed": 1047
+        },
+        "kernel": {
+          "completed": 1033
+        },
+        "generation": {
+          "completed": 1092,
+          "timeout": 1
+        }
+      }
+    },
+    "smoke-five-models-20261123/polynomial": {
+      "statistics": {
+        "precheck": {
+          "n": 7,
+          "minimum": 0.24429106712341309,
+          "median": 0.263477087020874,
+          "p90": 0.42780399322509766,
+          "maximum": 0.42780399322509766
+        },
+        "kernel": {
+          "n": 6,
+          "minimum": 3.5385642051696777,
+          "median": 6.556183099746704,
+          "p90": 9.593142986297607,
+          "maximum": 9.593142986297607
+        },
+        "generation": {
+          "n": 9,
+          "minimum": 0.18841886520385742,
+          "median": 0.2533299922943115,
+          "p90": 1.1228969097137451,
+          "maximum": 1.1228969097137451
+        },
+        "acceptedCertificationTotal": {
+          "n": 6,
+          "minimum": 3.804,
+          "median": 6.8125,
+          "p90": 10.023,
+          "maximum": 10.023
+        },
+        "simulationProcessSum": {
+          "n": 9,
+          "minimum": 1.2866089344024658,
+          "median": 1.3340158462524414,
+          "p90": 1.390592098236084,
+          "maximum": 1.390592098236084
+        }
+      },
+      "processStatuses": {
+        "precheck": {
+          "completed": 7
+        },
+        "kernel": {
+          "completed": 6
+        },
+        "generation": {
+          "completed": 9
+        }
+      }
+    },
+    "smoke-opus55-astra62-20261122/polynomial": {
+      "statistics": {
+        "precheck": {
+          "n": 5,
+          "minimum": 0.2383108139038086,
+          "median": 0.2648050785064697,
+          "p90": 0.3877139091491699,
+          "maximum": 0.3877139091491699
+        },
+        "kernel": {
+          "n": 5,
+          "minimum": 2.800884962081909,
+          "median": 5.975803852081299,
+          "p90": 8.588238954544067,
+          "maximum": 8.588238954544067
+        },
+        "generation": {
+          "n": 5,
+          "minimum": 0.21227288246154785,
+          "median": 0.363292932510376,
+          "p90": 23.890396118164062,
+          "maximum": 23.890396118164062
+        },
+        "acceptedCertificationTotal": {
+          "n": 5,
+          "minimum": 3.067,
+          "median": 6.217,
+          "p90": 8.978,
+          "maximum": 8.978
+        },
+        "simulationProcessSum": {
+          "n": 5,
+          "minimum": 1.2979786396026611,
+          "median": 1.313307762145996,
+          "p90": 1.3728358745574951,
+          "maximum": 1.3728358745574951
+        }
+      },
+      "processStatuses": {
+        "precheck": {
+          "completed": 5
+        },
+        "kernel": {
+          "completed": 5
+        },
+        "generation": {
+          "completed": 5
+        }
+      }
+    },
+    "suite-smoke-20261123/gram": {
+      "statistics": {
+        "precheck": {
+          "n": 46,
+          "minimum": 0.2226409912109375,
+          "median": 0.2421935796737671,
+          "p90": 0.35731005668640137,
+          "maximum": 0.37871503829956055
+        },
+        "kernel": {
+          "n": 46,
+          "minimum": 57.78685998916626,
+          "median": 82.94118142127991,
+          "p90": 93.70264005661011,
+          "maximum": 117.53122615814209
+        },
+        "generation": {
+          "n": 49,
+          "minimum": 0.20521116256713867,
+          "median": 0.2559528350830078,
+          "p90": 1.28829026222229,
+          "maximum": 4.76716423034668
+        },
+        "queue": {
+          "n": 46,
+          "minimum": 1.7466380596160889,
+          "median": 187.9243096113205,
+          "p90": 255.99771523475647,
+          "maximum": 291.97518491744995
+        },
+        "acceptedCertificationTotal": {
+          "n": 46,
+          "minimum": 119.54,
+          "median": 262.0325,
+          "p90": 343.797,
+          "maximum": 360.379
+        },
+        "simulationProcessSum": {
+          "n": 49,
+          "minimum": 1.1211774349212646,
+          "median": 1.4917240142822266,
+          "p90": 1.6646473407745361,
+          "maximum": 1.9913365840911865
+        }
+      },
+      "processStatuses": {
+        "precheck": {
+          "completed": 46
+        },
+        "kernel": {
+          "completed": 46
+        },
+        "generation": {
+          "completed": 49
+        },
+        "queue": {
+          "acquired": 46
+        }
+      }
+    },
+    "suite-smoke-20261123/matmul": {
+      "statistics": {
+        "precheck": {
+          "n": 45,
+          "minimum": 0.2514660358428955,
+          "median": 0.3409881591796875,
+          "p90": 0.4174690246582031,
+          "maximum": 0.8637588024139404
+        },
+        "kernel": {
+          "n": 44,
+          "minimum": 106.33783602714539,
+          "median": 122.24716889858246,
+          "p90": 139.2862069606781,
+          "maximum": 169.96808290481567
+        },
+        "generation": {
+          "n": 48,
+          "minimum": 0.22330975532531738,
+          "median": 0.3226970434188843,
+          "p90": 1.3403241634368896,
+          "maximum": 3.323338270187378
+        },
+        "queue": {
+          "n": 45,
+          "minimum": 0.0002307891845703125,
+          "median": 351.0747950077057,
+          "p90": 486.80936574935913,
+          "maximum": 879.6503438949585
+        },
+        "acceptedCertificationTotal": {
+          "n": 44,
+          "minimum": 138.554,
+          "median": 474.03499999999997,
+          "p90": 616.075,
+          "maximum": 1009.008
+        },
+        "simulationProcessSum": {
+          "n": 48,
+          "minimum": 1.3055782318115234,
+          "median": 1.9435162544250488,
+          "p90": 2.1811416149139404,
+          "maximum": 3.017789125442505
+        }
+      },
+      "processStatuses": {
+        "precheck": {
+          "completed": 45
+        },
+        "kernel": {
+          "completed": 44,
+          "timeout": 1
+        },
+        "generation": {
+          "completed": 48
+        },
+        "queue": {
+          "acquired": 45
+        }
+      }
+    },
+    "suite-smoke-20261123/polynomial": {
+      "statistics": {
+        "precheck": {
+          "n": 49,
+          "minimum": 0.17629289627075195,
+          "median": 0.20147991180419922,
+          "p90": 0.3319671154022217,
+          "maximum": 0.3899550437927246
+        },
+        "kernel": {
+          "n": 43,
+          "minimum": 2.150902032852173,
+          "median": 3.93581223487854,
+          "p90": 4.596718072891235,
+          "maximum": 5.228540897369385
+        },
+        "generation": {
+          "n": 54,
+          "minimum": 0.1778249740600586,
+          "median": 0.3138796091079712,
+          "p90": 1.5397839546203613,
+          "maximum": 6.081928968429565
+        },
+        "queue": {
+          "n": 43,
+          "minimum": 0.0001919269561767578,
+          "median": 0.00022411346435546875,
+          "p90": 1.8481471538543701,
+          "maximum": 300.5685729980469
+        },
+        "acceptedCertificationTotal": {
+          "n": 43,
+          "minimum": 2.382,
+          "median": 4.138,
+          "p90": 6.04,
+          "maximum": 305.525
+        },
+        "simulationProcessSum": {
+          "n": 54,
+          "minimum": 1.0191006660461426,
+          "median": 1.071198582649231,
+          "p90": 1.1176729202270508,
+          "maximum": 1.321305751800537
+        }
+      },
+      "processStatuses": {
+        "precheck": {
+          "completed": 49
+        },
+        "kernel": {
+          "completed": 43
+        },
+        "generation": {
+          "completed": 54
+        },
+        "queue": {
+          "acquired": 43
+        }
+      }
+    },
+    "suite-smoke-20261123/two-stage": {
+      "statistics": {
+        "precheck": {
+          "n": 52,
+          "minimum": 0.19708728790283203,
+          "median": 0.22453606128692627,
+          "p90": 0.34495997428894043,
+          "maximum": 0.3694419860839844
+        },
+        "kernel": {
+          "n": 49,
+          "minimum": 55.32520508766174,
+          "median": 59.02801203727722,
+          "p90": 64.42386412620544,
+          "maximum": 67.93020105361938
+        },
+        "generation": {
+          "n": 55,
+          "minimum": 0.1794140338897705,
+          "median": 0.20841693878173828,
+          "p90": 0.5266890525817871,
+          "maximum": 4.093027114868164
+        },
+        "queue": {
+          "n": 50,
+          "minimum": 0.0001862049102783203,
+          "median": 112.05020797252655,
+          "p90": 161.5699508190155,
+          "maximum": 208.94218492507935
+        },
+        "acceptedCertificationTotal": {
+          "n": 49,
+          "minimum": 56.532,
+          "median": 170.169,
+          "p90": 239.445,
+          "maximum": 268.751
+        },
+        "simulationProcessSum": {
+          "n": 55,
+          "minimum": 1.0659518241882324,
+          "median": 1.210932970046997,
+          "p90": 1.251868486404419,
+          "maximum": 1.415848970413208
+        }
+      },
+      "processStatuses": {
+        "precheck": {
+          "completed": 52
+        },
+        "kernel": {
+          "completed": 49,
+          "interrupted": 1
+        },
+        "generation": {
+          "completed": 55
+        },
+        "queue": {
+          "acquired": 50,
+          "waiting": 2
+        }
+      }
+    }
+  }
+}

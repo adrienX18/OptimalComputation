@@ -10,6 +10,8 @@ To read “certificate” correctly, separate two proof steps. First, the reusab
 
 Written 25 November 2026. Implementation excerpts use the same pinned source snapshot as the original guide, `71c608a2b573c322993264945dbb2be8a9e5006f`. Historical records retain their own earlier source revisions. A separately labeled current-source check below was performed while preparing this companion. The implementation files at the working revision `cdabaf3` match the pinned snapshot; documentation additions do not change machine or checker semantics.
 
+**Additional follow-up:** [why Docker is used](#docker), [what the model can actually call](#text-only-interface), [the mathematical proof of the checker](#proof-of-checker), [timings across the experiments](#timing-census), and [every observed error family, with a deduplicated exact-message catalogue](#error-census).
+
 | Adrien's question | Where to read |
 | --- | --- |
 | 1. String identifier versus `CoefficientProfile` | Original guide, §2.1, **Adrien's notes**: version label, record type, and record value are different things. |
@@ -75,6 +77,36 @@ The Python helper module's name, `candidate_tools`, is misleading if read as a l
 The complete [helper source](scripts/harness/candidate_tools.py) is 46 lines at the pinned snapshot. The generator can also use Python's standard library: loops, lists, dictionaries, `random`, a private search algorithm, and so on. It runs in the configured Python Docker image, without network access and with CPU/memory/time limits. There is no exposed interactive shell tool, browser tool, or Lean tool for the model. Python execution is real, but **the harness initiates it after receiving the response**. Any exploratory computation in that Python must already have been written into the returned code.
 
 The 30-cycle winner illustrates this distinction: Sol wrote a bounded depth-first scheduler, and the resulting Python searched for schedules in Docker. It did not ask the harness to run a command, inspect that command's result, and then send more code within the same response. Only the next attempt receives verification feedback.
+
+<a id="text-only-interface"></a>
+
+### Confirmation: the model receives text, not callable tools
+
+**Yes: in these experiments the model cannot open a terminal, run its answer, inspect the result, and revise it within the same attempt.** The source of `candidate_tools.py` is a string appended to the system prompt. It is not an API tool declaration and does not install Python functions inside the model. The helper table above is the complete supplied helper interface; the generated program also has Python's standard library.
+
+The proposed answer is a string in `message.content`, encoding a JSON object with the three string values `idea`, `code`, and `notes`. The API may additionally return a thinking summary and metadata. Once this response has finished, the harness parses `code`, writes it to a file, and runs `build()` once. Helper calls such as `baseline()` and `mac(...)` happen during **that later Python execution**.
+
+There is one useful qualification: the model can put exploration or self-tests *inside the program it returns*. For example, `build()` can try several schedules, run its own Python calculations, and select one candidate. That is a single submitted program performing a computation. There is no intervening conversation in which the model sees the program's partial results and chooses its next tool call. On success, Python debug prints are archived but are not automatically inserted into the next prompt; on generator failure, the harness returns a bounded stderr excerpt.
+
+The request and response records support this directly: all 1,250 requests in the main polynomial experiment lacked API `tools`/`functions`, and their received responses contained no tool calls. The [complete Fable walkthrough](docs/FABLE_WALKTHROUGH.md) shows the exact provider requests, helper source, returned text, post-response Python commands, and next prompts.
+
+<a id="docker"></a>
+
+### Why Docker is used, and which part needs it
+
+Docker is the execution environment for the **LLM-written Python generator**. Running this code is necessary to expand loops or execute a search and obtain the final candidate JSON. The code is an arbitrary Python program, so it can also crash, loop indefinitely, allocate excessive memory, or attempt file and network access. The harness uses Docker to constrain that execution and to supply a consistent Python environment.
+
+| Purpose | What this harness actually does |
+| --- | --- |
+| Limit file access and changes | Mounts only the prepared input directory read-only, uses a read-only container filesystem, and provides a 16 MiB temporary filesystem. The repository and credentials are not mounted. |
+| Limit external access and privileges | Disables networking, drops Linux capabilities, prevents privilege escalation, and runs as UID/GID 65534. |
+| Bound resource consumption | Sets one CPU, 256 MiB memory, a 64-process limit, an external generator timeout, and an output-size limit. |
+| Make the environment identifiable | Resolves the configured Python image to a digest and archives that digest and the exact invocation. The selected Fable run used `python:3.12-slim-bookworm`. |
+| Clean up after failure | Explicitly removes the container in a `finally` block, including when the Docker client times out. |
+
+These choices are implemented by [the image resolver and generator runner](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/scripts/harness/evaluate.py#L97-L135); Fable's [actual command](docs/evidence/fable-two-iterations/attempts/0001/generation/process/request.json) records the flags and image digest used.
+
+**Docker contributes isolation and reproducibility, not the mathematical correctness proof.** The local simulation and certification processes subsequently consume candidate JSON; the model API call is also outside the generator container. Given an existing candidate JSON file, `scripts/certify.py` can certify it without Docker or an LLM API key. Another suitably isolated Python runner could replace Docker without changing the Lean theorem. Bypassing it with unrestricted host execution would change the generator's access and resource limits.
 
 ### What records exist, and what they mean
 
@@ -455,6 +487,94 @@ For the polynomial winner this means: **for every eight coefficients in `[-8,7]`
 
 <a id="reuse"></a>
 
+<a id="proof-of-checker"></a>
+
+### Where is the proof that the checker is sound?
+
+There are two different theorems, and both have proofs:
+
+| Theorem | Scope | Where its proof comes from |
+| --- | --- | --- |
+| `check_sound` | Any supported problem, candidate, and budgets: successful checking implies safe execution and correct outputs for every allowed input. | A reusable mathematical proof in [Checker.lean, lines 73–111](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Certification/Checker.lean#L73-L111), using the lower-level soundness lemmas. The linked range includes the complete proof after `:= by`. |
+| `checked` | This particular candidate's check evaluates to the particular successful result, for example `some 30`. | A new proof constructed by `by decide +kernel` in [that candidate's certificate](docs/evidence/fable-two-iterations/attempts/0001/certification/Certificate.lean). |
+
+The logical structure is ordinary implication elimination:
+
+```text
+General proof:   ∀ C, Check(C) = success  →  SafeAndCorrect(C)
+Instance proof:       Check(thisCandidate) = success
+Conclusion:                                SafeAndCorrect(thisCandidate)
+```
+
+The first line is not accepted because the checker calls itself correct. Its proof explains why the checker's symbolic computations agree with the concrete machine. The second line supplies its premise for a particular candidate.
+
+### The mathematical argument, from arithmetic to whole programs
+
+Fix an arbitrary assignment `x` of values to input variables satisfying the problem's input box. Write `eval_x(S)` for the concrete machine state obtained by evaluating every polynomial in symbolic state `S` at `x`.
+
+1. **Symbolic arithmetic preserves meaning.** The polynomial library proves, for example, `eval_x(p.add(q)) = eval_x(p) + eval_x(q)` and the corresponding multiplication identity. Its normalization may reorder and combine terms, but the proofs establish that evaluation is preserved. See the complete proofs in [Polynomial.lean](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Certification/Polynomial.lean#L88-L176).
+2. **Numeric bounds are valid for every allowed assignment.** `Polynomial.bound_sound` proves that the derived interval contains `eval_x(p)`. A symbolic `Value` carries this range proof and evidence that its range fits signed48. `Value.require16_sound` proves that a successful multiplicand check implies its actual value fits signed16. `Value.add_sound`, `mul_sound`, and `mac_sound` then connect symbolic arithmetic to the concrete checked operations. See [Value.lean](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Certification/Value.lean).
+3. **A successful symbolic machine step implies a successful concrete step.** `prepare_sound` handles instructions; `step_sound` handles the boundary, including commits and the batch of issued instructions. The resulting concrete state is `eval_x(S')`, where `S'` is the symbolic result. Timing and resource restrictions are part of these checked transitions. See [Machine.lean](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Certification/Machine.lean) and [Soundness.lean](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Certification/Soundness.lean#L109-L155).
+4. **Induction composes the steps into a run.** `run_sound` proves the correspondence for the whole schedule by induction on the boundary budget. A completed symbolic run corresponds to a completed concrete run, with the same completion cycle. See the full [Runner.lean proof](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Certification/Runner.lean#L24-L55).
+5. **Output equality connects the run to the specification.** `checkOutputs` compares the stored output polynomials with the expected ones. If two polynomial data structures are equal, applying the same evaluation function gives equal values for every `x`. This implication needs no sampling and no additional assumption that the checker is infallible. The earlier arithmetic lemmas justify how the stored polynomials were obtained. `checkOutputs_sound` also proves that required outputs are present. See [Checker.lean, lines 22–56](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Certification/Checker.lean#L22-L56).
+6. **The workload bridge supplies the intended mathematical answer.** `Problem.input_sound` connects allowed workload inputs to the box, and `Problem.output_sound` connects the expected symbolic polynomials to the reference function. Concrete workload entries must provide proofs of these fields. For this polynomial task, see [the workload instance](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Certification/WorkloadInstances.lean#L85-L116).
+
+Because `x` was arbitrary, this gives the result for every allowed input. In the final part of the actual `check_sound` proof, `run_sound` supplies the successful run, `checkOutputs_sound` supplies its outputs, and the workload bridge rewrites those outputs into the reference answer:
+
+Source: [Checker.lean:101–111](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Certification/Checker.lean#L101-L111).
+
+<!-- source-excerpt {"commit": "71c608a2b573c322993264945dbb2be8a9e5006f", "path": "OptimalComputation/Certification/Checker.lean", "start": 101, "end": 111} -->
+```lean
+        obtain ⟨counts, hrun⟩ := run_sound maxTerms boundaries 0 (Evaluation.program candidate) initial result hr
+          (environment a x) hbox (Evaluation.Counters.empty candidate.configuration)
+        rw [hi] at hrun
+        obtain ⟨hn, hout⟩ := checkOutputs_sound result.state 0 candidate.layout.outputs p.outputs ho
+          (environment a x) hbox
+        rw [p.output_sound x hx] at hout
+        unfold Evaluation.executeValues
+        rw [hrun]
+        unfold Evaluation.finish
+        simp only [hn, List.isEmpty_nil, ↓reduceIte]
+        exact ⟨_, rfl, hout⟩
+```
+
+The last line constructs the witness execution record and the two proofs required by the theorem: successful execution and correct outputs. It is not a placeholder or an axiom declaration.
+
+### Where is the proof of the checker equality itself?
+
+For the concrete `checked` theorem, the entire candidate and all budgets are closed data: there are no free input variables in that equality. The checker operates on symbolic expressions, so this finite computation can be reduced to a result. Lean's `Decidable` machinery has proof-bearing true/false branches; `by decide +kernel` constructs and kernel-checks a proof of the proposition using that computation. The text is short because it invokes a general proof-producing procedure. If the result is an error rather than `some 30`, this tactic cannot prove that equality.
+
+There is also an explicit small bridge between the two displayed result types. The generated equality uses `.toOption = some cycles`; `check_sound` takes `= .ok cycles`. The complete bridge proof is:
+
+Source: [Checker.lean:114–119](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Certification/Checker.lean#L114-L119).
+
+<!-- source-excerpt {"commit": "71c608a2b573c322993264945dbb2be8a9e5006f", "path": "OptimalComputation/Certification/Checker.lean", "start": 114, "end": 119} -->
+```lean
+theorem check_of_toOption (p : Problem a) (candidate : Candidate a.shape) (boundaries maxTerms cycles : Nat)
+    (h : (check p candidate boundaries maxTerms).toOption = some cycles) :
+    check p candidate boundaries maxTerms = .ok cycles := by
+  cases he : check p candidate boundaries maxTerms with
+  | error e => simp [he, Except.toOption] at h
+  | ok n => simpa [he, Except.toOption] using h
+```
+
+It considers both possible checker outcomes. The error branch would map to `none`, contradicting the hypothesis. The successful branch gives precisely the needed equality. `Entry.artifact` uses this bridge and then the shared `certificate` constructor; the constructor fills its `safety` and `correctness` fields using `check_sound`.
+
+### How do we check that these proofs are correct?
+
+Lean checks that each proof term has the stated theorem as its type. Tactics help construct those terms; their prose or apparent plausibility is not what establishes acceptance. The candidate proof and generic proof chain are also audited for axiom dependencies. Here the accepted dependencies are only `propext`, `Classical.choice`, and `Quot.sound`; a declaration that merely assumed `check_sound`, or a `sorry`, would add an unauthorized dependency.
+
+For this follow-up, the eight source modules from polynomial arithmetic through `Catalog` were rechecked directly with `lake env lean`, and the thirteen relevant declarations were audited. All rechecks succeeded, and every printed axiom set was within the allowed three. The [commands, source hashes, exit statuses, and timings](docs/evidence/deep-dive-2-proof-audit/result.json), [audit source](docs/evidence/deep-dive-2-proof-audit/Axioms.lean), and [complete axiom output](docs/evidence/deep-dive-2-proof-audit/axioms.stdout.txt) are retained. These are new checks of the shared proofs, not new LLM experiments or candidate-timing samples.
+
+For example, from a built checkout:
+
+```sh
+lake env lean OptimalComputation/Certification/Checker.lean
+lake env lean docs/evidence/deep-dive-2-proof-audit/Axioms.lean
+```
+
+The precise confidence claim is a kernel-checked derivation from the allowed foundations and the written machine/workload definitions. Reviewing those definitions still matters: a proof about the wrong specification would establish the wrong thing, and this is not a proof about an unmodeled physical FPGA. There is also no claim of completeness: a conservative interval calculation can fail to prove a correct program safe.
+
 ### What is reused from one instruction or candidate to the next?
 
 There are three levels of reuse:
@@ -543,6 +663,30 @@ The consequence for trust is precise: the kernel has checked a derivation using 
 
 ## 7. How long it took, and how long the proofs are
 
+<a id="timing-census"></a>
+
+### Typical processing time across the experiments
+
+**Yes, these durations were saved.** “Checker time” can mean either the fast compiled symbolic precheck or the entire certification process, including the Lean proof check. They have very different costs. The following census uses all saved attempt-stage records in the two reported experiments, rather than selecting only the winners. All times are host wall-clock seconds.
+
+| Experiment / workload | Prechecks / completed Lean processes | Precheck median / p90 | Lean process median / p90 | Queue median | Successful certification total median / p90 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Main polynomial study | 1,047 / 1,033 | 0.265 / 0.282 | 6.327 / 6.895 | not recorded | 6.589 / 7.167 |
+| Suite smoke: polynomial | 49 / 43 | 0.201 / 0.332 | 3.936 / 4.597 | 0.000 | 4.138 / 6.040 |
+| Suite smoke: matrix multiplication | 45 / 44 | 0.341 / 0.417 | 122.247 / 139.286 | 351.075 | 474.035 / 616.075 |
+| Suite smoke: Gram | 46 / 46 | 0.242 / 0.357 | 82.941 / 93.703 | 187.924 | 262.033 / 343.797 |
+| Suite smoke: two-stage | 52 / 49 | 0.225 / 0.345 | 59.028 / 64.424 | 112.050 | 170.169 / 239.445 |
+
+Thus the main polynomial precheck typically took about a quarter of a second, and actual Lean certification about six to seven seconds. Matrix multiplication's completed Lean processes typically took about two minutes; waiting for the shared kernel slot often added several more minutes. The total column includes that wait. A queue median displayed as 0.000 means the measured median rounds to zero at millisecond precision, not that no attempt waited.
+
+The underlying [per-attempt timing records](docs/evidence/deep-dive-2-census/attempts.json), [full statistics including minima/maxima and pilot runs](docs/evidence/deep-dive-2-census/summary.json), and [census script](docs/build-feedback-census.py) make these values reproducible. The p90 uses the nearest-rank convention: sort the observed durations and select position `ceil(0.9*n)`. Source revisions are retained per attempt. These are measurements under the experiments' actual concurrency and host load, not isolated benchmarks or a comparison of proof quality across models.
+
+The sample counts differ for a reason. Malformed responses and failed generators never reach the checker; a failing concrete simulation also skips certification. A failed symbolic bound does reach the precheck but does not reach Lean. In the suite smoke there was one matrix Lean timeout at **600.019 seconds**, one interrupted two-stage Lean process, and two two-stage queue records still marked waiting. Those are retained as incomplete observations, not silently treated as successful proof durations. The displayed queue distribution includes records with an acquired slot; the successful-total distribution includes accepted certifications only.
+
+The five concrete fixture simulations precede certification. Their median summed process time was **1.340 seconds** in the main polynomial study; in the suite smoke it was **1.071** for polynomial, **1.944** for matrix multiplication, **1.492** for Gram, and **1.211** for two-stage. These sums exclude orchestration gaps. Python generation and the LLM response are separate stages again. Do not add the precheck and Lean columns onto “certification total”: they are already inside it, and medians of different samples need not add exactly.
+
+Specifically, the archive saves `generation/process/result.json`, `simulation/<fixture>/process/result.json`, `certification/precheck/result.json`, `certification/kernel/result.json`, and—where supported by the historical driver—`certification/kernel-queue.json`. Successful `certification/result.json` contains `totalSeconds` and `kernelSeconds`; `feedback.json` normally contains whole-attempt time. The subprocess duration includes startup, loading imports, elaboration, axiom output, and scoring. There is no separate saved measurement of only the kernel's internal reduction time. No LLM is used in these checker/proof stages.
+
 ### Four actual winning attempts
 
 These are individual observations from the four illustrated winners, not model medians or controlled performance comparisons. All entries are **host wall-clock seconds**, except the final column. API time includes provider/transport overhead; it is not pure inference compute time. The source revisions differ across historical runs.
@@ -577,7 +721,76 @@ No LLM is used in any of these proof-checking phases. The model named in a row a
 
 <a id="error-feedback"></a>
 
-## 8. An actual wrong candidate and the feedback the model received
+## 8. Wrong candidates and the feedback the model received
+
+<a id="error-census"></a>
+
+### All observed rejection messages, without duplicates
+
+I inspected **all 1,506 saved live-model attempt feedback records**: the main polynomial study (1,250), suite smoke (240), five-model pilot (10), and earlier two-model pilot (6). Of these, **1,226 were certified and 280 were unaccepted**. The two reported studies account for 275 of those unaccepted attempts. The separate 43 offline replay/integration attempts are identified in the [scope record](docs/evidence/deep-dive-2-census/scope.json); their feedback was not sent to a live LLM and is excluded from this catalogue.
+
+**[Open the complete deduplicated error-message catalogue](docs/ERROR_CATALOGUE.md).** It prints all **69 distinct nonempty message strings** exactly, including nested simulator diagnostics, Python tracebacks, parser errors, and provider errors. It lists occurrence counts and whether each string actually appears in a saved next prompt. Identical strings appear once; messages with different register/cycle/range values, traceback lines, or provider request IDs remain available as separate exact variants. The tables here group those variants by meaning.
+
+There are **258 saved next requests containing failure feedback**, and **22 failures without a subsequent request**. Of the 69 exact strings, **63 appear in full in at least one next prompt**. Thus a recorded error is not automatically an error the model was shown. The [complete 280 failure records](docs/evidence/deep-dive-2-census/failures.json) retain both the original feedback and the actual next-prompt string when it exists.
+
+#### Response and Python-generation failures
+
+| Error family / message | Recorded attempts | With a next prompt | Meaning |
+| --- | ---: | ---: | --- |
+| `Incomplete response: content_filter` | 124 | 121 | The provider/adapter finish reason was `content_filter`; the harness did not accept a complete proposal. This label alone does not explain why the provider returned it. |
+| `Generator exceeds code_bytes.` | 44 | 38 | The proposed Python source exceeded the configured code-size limit. |
+| `Expecting value: line 1 column 1 (char 0)` | 13 | 12 | Parsing the proposed JSON failed at its beginning. |
+| `Extra data: …` | 4 | 3 | Additional content remained after a JSON value. The four exact line/column variants are in the catalogue. |
+| `Incomplete response: length` | 1 | 1 | The answer ended with a length-limit finish reason. |
+| Python `SyntaxError` | 2 | 2 | An unclosed `(` or an unmatched `)`. |
+| Python `AssertionError` | 4 | 4 | An assertion in the generated program failed. |
+| Python `IndexError` | 5 | 5 | `list index out of range` or `Cannot choose from an empty sequence`. |
+| Python `KeyError` | 2 | 2 | Missing dictionary key `17` or `10`. |
+| Python `RuntimeError: schedule failed` | 1 | 1 | The submitted generator explicitly raised this error. |
+| Python `ValueError: min() iterable argument is empty` | 1 | 1 | The program called `min()` without any candidate values. |
+| Generator process timeout | 1 | 1 | The process status was `timeout`; its stderr/message was empty. The status is still feedback, despite there being no nonempty message string. |
+
+The Python rows include their complete tracebacks in the exact catalogue. They are failures of the submitted generator, not Lean counterexamples to a completed candidate. Likewise, an invalid response format prevents the proposed program from reaching execution.
+
+#### Candidate simulation and symbolic-bound failures
+
+| Diagnostic | Recorded attempts | With a next prompt | Meaning |
+| --- | ---: | ---: | --- |
+| `pendingRead` | 14 | 12 | The schedule reads a register whose pending result is not ready. |
+| `bankCapacity` | 9 | 8 | Too many memory accesses hit a bank in one cycle. |
+| `operandOutOfRange` | 8 | 8 | A concrete execution uses **−34,952** as a signed16 left multiplicand; all exact cycle/lane variants are retained. |
+| `output-mismatch` | 5 | 4 | The simulator completes but some outputs differ from the reference on a fixture. |
+| `writebackCollision` | 3 | 3 | Two register results would write back to the same lane at the same boundary. |
+| `issueCollision` | 2 | 2 | More than one instruction is issued on a lane in one cycle. |
+| `uninitializedRegister` | 2 | 2 | The schedule reads a register with no initialized value. |
+| `configuration: expected an object` | 2 | 0 | The candidate JSON's configuration has the wrong shape. These rejections were recorded on final attempts. |
+| `incompleteOutput` | 1 | 0 | Required output addresses were unwritten at completion. The exact missing-address list is in the catalogue; no next request exists for this case. |
+| `Cannot prove that the left fits signed 16 bits: derived range [-42596, 39319].` | 20 | 18 | The symbolic interval extends outside signed16. This alone is not a concrete counterexample. |
+| `Cannot prove that the left fits signed 16 bits: derived range [-42568, 39287].` | 1 | 1 | The other observed symbolic-range message, with the same limitation. |
+
+The first nine rows account for **46 candidates rejected by simulation**. Each feedback object has the top-level message `A public fixture failed.` and includes the first failed fixture's detailed report. The harness did run the remaining fixtures: there are **191 failing fixture reports** in total. The [full fixture-failure record](docs/evidence/deep-dive-2-census/fixture-failures.json) retains all of them and marks the 46 selected for feedback. The other fixture reports were archived but not all inserted into the model's prompt.
+
+The 21 symbolic-range failures had passed the concrete fixtures. This is a useful example of why fixture success is insufficient for certification, and also why “not proved” should not automatically be called “wrong.”
+
+#### Infrastructure and incomplete checks
+
+| Error family / message | Recorded attempts | With a next prompt | Meaning |
+| --- | ---: | ---: | --- |
+| `litellm.InternalServerError … Internal server error` | 3 | 3 | Provider API failure. |
+| `litellm.Timeout … Read timed out` | 2 | 2 | The model request exceeded its timeout. |
+| `litellm.BadGatewayError … Error 502: Bad gateway` | 1 | 0 | Provider/gateway failure on a final attempt. |
+| `Kernel checking exceeded its time budget; no certificate was accepted.` | 1 | 1 | Certification remained inconclusive after the Lean timeout. |
+| `Interrupted attempt; artifacts retained.` | 4 | 3 | The attempt did not finish normally. |
+
+These are not proof that the proposed mathematics or schedule was invalid. All exact provider strings, including their distinct request IDs and reported timeout durations, are retained once each in the catalogue.
+
+#### Exactly how much feedback reached the LLM
+
+For the main studies, the next prompt removes timing fields from the feedback object, JSON-encodes it as a string, and clips that string to 3,000 bytes. The earlier two-model pilot retained its timing field; the census uses its actual saved request rather than assuming today's formatting.
+
+One Gram `output-mismatch` case—Sol, seed 11, attempt 2—was clipped mid-array: the expected output vector consumed the remaining space. Its human-readable mismatch message and list of mismatched indices were included, but the full expected/actual payload was not. The catalogue reproduces the **exact clipped string** sent in attempt 3. The outer request was valid JSON; the nested feedback string was no longer independently parseable JSON. This suggests a concrete improvement for a future run: reserve space for the category, message, first mismatches, and a compact expected/actual comparison before adding large vectors. No harness behavior was changed for this documentation update.
+
+### One wrong candidate, explained end to end
 
 Sonnet, seed 23, attempt 2 proposed an even/odd polynomial decomposition. Its explanation claimed that all multiplicands stayed small. On the allowed `negative-endpoints` fixture, however, the program tried to use **−34,952** as a signed16 multiplicand at cycle 30, lane 0. Signed16 stops at −32,768. That is a concrete illegal execution, not merely an inconclusive interval bound.
 
@@ -664,7 +877,7 @@ python3 docs/check-deep-dive.py
 python3 docs/check-deep-dive-2.py
 ```
 
-The second check verifies source/evidence quotations, local and pinned source links, the four candidate/proof/score bindings, measured source sizes and timings, the response census arithmetic, the actual carried error feedback, and the separately saved new certificate result. It does not mistake archived exit status or a hash for a new kernel proof.
+The second check verifies source/evidence quotations, local and pinned source links, the four candidate/proof/score bindings, measured source sizes and timings, the response census arithmetic, the actual carried error feedback, and the separately saved new certificate result. It also checks the full rejection/timing census, its timing table, and the recorded shared-proof rechecks and thirteen axiom reports. It does not mistake archived exit status or a hash for a new kernel proof.
 
 To certify the already saved candidate yourself, use a fresh archive directory after building the project:
 
@@ -680,8 +893,9 @@ To rebuild the historical exports/census when the original archives are locally 
 
 ```sh
 python3 docs/build-deep-dive-2-evidence.py
+python3 docs/build-feedback-census.py
 ```
 
 This reads records and copies selected files. It neither sends provider requests nor runs model-written code. The current-polynomial directory is a separately observed check and is retained unless a new check is explicitly supplied to the exporter.
 
-**Checks performed for this companion:** both documentation audits passed; the new polynomial certificate passed kernel checking and the axiom audit at 30 modeled cycles; and running the saved Sonnet failure through the current simulator reproduced the same signed16 operand failure at cycle 30, lane 0, value −34,952. No new model responses were requested.
+**Checks performed for this companion:** both documentation audits passed; the new polynomial certificate passed kernel checking and the axiom audit at 30 modeled cycles; and running the saved Sonnet failure through the current simulator reproduced the same signed16 operand failure at cycle 30, lane 0, value −34,952. The later follow-up rechecked eight shared-proof source modules and thirteen axiom reports, and audited 1,506 live attempts, 280 unaccepted attempts, all 69 distinct message strings, and their source hashes. No new model responses were requested.
