@@ -1,0 +1,169 @@
+{
+  "accepted": true,
+  "boundaryBudget": 1000000,
+  "candidateFormatVersion": "candidate-v1",
+  "candidateIdentifier": "polynomial-naive-v1",
+  "certificateBoundaryBudget": 32,
+  "cycles": 30,
+  "modelVersion": "arty-model-v1",
+  "status": "correct",
+  "termBudget": 4096,
+  "workloadIdentifier": "polynomial-degree7-points16-v1",
+  "candidateSha256": "262fc34b8f94d64ec61e73630018aa03c98900fd0f3dcd7d4df971b3e60d7d67",
+  "checkerVersion": "symbolic-certifier-v1",
+  "recordVersion": "certification-result-v1",
+  "message": "Safe and correct for every allowed input on the specified machine model.",
+  "proof": "Lean kernel; standard axioms only",
+  "certificateSha256": "1ee50415d401d10e314ac202aa9275afc4a149d33ca47ae7b7980251bc6e76c5",
+  "certificateDeclaration": "Certificate_c70881073b615e01e73756cc4e8b21d4f727634f2f1b90be2b6d0e0771e96c5c.artifact",
+  "kernelSeconds": 5.572,
+  "totalSeconds": 5.925,
+  "score": {
+    "candidateFormatVersion": "candidate-v1",
+    "candidateIdentifier": "polynomial-naive-v1",
+    "configuration": {
+      "banks": 8,
+      "lanes": 8
+    },
+    "execution": {
+      "counters": {
+        "additions": 0,
+        "bankAccesses": [
+          17,
+          16,
+          12,
+          11,
+          10,
+          10,
+          10,
+          10
+        ],
+        "laneActiveCycles": [
+          30,
+          30,
+          30,
+          30,
+          30,
+          30,
+          30,
+          30
+        ],
+        "laneCompletions": [
+          28,
+          28,
+          28,
+          28,
+          28,
+          28,
+          28,
+          28
+        ],
+        "laneIssues": [
+          28,
+          28,
+          28,
+          28,
+          28,
+          28,
+          28,
+          28
+        ],
+        "loads": 80,
+        "multiplications": 16,
+        "multiplyAdds": 112,
+        "registerReads": 384,
+        "registerWrites": 208,
+        "stores": 16
+      },
+      "cycles": 30,
+      "outputs": [
+        4,
+        -329,
+        335,
+        -4,
+        7676,
+        -1,
+        -6940,
+        4,
+        -329,
+        335,
+        -4,
+        7676,
+        -1,
+        -6940,
+        4,
+        -329
+      ],
+      "resources": {
+        "bram36Blocks": 16,
+        "connectionArea": null,
+        "controlArea": null,
+        "dspSlices": 8,
+        "generalPurposePortsPerBank": 2,
+        "logicAreaStatus": "uncalibrated",
+        "logicalMemoryBits": 262144,
+        "pendingInstructionSlots": 24,
+        "pipelineArea": null,
+        "slotsPerBank": 512,
+        "totalLogicArea": null,
+        "writableArchitecturalRegisterBits": 5760
+      },
+      "scheduleSize": 224,
+      "storage": {
+        "declaredBytes": 320,
+        "declaredSlots": 40,
+        "inputSlots": 24,
+        "outputSlots": 16,
+        "scratchSlots": 0
+      },
+      "traceCaptured": false
+    },
+    "executionBinding": "exact artifact and runtime input; executeValues; trace disabled",
+    "inputIdentifier": "generated-23",
+    "inputScalars": [
+      -1,
+      -6,
+      5,
+      0,
+      -5,
+      6,
+      1,
+      -4,
+      -1,
+      2,
+      -2,
+      1,
+      -3,
+      0,
+      3,
+      -1,
+      2,
+      -2,
+      1,
+      -3,
+      0,
+      3,
+      -1,
+      2
+    ],
+    "modelVersion": "arty-model-v1",
+    "objective": {
+      "breakdown": [
+        {
+          "coefficient": 1,
+          "cost": 30,
+          "label": "elapsed cycles",
+          "quantity": 30
+        }
+      ],
+      "coefficients": null,
+      "direction": "minimize",
+      "identifier": "latency-v1",
+      "score": 30,
+      "unit": "cycles"
+    },
+    "recordVersion": "accepted-objective-result-v1",
+    "verificationStatus": "all-input-certified",
+    "workloadIdentifier": "polynomial-degree7-points16-v1"
+  }
+}

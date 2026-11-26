@@ -11,6 +11,9 @@ not FPGA measurements or proofs of optimality.
 For direct inspection of the implementation and evidence, see
 [DEEP_DIVE.md](DEEP_DIVE.md): exact source excerpts, pinned file/line links,
 the certification proof chain, and a complete model-exchange walkthrough.
+The [follow-up deep dive](DEEP_DIVE_2.md) explains exactly how candidates become
+certificates, what is proved each time, model/tool trace availability, and the
+measured time and size of the proofs, with complete certificate and error examples.
 
 ## 1. The machine being optimized
 

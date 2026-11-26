@@ -1,0 +1,37 @@
+{
+  "accepted": false,
+  "category": "simulation-failed",
+  "message": "A public fixture failed.",
+  "failure": {
+    "fixture": "negative-endpoints",
+    "passed": false,
+    "process": {
+      "status": "completed",
+      "exitCode": 1,
+      "seconds": 0.27091312408447266
+    },
+    "report": {
+      "status": "failure",
+      "recordVersion": "cli-error-v1",
+      "message": "OptimalComputation.Evaluation.Failure.arithmeticFailure\n  { cycle := 30,\n    lane := some 0,\n    rule := OptimalComputation.Hardware.MachineRule.arithmetic\n              (OptimalComputation.Hardware.ArithmeticError.operandOutOfRange\n                (OptimalComputation.Hardware.ArithmeticOperand.left)\n                16\n                (-34952)) }",
+      "details": {
+        "violation": {
+          "value": -34952,
+          "operand": "left",
+          "name": "operandOutOfRange",
+          "bits": 16
+        },
+        "rule": "OptimalComputation.Hardware.MachineRule.arithmetic\n  (OptimalComputation.Hardware.ArithmeticError.operandOutOfRange\n    (OptimalComputation.Hardware.ArithmeticOperand.left)\n    16\n    (-34952))",
+        "lane": 0,
+        "cycle": 30
+      },
+      "category": "arithmetic-failure"
+    }
+  },
+  "attempt": 2,
+  "idea": "Avoid the Horner range failure by splitting the polynomial into even and odd parts in y=x*x. That gives E=c0+y(c2+y(c4+y c6)) and O=c1+y(c3+y(c5+y c7)), with result=E+O*x. All multiplicands stay small. Each lane handles 2 points, and a greedy in-order hazard-aware scheduler emits the schedule.",
+  "directory": "attempts/0002",
+  "seconds": 43.537,
+  "improved": false,
+  "bestScore": 1520
+}

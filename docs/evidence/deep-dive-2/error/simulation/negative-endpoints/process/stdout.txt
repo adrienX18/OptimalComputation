@@ -1,0 +1,12 @@
+{"status": "failure",
+ "recordVersion": "cli-error-v1",
+ "message":
+ "OptimalComputation.Evaluation.Failure.arithmeticFailure\n  { cycle := 30,\n    lane := some 0,\n    rule := OptimalComputation.Hardware.MachineRule.arithmetic\n              (OptimalComputation.Hardware.ArithmeticError.operandOutOfRange\n                (OptimalComputation.Hardware.ArithmeticOperand.left)\n                16\n                (-34952)) }",
+ "details":
+ {"violation":
+  {"value": -34952, "operand": "left", "name": "operandOutOfRange", "bits": 16},
+  "rule":
+  "OptimalComputation.Hardware.MachineRule.arithmetic\n  (OptimalComputation.Hardware.ArithmeticError.operandOutOfRange\n    (OptimalComputation.Hardware.ArithmeticOperand.left)\n    16\n    (-34952))",
+  "lane": 0,
+  "cycle": 30},
+ "category": "arithmetic-failure"}

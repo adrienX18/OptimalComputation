@@ -2,6 +2,8 @@
 
 This is a reading and audit companion to [report.md](report.md). It puts the important definitions, executable checks, proof statements, model inputs/outputs, and evidence paths in one place. Explanations tell you what to inspect; the quoted source lets you check the explanation.
 
+Follow-up questions about the model's tools and thinking records, actual certificates and error feedback, proof construction, exact theorem statements, reuse, and timings are answered in [Deep dive 2](DEEP_DIVE_2.md). The short clarifications marked **Adrien's notes** below belong alongside this guide's original definitions.
+
 **Inspected source snapshot:** `71c608a2b573c322993264945dbb2be8a9e5006f` ([GitHub tree](https://github.com/adrienX18/OptimalComputation/tree/71c608a2b573c322993264945dbb2be8a9e5006f/)). The working tree was clean when inspection began. Source links and copied excerpts below are pinned to this commit, not to a moving `main`. This guide was written on 25 November 2026. It describes the repository at that snapshot; it does not update the historical experiments to newer code.
 
 **How to read the evidence:** Every block introduced by **Source** is an exact contiguous copy, including the original comments and indentation. Its link identifies inclusive source line numbers. Separate blocks indicate omitted intervening material; there are no inserted ellipses or editorial comments inside them. Explanations, diagrams, calculated tables, and shell recipes are labeled separately. “Exact decoded JSON string” means the saved string with JSON escapes decoded, not a verbatim slice of the JSON file. The checker in [docs/check-deep-dive.py](docs/check-deep-dive.py) compares both kinds against the pinned Git objects and checks repository links.
@@ -120,6 +122,8 @@ def energy : String := "energy-proxy-v1"
 def energyCoefficients : String := "energy-coefficients-v1"
 ```
 
+**Adrien's notes — why does `energyCoefficients` appear twice?** These are two different names once their namespaces are included. `Versions.energyCoefficients : String` is the **version label** above. `Evaluation.energyCoefficients : CoefficientProfile` in §6.2 is the **actual record of numbers**, carrying that label. `CoefficientProfile` is the record's type: it has an `identifier : String` and `coefficients : List (String × Nat)`. For example, `("load", 4)` names an operation and gives its numerical coefficient. The value is not itself a new type. Compare a price list's edition name with the price list itself. The objective's `breakdown` applies the numerical costs; the version string does not compute them.
+
 Source: [OptimalComputation/Hardware/Config.lean:7–38](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Hardware/Config.lean#L7-L38).
 
 <!-- source-excerpt {"commit": "71c608a2b573c322993264945dbb2be8a9e5006f", "path": "OptimalComputation/Hardware/Config.lean", "start": 7, "end": 38} -->
@@ -200,6 +204,17 @@ theorem mapAddress_reconstruct (c : ValidConfig) (a : Address) :
 ```
 
 For eight banks, addresses `0,8,16` all use bank 0, at rows 0,1,2. Two simultaneous loads at addresses 0 and 8 fit its two ports; a third at 16 exceeds capacity. Two loads of the **same** address also consume two ports. Input and output mappings select addresses, so layout changes can change contention.
+
+**Adrien's notes — more banks, fewer slots per bank.** Yes: `localMemorySlots` is a fixed **total** of 4,096 slots, divided among the banks. `c.val` accesses the configuration inside its validated subtype, and `c.val.banks` is its bank count. The following table is calculated from `bankCapacity` and the two-port rule:
+
+| Banks | Slots per bank | Total logical slots | Maximum memory accesses per cycle | Adrien's notes |
+| ---: | ---: | ---: | ---: | --- |
+| 1 | 4,096 | 4,096 | 2 | All capacity and traffic share one bank. |
+| 2 | 2,048 | 4,096 | 4 | The same capacity is split in two. |
+| 4 | 1,024 | 4,096 | 8 | More independent ports; smaller banks. |
+| 8 | 512 | 4,096 | 16 | Same total capacity; most parallel access. |
+
+This is a normal way to define a family with fixed memory capacity, **not a universal law of hardware**. Another design could keep each bank's capacity fixed and grow the total when adding banks. This project chooses fixed total capacity so bank count changes memory organization and access parallelism. The maximum above requires suitably distributed accesses. Physical allocation is a separate issue: the rounding rule below allocates more BRAM blocks at eight banks even though logical capacity remains 4,096 slots (32 KiB).
 
 Source: [OptimalComputation/Hardware/Resources.lean:7–29](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/OptimalComputation/Hardware/Resources.lean#L7-L29).
 
@@ -2255,6 +2270,8 @@ Source: [scripts/certify.py:129–182](https://github.com/adrienX18/OptimalCompu
 
 The driver reads one bounded snapshot of the candidate and runs both phases on that snapshot. It assigns a namespace derived from the generated source and scoring request, invokes `lake env lean`, requires a zero exit, and requires all three named axiom reports. An absent report does not pass. The allowed axioms are Lean’s `propext` (propositional extensionality), `Quot.sound` (quotient soundness), and `Classical.choice`. A placeholder proof introducing `sorryAx` fails the whitelist. External certificate output is written atomically only after success; intermediate `Certificate.lean` files in failed archives remain unsuccessful proof attempts.
 
+**Adrien's notes — what does accepting an axiom mean?** An axiom is a foundational statement used without a proof inside this system. `propext` lets logically equivalent propositions be equal; `Quot.sound` identifies related representatives inside a quotient; `Classical.choice` selects an element from a type known to be nonempty. These are the project's permitted foundations for ordinary Lean mathematics, not permissions to assume a candidate is correct. `#print axioms` follows the proof's dependencies, including library lemmas, and the driver rejects additional assumptions such as an unfinished proof's `sorryAx`. Acceptance is relative to Lean's logic and these foundations, as well as the implementation trust boundary in §5.8. [Deep dive 2, §6](DEEP_DIVE_2.md#axioms) explains the statements, consequences, and the actual winner's audit.
+
 The generic 23-declaration audit is [scripts/audit-certification.lean](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/scripts/audit-certification.lean). The broader source/axiom validation is [scripts/validate.py](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/scripts/validate.py). In addition to auditing axioms, that script rejects `sorry`, `admit`, `native_decide`, and several unsafe/source-override patterns in Lean files. A syntax scan is supplemental; dependency auditing is what checks which axioms a declaration actually uses.
 
 ### 5.8 Exactly where the guarantee stops
@@ -2974,6 +2991,8 @@ def serial(instructions, lane=0, start=0):
 ```
 
 `baseline()` reads a fresh original candidate, not the latest incumbent. `serial()` simply emits successive issue cycles using fixed latencies; it neither proves arithmetic correctness nor magically fixes memory/register initialization. Generated Python can implement its own scheduling search and then return one static candidate. That Python search’s running time is separate from the modeled candidate’s cycle count.
+
+**Adrien's notes — these are Python helpers, not interactive model tools.** The model sees their source in its prompt and writes code that calls them. After the response ends, the harness runs that code once in Docker. The model does not receive a terminal or issue tool calls during the response. It gets the resulting feedback in the next attempt. The archive preserves returned text, code, process logs, and simulated machine traces; it does not record every helper invocation or every internal scheduling-search branch. Provider-returned thinking records also vary by model. See [Deep dive 2, §§1–2](DEEP_DIVE_2.md#model-interface) for the exact interface and observed record availability.
 
 ### 7.5 Actual provider request and strict response parsing
 
@@ -3828,6 +3847,8 @@ Source: [analysis/2026-11-23-five-model-search/walkthrough/winner/feedback.json:
 ```
 
 `accepted` records successful certification; `improved` records a strict improvement over 35; `bestScore` becomes 30. The next prompt drops `seconds`, clips the idea in history, includes this full generator as best/latest code, and carries the returned notebook. The saved [analysis/2026-11-23-five-model-search/walkthrough/next-request.json](https://github.com/adrienX18/OptimalComputation/blob/71c608a2b573c322993264945dbb2be8a9e5006f/analysis/2026-11-23-five-model-search/walkthrough/next-request.json) lets you inspect that actual next input. It is separate evidence from the feedback file itself.
+
+**Adrien's notes — open the certificate itself.** The feedback's `certificate` string names a Lean declaration; it is not the proof text. The [complete original 258-line certificate](docs/evidence/deep-dive-2/polynomial/certification/Certificate.lean) and its [kernel output](docs/evidence/deep-dive-2/polynomial/certification/kernel/stdout.txt) are now exported from the original archive. [Deep dive 2](DEEP_DIVE_2.md#certificate) explains its contents and construction, and [its error example](DEEP_DIVE_2.md#error-feedback) shows a real rejected model candidate plus the exact feedback carried into the next request. The original certificate uses a 1,000,000-boundary cap; today's emitter uses 32 for this same 30-cycle program. Those are distinct proof files for the same candidate, as the companion explains.
 
 For a visual overview of the two actual schedules and their computation graphs:
 

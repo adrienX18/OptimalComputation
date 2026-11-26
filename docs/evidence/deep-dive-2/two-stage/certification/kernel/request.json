@@ -1,0 +1,12 @@
+{
+  "args": [
+    "lake",
+    "env",
+    "lean",
+    "/Users/adrien/Desktop/Niko projects/OptimalComputation/runs/suite-smoke-20261123/runs/two-stage-latency-8x8/sol/seed-11/attempts/0003/certification/Certificate.lean"
+  ],
+  "cwd": "/Users/adrien/Desktop/Niko projects/OptimalComputation",
+  "timeout": 600,
+  "outputLimitBytes": 67108864,
+  "started": 1795478852.7986019
+}

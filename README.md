@@ -11,6 +11,9 @@ We will start with small mathematical computations in software. Testing on physi
 Read [report.md](report.md) for the research results and [DEEP_DIVE.md](DEEP_DIVE.md)
 to inspect the critical source, proof obligations, model exchanges, and evidence
 through exact excerpts and pinned file/line links.
+Read [DEEP_DIVE_2.md](DEEP_DIVE_2.md) for the model's actual interface and saved
+thinking records, complete certificates, proof construction and reuse, exact
+theorem statements, measured verification time, and a real error-feedback example.
 
 ## Run the experiment
 
