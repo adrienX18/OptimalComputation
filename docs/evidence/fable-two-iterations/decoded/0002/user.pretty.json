@@ -1,0 +1,280 @@
+{
+  "task": "Inputs c[0..7] in [-8,7], then 16 points x in [-4,3]. Output sum(c[k]*x^k,k=0..7) per point.",
+  "objective": "latency-v1",
+  "configuration": [
+    8,
+    8
+  ],
+  "attempt": 2,
+  "limit": 50,
+  "runSeed": 11,
+  "attemptSeed": 1162763546,
+  "codeByteLimit": 8000,
+  "notebookByteLimit": 2000,
+  "baseline": {
+    "score": 1520,
+    "unit": "cycles",
+    "layout": {
+      "scratch": [
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167
+      ],
+      "outputs": [
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39
+      ],
+      "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "scheduleSize": 912,
+    "firstInstructions": [
+      {
+        "lane": 0,
+        "instruction": {
+          "kind": "load",
+          "destination": 3,
+          "address": 8
+        },
+        "cycle": 0
+      },
+      {
+        "lane": 0,
+        "instruction": {
+          "source": 3,
+          "kind": "store",
+          "address": 40
+        },
+        "cycle": 1
+      },
+      {
+        "lane": 0,
+        "instruction": {
+          "right": 0,
+          "left": 0,
+          "kind": "add",
+          "destination": 3
+        },
+        "cycle": 2
+      },
+      {
+        "lane": 0,
+        "instruction": {
+          "kind": "load",
+          "destination": 1,
+          "address": 40
+        },
+        "cycle": 5
+      },
+      {
+        "lane": 0,
+        "instruction": {
+          "kind": "load",
+          "destination": 2,
+          "address": 8
+        },
+        "cycle": 6
+      }
+    ],
+    "lastInstructions": [
+      {
+        "lane": 0,
+        "instruction": {
+          "kind": "load",
+          "destination": 3,
+          "address": 167
+        },
+        "cycle": 1518
+      },
+      {
+        "lane": 0,
+        "instruction": {
+          "source": 3,
+          "kind": "store",
+          "address": 39
+        },
+        "cycle": 1519
+      }
+    ]
+  },
+  "best": {
+    "score": 30,
+    "code": "from candidate_tools import baseline, load, store, mul, mac, issue\n\ndef build():\n    b = baseline()\n    s = []\n    for L in range(8):\n        def I(t, ins):\n            s.append(issue(t, L, ins))\n        # coefficient c[k] -> register k+1, rotated so each bank has one load per cycle\n        for t in range(8):\n            k = (L + t) % 8\n            I(t, load(k + 1, k))\n        I(8, load(9, 8 + L))    # xA\n        I(9, load(10, 16 + L))  # xB\n        I(10, mac(11, 8, 9, 7))    # a3A = c7*xA+c6\n        I(11, mac(12, 6, 9, 5))    # a2A\n        I(12, mul(13, 9, 9))       # x2A\n        I(13, mac(14, 8, 10, 7))   # a3B\n        I(14, mac(15, 6, 10, 5))   # a2B\n        I(15, mul(8, 10, 10))      # x2B -> r8\n        I(16, mac(7, 4, 9, 3))     # a1A -> r7\n        I(17, mac(6, 4, 10, 3))    # a1B -> r6\n        I(18, mac(5, 2, 9, 1))     # a0A -> r5\n        I(19, mac(4, 11, 13, 12))  # m1A -> r4\n        I(20, mac(3, 14, 8, 15))   # m1B -> r3\n        I(21, mac(9, 2, 10, 1))    # a0B -> r9\n        I(22, mac(11, 4, 13, 7))   # m2A -> r11\n        I(23, mac(12, 3, 8, 6))    # m2B -> r12\n        I(25, mac(14, 11, 13, 5))  # m3A -> r14\n        I(26, mac(15, 12, 8, 9))   # m3B -> r15\n        I(28, store(14, 24 + L))\n        I(29, store(15, 32 + L))\n    s.sort(key=lambda e: (e['cycle'], e['lane']))\n    key = 'schedule'\n    for k, v in b.items():\n        if isinstance(v, list) and v and isinstance(v[0], dict) and 'cycle' in v[0]:\n            key = k\n    b[key] = s\n    return b\n"
+  },
+  "latest": {
+    "code": "(same as best)",
+    "feedback": "{\"accepted\": true, \"category\": \"certified\", \"score\": 30, \"unit\": \"cycles\", \"cycles\": 30, \"certificate\": \"Certificate_464c3fbeaa50f25e30ab519e3963f7e54ef35b085e33c54dd49762597aaf1469.artifact\", \"attempt\": 1, \"idea\": \"Give each of the 8 lanes two points. Each lane loads all 8 coefficients (rotated order so every bank sees one load per cycle) and its two x values, then evaluates each point in 8 ops: four pair terms a_i = c[2i+1]*x + c[2i], x2 = x*x, and three Horner steps in x2. Expected latency is 30 cycles; not \", \"directory\": \"attempts/0001\", \"improved\": true, \"bestScore\": 30}"
+  },
+  "notebook": "Attempt 1 (result unknown when written): 8 lanes x 2 points (lane L takes x at 8+L and 16+L, outputs 24+L and 32+L). Cycles 0-7 load c[(L+t)%8] into r(k+1); cycles 8-9 load the two x. Per point 8 ops: a_i=mac(c[2i+1],x,c[2i]), x2=mul(x,x), then m=((a3*x2+a2)*x2+a1)*x2+a0. Fixed template with register reuse of dead coefficient registers, no dest==source. Expected score 30.\nCandidate built by taking baseline() and replacing the schedule list (key auto-detected, assumed 'schedule'); layout and scratch left unchanged.\nWhy 30 and not 29 with this structure: each lane has 26 non-store instructions, and the two issue slots just before the last op can only hold the other point's final op, so one slot is wasted.\nIf it fails: check whether the candidate format or schedule key was wrong, and read the error.\nIdeas to go below 30: uneven split of work across lanes; start ops before all loads finish (a load issued at t clashes on writeback with an arithmetic op issued at t-2); Estrin needs 9 ops (est. 31); plain Horner needs 7 ops but depth 21, and two interleaved Horner chains leave no legal load slot.",
+  "history": [
+    {
+      "attempt": 1,
+      "idea": "Give each of the 8 lanes two points. Each lane loads all 8 coefficients (rotated order so every bank",
+      "status": "certified",
+      "score": 30
+    }
+  ]
+}

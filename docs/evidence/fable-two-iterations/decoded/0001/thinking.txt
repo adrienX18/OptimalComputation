@@ -1,0 +1,82 @@
+I'm designing a candidate for 16-point polynomial evaluation with 8 lanes and 8 banks. I don't know the exact candidate-v1 JSON format, so I'm planning to start from the baseline and adjust its layout and schedule keys.
+
+I'm settling on a layout where each of the 8 lanes handles two of the 16 points, with the inputs at addresses 0–23 and outputs at 24–39. Since the bank is the address mod 8, I'm checking how the coefficient loads spread across banks, and I'm weighing Estrin's scheme against plain Horner to cut the per-point latency.
+
+I'm checking the per-lane issue and writeback limits: one op issues per cycle, up to three in flight, and a load collides with any arithmetic op issued two cycles earlier at the same writeback slot. Estrin's grouping for each point is the next thing I'm working out.
+
+I'm checking the multiplicand ranges for the Estrin combine steps, and they all stay within signed 16-bit, with the largest value for b1 around 680. Each lane then carries 18 arithmetic ops plus 10 loads and 2 stores for its two points, for 30 instructions in total.
+
+I'm checking whether the load schedule can go faster: each lane loads one coefficient per cycle, so the eight loads still take about eight cycles per lane.
+
+I'm weighing the bank conflicts for the x loads, and since each bank holds one address per residue, I'm working out how to keep each bank to two accesses. I'm also comparing Horner against Estrin: Horner needs seven sequential ops, while Estrin's grouping costs more operations but shorter depth. With two points per lane, the total time comes down to either the instruction count or the critical path, whichever is larger. Counting 10 loads, 18 arithmetic ops, and 2 stores gives 30 issue slots, and the last store can only go after the final op finishes.
+
+I'm working out how to split the remaining work so the loads and ops overlap, since the tail of the schedule has two idle cycles waiting on the last op. I'm also considering a hybrid that uses x squared to cut the op count, with the even and odd coefficient chains each built by Horner-style multiply-adds.
+
+I'm comparing the op counts and depths of the Estrin scheme against a hybrid that uses x squared with Horner-style chains for the even and odd coefficients. I'm also checking whether sharing work between points could cut the totals, and concluding it can't here. Per lane the total comes to about 30 instructions, so I'm taking that as the bottleneck.
+
+I'm working through whether a Horner chain interleaved across the two points in each lane can beat the Estrin layout, since the load writebacks have to avoid the arithmetic writeback slots, and I'm checking which cycle offsets leave room for the coefficient loads.
+
+I'm checking whether loading the coefficients first, with the x values, and then running the chains would be the right order, since each load slot conflicts with the writeback timing of the arithmetic ops.
+
+I'm weighing a single Horner chain per lane, where loads can slot into the free writeback cycles, against two interleaved chains, which leave no room for loads. I'm also considering whether a reduced coefficient-load scheme could bring the total below about 30 cycles.
+
+I'm considering whether a seven-op variant with only multiply-add steps could reach lower depth than Horner, since without a separate x-squared op every step has to fold in one new coefficient.
+
+I'm looking at whether a one-x-squared variant could work: a Horner-by-pairs start with h = mac(c7, x, c6), then combining that with x² and the next pair of coefficients, which would land at a depth of about 15.
+
+I'm looking at an 8-op alternative to Horner: a pair-wise form with x² and four pair-macs, combined in three steps, which gives a critical-path depth of about 12. That puts each lane at 10 loads, 16 ops, and 2 stores, or 28 issue slots.
+
+I'm working out the cycle budget for the two points per lane: 28 slots can't fit cleanly into a 28-cycle window given the store timing and the idle slot near the end, so I'm leaning toward about 29–30 cycles.
+
+I'm checking whether cross-lane sharing could cut the load and store counts, but since every lane is symmetric and each one needs all eight coefficients, splitting work by op instead of by point would only add communication. I'm leaving the idle slot at cycle 26 in place for now, which puts the schedule at about 29 cycles.
+
+I'm comparing a partition that splits the coefficients into low and high halves across lanes against keeping each lane on whole points. That split would add stores and loads, so it doesn't look better. I'm keeping the 8-op layout as the target at about 29 cycles, and I'm checking whether mixing in a Horner-style variant could bring the total down.
+
+I'm weighing a hybrid with one Horner chain, but the load-writeback conflicts cut against it, so I'm leaning toward a hand-built schedule checked by a small greedy scheduler in the generator, since the bank limits and timing make a careful first attempt essential.
+
+I'm going to let a greedy scheduler handle the cross-lane bank conflicts and writeback timing, since a template copied across all eight lanes would have them all loading the same coefficient in the same cycle. Registers are tight, so I'm checking the budget: eight coefficients plus two x values and two x-squared values already take 12 of them.
+
+I'm checking whether the two points in a lane can share temporary registers, since the coefficients are only needed until their last use. I'm planning to finish point A's chain first so its temporaries are freed, then reuse those registers for point B, though I'm not sure the baseline allows a destination to match its own source operand.
+
+I'm checking whether a destination register can reuse a source register, since the coefficients and x values are still needed by point B. I'm wondering if the model reads operands at issue, which would decide whether overwriting a source that's still pending is safe.
+
+I'm checking whether the destination register can also be one of the sources, since I'd need that to reuse temporaries across the two points. If the model reads operands at issue, overwriting them should be safe, but I'm not certain, so I'd rather avoid it where I can.
+
+I'm working through whether the second point's temporaries can reuse the registers freed by the first point's chain, which would mean finishing point A's ops before starting B's. I'm checking whether a destination register can be the same as a source, and what order the coefficient-to-register reuse would force.
+
+I'm weighing a greedy scheduler that reuses registers as each value's last consumer issues, since that keeps the temporaries within the budget, but I'm worried it could deadlock if every free register is waiting on an unissued operation.
+
+I'm thinking about a greedy scheduler with a critical-path priority, trying several seeded random orderings and keeping the best result. Since each lane's schedule has to respect bank limits, I'm considering whether a single lane template can be laid out first and the banks handled afterward.
+
+I'm considering whether loads can be ordered per lane instead of using one template, since every lane needs all coefficients and the bank limit means only two loads per bank per cycle. The op count, not the loads, seems to be the real bottleneck at about 26 slots.
+
+I'm checking the timing now: the ten loads go first in cycles 0–9, then the 16 arithmetic ops fill cycles 10–25. The chain has plenty of slack, since m1 only needs to start by around cycle 18, so the coefficient load order barely matters as long as loads and writebacks don't collide.
+
+I'm checking the dependencies in this order: m3B at cycle 25 needs a0B, which would only finish at cycle 26, so that ordering doesn't work and I need to swap a0B earlier.
+
+I'm checking the slot assignments again: the two first-level ops for the two points have to fill cycles 20 and 23, but neither a1 nor a0 can finish in time for the m2 and m3 slots that follow, so I'm weighing which of the a0 ops can go in cycle 20.
+
+I'm checking whether slot 23 can hold anything useful, since no arithmetic op placed there could finish in time for a later consumer. I'm concluding the ten loads and nine first-level ops don't fit before cycle 18 as ordered, so I'm trying moving m3A earlier to see if the chain shifts back into place.
+
+I'm trying slot placements for the two chains so the final ops don't leave an unusable gap before the last store, and I'm checking which free slots (16, 17, 20, 23, 24) can still hold useful arithmetic.
+
+I'm checking the slot arithmetic again: an op issued at cycle 23 or 24 finishes after cycle 25, so those slots can't feed anything, which forces a wasted slot before the final store.
+
+I'm seeing that a store can't go in slot 23 or 24 without the final op landing too late, so both of those slots end up idle. With the last arithmetic op at cycle 25 and the store at 28, that leaves just one wasted slot overall, which is tight but still workable if m3A sits at 23 and its store follows at 26.
+
+I'm working out the slot layout for the final stretch: the last op at cycle 26 with the store at 29 gives the best finish at 30. Slot 24 ends up idle, so I'm placing the lane B chain at 20, 23, 26 and the lane A chain at 19, 22, 25, then filling slot 21 with a first-level op and slots 10–18 with the remaining first-level ops.
+
+I'm checking the store timing next: storing A at 28 and B at 29 gives a finish at 30, and I'm weighing whether a different structure could get it to 29 before settling on this as the first attempt. I'm also questioning whether lane-to-lane sharing of the x2 values would help, and concluding it wouldn't. Then I'm asking whether c0 really has to be loaded per lane, since a0 depends on it, and deciding it does.
+
+I'm assigning the coefficient loads so each lane cycles through the eight banks, giving each bank one access per cycle, and I'm placing the two x loads in cycles 8 and 9 where they also hit distinct banks. The stores go to 24+L at cycle 28 and 32+L at cycle 29, which keeps one write per bank each cycle. I'm also settling the register map: coefficients in r1–r8, the two x values in r9 and r10, and temporaries starting at r11.
+
+Still assigning the remaining ops to registers, keeping each destination clear of live sources. I'm placing the lane B stores and checking that the freed registers are reused in order.
+
+Checking the remaining register assignments for the lane A final ops, I'm making sure each destination is free by then. The final multiply-adds are landing in slots 22 and 23, and slot 24 stays idle before the last op at 25.
+
+Checking the last few register reassignments: the lane A final multiply-add lands in r14 at cycle 25, and the lane B one in r15 at 26. Both stores follow after their results are ready, at 28 and 29, and I'm confirming each destination register is free by the time it's written.
+
+I'm checking the mac operand order and confirming the intermediate values stay well within range, with the final polynomial form coming out correct. Then I'm setting the coefficient load pattern so each lane walks through the eight banks, and placing the two x loads in cycles 8 and 9.
+
+I'm deciding to keep the baseline's scratch setting and its configuration as they are, and to change only the schedule key, finding it in a robust way.
+

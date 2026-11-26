@@ -1,0 +1,17 @@
+{
+  "description": "New explanatory all-input theorem appended to the historical certificate and checked against current source. Not part of the historical experiment.",
+  "args": [
+    "lake",
+    "env",
+    "lean",
+    "docs/evidence/fable-two-iterations/recheck/FableContract.lean"
+  ],
+  "revision": "2eba8b257ae1a4f8caac3ff3b5420f10ece479d3",
+  "toolchain": "leanprover/lean4:v4.35.0",
+  "exitCode": 0,
+  "started": 1795661184.290926,
+  "seconds": 2.7481770515441895,
+  "sourceSha256": "8cc90fecc3b1ecd347b675e7b70234e7d84704b0322eb5ea5a3ef041ccebf6f6",
+  "stdoutSha256": "54972d4886e4b003af93ee1b371677a08130c67f09017a08c357bd29747d7f1c",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

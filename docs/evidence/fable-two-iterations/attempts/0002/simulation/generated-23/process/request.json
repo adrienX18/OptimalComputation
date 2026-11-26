@@ -1,0 +1,18 @@
+{
+  "args": [
+    "/Users/adrien/Desktop/Niko projects/OptimalComputation/.lake/build/bin/optimal_computation",
+    "simulate",
+    "/Users/adrien/Desktop/Niko projects/OptimalComputation/runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/candidate.json",
+    "--input",
+    "/Users/adrien/Desktop/Niko projects/OptimalComputation/runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/generated-23/input.json",
+    "--budget",
+    "1000000",
+    "--trace",
+    "/Users/adrien/Desktop/Niko projects/OptimalComputation/runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/generated-23/trace.json",
+    "--json"
+  ],
+  "cwd": "/Users/adrien/Desktop/Niko projects/OptimalComputation",
+  "timeout": 120,
+  "outputLimitBytes": 67108864,
+  "started": 1795422578.3993201
+}

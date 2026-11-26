@@ -1,0 +1,12 @@
+{
+  "args": [
+    "/Users/adrien/Desktop/Niko projects/OptimalComputation/.lake/build/bin/certification_check",
+    "/Users/adrien/Desktop/Niko projects/OptimalComputation/runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/certification/candidate.json",
+    "1000000",
+    "4096"
+  ],
+  "cwd": "/Users/adrien/Desktop/Niko projects/OptimalComputation",
+  "timeout": 120,
+  "outputLimitBytes": 67108864,
+  "started": 1795422442.415807
+}

@@ -1,0 +1,14 @@
+{
+  "accepted": true,
+  "category": "certified",
+  "score": 30,
+  "unit": "cycles",
+  "cycles": 30,
+  "certificate": "Certificate_464c3fbeaa50f25e30ab519e3963f7e54ef35b085e33c54dd49762597aaf1469.artifact",
+  "attempt": 1,
+  "idea": "Give each of the 8 lanes two points. Each lane loads all 8 coefficients (rotated order so every bank sees one load per cycle) and its two x values, then evaluates each point in 8 ops: four pair terms a_i = c[2i+1]*x + c[2i], x2 = x*x, and three Horner steps in x2. Expected latency is 30 cycles; not ",
+  "directory": "attempts/0001",
+  "seconds": 135.056,
+  "improved": true,
+  "bestScore": 30
+}

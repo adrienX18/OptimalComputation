@@ -1,0 +1,918 @@
+{
+  "description": "Two complete historical attempt directories, with run metadata and relevant historical harness source. Byte-for-byte exports; decoded/ contains derived text.",
+  "inventorySha256": "00f2bfcff7093edae48df8463227764fcc02cc43ebfa858de602a6030b7695d4",
+  "files": [
+    {
+      "file": "manifest.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/manifest.json",
+      "bytes": 13389,
+      "sha256": "2b793ad710773b25c5ad31c6643ce3c7284edf0704f4c95c76af81d64912cb79"
+    },
+    {
+      "file": "baseline.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/baseline.json",
+      "bytes": 172189,
+      "sha256": "08e15c99b0578d950911ade3f2aee2b5a24bddf763a4f15f539b290e967a6b26"
+    },
+    {
+      "file": "source/scripts/search.py",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/source/scripts/search.py",
+      "bytes": 15127,
+      "sha256": "1b395298dcbeb151e4a622f71f0a2cc32ce1160dd918b34182d7f817468faa2d"
+    },
+    {
+      "file": "source/scripts/harness/model.py",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/source/scripts/harness/model.py",
+      "bytes": 7243,
+      "sha256": "214b280079f1f44e9e2d8076ea319cb93d4806876dba1abfa66306624d82c7c7"
+    },
+    {
+      "file": "source/scripts/harness/prompt.py",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/source/scripts/harness/prompt.py",
+      "bytes": 5376,
+      "sha256": "60a732ab2bba461ea1f6a50b9f8c65288ea8fcf3c9af6fe4df174fc821c3b64f"
+    },
+    {
+      "file": "source/scripts/harness/evaluate.py",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/source/scripts/harness/evaluate.py",
+      "bytes": 9758,
+      "sha256": "4c2f3f89f0d7cf02ba3b3af7a283ccc0ff5764e9f2d21813b2802af1b3d6281a"
+    },
+    {
+      "file": "attempts/0001/candidate.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/candidate.json",
+      "bytes": 25499,
+      "sha256": "67b759b0a827fe87555d8e251c355b2cd0dd23cd72c9808cdbac6fc38e75a571"
+    },
+    {
+      "file": "attempts/0001/certification/Certificate.lean",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/certification/Certificate.lean",
+      "bytes": 9829,
+      "sha256": "8aa953f17657b2d2a71f25e6ceceb4e9b5d24b3f1e15c9c88558beb9f6bd1ef9"
+    },
+    {
+      "file": "attempts/0001/certification/candidate.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/certification/candidate.json",
+      "bytes": 25499,
+      "sha256": "67b759b0a827fe87555d8e251c355b2cd0dd23cd72c9808cdbac6fc38e75a571"
+    },
+    {
+      "file": "attempts/0001/certification/kernel/request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/certification/kernel/request.json",
+      "bytes": 363,
+      "sha256": "194cd227ad13257acc051d9ff5df35e2c3b8ba45423d9ed6d0ebf288c03b39a1"
+    },
+    {
+      "file": "attempts/0001/certification/kernel/result.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/certification/kernel/result.json",
+      "bytes": 77,
+      "sha256": "96ba9548a21379261c79e69c24f0d7b2f5450332de257e728a2f4b09b9d70d8f"
+    },
+    {
+      "file": "attempts/0001/certification/kernel/stderr.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/certification/kernel/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0001/certification/kernel/stdout.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/certification/kernel/stdout.txt",
+      "bytes": 2006,
+      "sha256": "34c41680c5fb448eba860b27c1d5c59d1f81b40479b1d40776c38069e132aa50"
+    },
+    {
+      "file": "attempts/0001/certification/precheck/request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/certification/precheck/request.json",
+      "bytes": 451,
+      "sha256": "75e040908d253acc4c8243ff4925bcecabc315c79e1a17a6d3d6f1ae638145fd"
+    },
+    {
+      "file": "attempts/0001/certification/precheck/result.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/certification/precheck/result.json",
+      "bytes": 78,
+      "sha256": "4ae54dee9b8615ae97886437555897c6eb0920d2455d9d868b4c6a7b29dbe38a"
+    },
+    {
+      "file": "attempts/0001/certification/precheck/stderr.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/certification/precheck/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0001/certification/precheck/stdout.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/certification/precheck/stdout.txt",
+      "bytes": 10055,
+      "sha256": "a05aa49946f35ac49dace164befae05b7b32bed9c7ca7d18d773ed1a99d62a41"
+    },
+    {
+      "file": "attempts/0001/certification/result.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/certification/result.json",
+      "bytes": 3722,
+      "sha256": "a346040759b940d56115ac11670c5b0465ebe4b6e107f6f2ec7bf18c73e0fe2c"
+    },
+    {
+      "file": "attempts/0001/feedback.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/feedback.json",
+      "bytes": 630,
+      "sha256": "b2c39f7e39c9936a944a3778fbe1984589eac6db481ffb9908e59e549da90b80"
+    },
+    {
+      "file": "attempts/0001/generation/cleanup/request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/generation/cleanup/request.json",
+      "bytes": 259,
+      "sha256": "e482251ccfd9172be6257dea73343da75b5ebf329e3432a48a4718048bf48a16"
+    },
+    {
+      "file": "attempts/0001/generation/cleanup/result.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/generation/cleanup/result.json",
+      "bytes": 80,
+      "sha256": "e817b7a4e385eeb26c121f9f6ca91a550e8a9d1cd31c1e10bc846c78831864dd"
+    },
+    {
+      "file": "attempts/0001/generation/cleanup/stderr.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/generation/cleanup/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0001/generation/cleanup/stdout.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/generation/cleanup/stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0001/generation/container.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/generation/container.json",
+      "bytes": 153,
+      "sha256": "6243b0aa4819467d76ed926b2888297e80cba05777f41ae731c73ae95daee2a3"
+    },
+    {
+      "file": "attempts/0001/generation/input/baseline.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/generation/input/baseline.json",
+      "bytes": 152961,
+      "sha256": "53b59455785f790b7591bcfe1a5435c38472768f10b77a4e23d83369bc4675da"
+    },
+    {
+      "file": "attempts/0001/generation/input/candidate_tools.py",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/generation/input/candidate_tools.py",
+      "bytes": 1466,
+      "sha256": "bfcf8e20bba4e4407dbfac9fa7ab919fab6354f367dc1defb8ac61a96061359f"
+    },
+    {
+      "file": "attempts/0001/generation/input/container_entry.py",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/generation/input/container_entry.py",
+      "bytes": 461,
+      "sha256": "0d61c0afde2f5c334ca5705468442b7a113eb814a3cfe76796006ba8b419518e"
+    },
+    {
+      "file": "attempts/0001/generation/input/generator.py",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/generation/input/generator.py",
+      "bytes": 1480,
+      "sha256": "22e2ab3883278d879eb3a44f35c96480d9f01e6ad715e63a465a63fc74fbc894"
+    },
+    {
+      "file": "attempts/0001/generation/input/randomness.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/generation/input/randomness.json",
+      "bytes": 31,
+      "sha256": "2e6d2011aaf534c5dd3a1a4699efea0979c9e4c482c9a04094f08c81994dadb1"
+    },
+    {
+      "file": "attempts/0001/generation/process/request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/generation/process/request.json",
+      "bytes": 980,
+      "sha256": "d4fc3fcfbe54cafc3cc129bb9edff22f9c080f44510f938f422d49c7c36346f8"
+    },
+    {
+      "file": "attempts/0001/generation/process/result.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/generation/process/result.json",
+      "bytes": 79,
+      "sha256": "8ea78ed20b8e7b50d3225a161b561d554b0c90eafda7096f3685dc41b82c3685"
+    },
+    {
+      "file": "attempts/0001/generation/process/stderr.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/generation/process/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0001/generation/process/stdout.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/generation/process/stdout.txt",
+      "bytes": 25499,
+      "sha256": "67b759b0a827fe87555d8e251c355b2cd0dd23cd72c9808cdbac6fc38e75a571"
+    },
+    {
+      "file": "attempts/0001/generator.py",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/generator.py",
+      "bytes": 1480,
+      "sha256": "22e2ab3883278d879eb3a44f35c96480d9f01e6ad715e63a465a63fc74fbc894"
+    },
+    {
+      "file": "attempts/0001/model-stderr.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/model-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0001/model-stdout.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/model-stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0001/proposal.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/proposal.json",
+      "bytes": 2996,
+      "sha256": "f01f2d598cacfb2feef285eef3cd48d166b5959b67048be4040400b1f90b6cba"
+    },
+    {
+      "file": "attempts/0001/provider-001-request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/provider-001-request.json",
+      "bytes": 12200,
+      "sha256": "1037a3cfe0296173c1976c58917f63a92a37360c8929d327b4132ebe65727ec9"
+    },
+    {
+      "file": "attempts/0001/provider-002-response.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/provider-002-response.json",
+      "bytes": 52354,
+      "sha256": "c7f79383fead590804d7b43c2df08babd3594fe289a4bf19fe3e9f41f0ac7064"
+    },
+    {
+      "file": "attempts/0001/randomness.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/randomness.json",
+      "bytes": 133,
+      "sha256": "532da3e5628fbbcecfc4f547fdf1688f6ac69627211770d6259b38b21935be47"
+    },
+    {
+      "file": "attempts/0001/request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/request.json",
+      "bytes": 5844,
+      "sha256": "4f8a77b21ac79acef65b326a9b84862702f114d2e6b7cdf38811de6cfdfa2080"
+    },
+    {
+      "file": "attempts/0001/response.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/response.json",
+      "bytes": 146158,
+      "sha256": "67383d20a9687ce5dd1f6b6c94d66756785057edb240cf1c9716981489bdca77"
+    },
+    {
+      "file": "attempts/0001/score.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/score.json",
+      "bytes": 2542,
+      "sha256": "3529768117e0a4d416a9ac1af0ad3fed4b4d2f9b0d6d784605c9cb7c18e7da41"
+    },
+    {
+      "file": "attempts/0001/simulation/generated-23/input.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/generated-23/input.json",
+      "bytes": 134,
+      "sha256": "351169af8f61a8925174875720f07e831952dc7ee5fea3b2868f94a002e08dec"
+    },
+    {
+      "file": "attempts/0001/simulation/generated-23/process/request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/generated-23/process/request.json",
+      "bytes": 830,
+      "sha256": "d90320748076d70349b08ecdd89b888ef753d2fe9d927928230d843a2038638f"
+    },
+    {
+      "file": "attempts/0001/simulation/generated-23/process/result.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/generated-23/process/result.json",
+      "bytes": 79,
+      "sha256": "5aa2e12c88d9778e00d73354e118a73056867f4b6f7278e3d8dc711e92893439"
+    },
+    {
+      "file": "attempts/0001/simulation/generated-23/process/stderr.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/generated-23/process/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0001/simulation/generated-23/process/stdout.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/generated-23/process/stdout.txt",
+      "bytes": 1874,
+      "sha256": "90f9366d85772c6c7f0d2b8240cb9ac9b59af4595a9e576f726226b14a15442f"
+    },
+    {
+      "file": "attempts/0001/simulation/generated-23/trace.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/generated-23/trace.json",
+      "bytes": 82310,
+      "sha256": "8548501a8e87d4fada9f9e3b69eff2e1a470655b5d657adffe69fdbff99cf71f"
+    },
+    {
+      "file": "attempts/0001/simulation/generated-23/trace.json.gz",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/generated-23/trace.json.gz",
+      "bytes": 4628,
+      "sha256": "8723dcdf4d73df83cb922b5524c63a27a3358507375c02a9a531adcdefed1074"
+    },
+    {
+      "file": "attempts/0001/simulation/mixed-signs/input.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/mixed-signs/input.json",
+      "bytes": 127,
+      "sha256": "f8bdd2dda473deb7d39dd6f6568f2bddec6d61b2dbf64ac399a8c059ff800f89"
+    },
+    {
+      "file": "attempts/0001/simulation/mixed-signs/process/request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/mixed-signs/process/request.json",
+      "bytes": 827,
+      "sha256": "0d2c9981ff2c2593a48993d30bae0bad4cd2d4939ff70423b753b2b72c25b9f5"
+    },
+    {
+      "file": "attempts/0001/simulation/mixed-signs/process/result.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/mixed-signs/process/result.json",
+      "bytes": 79,
+      "sha256": "ad48acac150ca0e23c0bc60e73f271bf6df0780a3280588de83752839e81cee5"
+    },
+    {
+      "file": "attempts/0001/simulation/mixed-signs/process/stderr.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/mixed-signs/process/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0001/simulation/mixed-signs/process/stdout.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/mixed-signs/process/stdout.txt",
+      "bytes": 1869,
+      "sha256": "78348dfd140d8ddf93aff1588995cbdc64f1a478e02f793688b4c5c27ae18d16"
+    },
+    {
+      "file": "attempts/0001/simulation/mixed-signs/trace.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/mixed-signs/trace.json",
+      "bytes": 82524,
+      "sha256": "06fc9d64dd0dc56a6cdb1d0e3f617ed2316c16ebc3db97363b364e84ef447d40"
+    },
+    {
+      "file": "attempts/0001/simulation/mixed-signs/trace.json.gz",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/mixed-signs/trace.json.gz",
+      "bytes": 4272,
+      "sha256": "b7f172a7662af3bda5acb9141f88049139a316fe8731579f3f7da17b38a5fd6a"
+    },
+    {
+      "file": "attempts/0001/simulation/negative-endpoints/input.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/negative-endpoints/input.json",
+      "bytes": 147,
+      "sha256": "332478ef6a5b14ce440a8e2aed8cf27ce096fd80dd16047725a0530862604c21"
+    },
+    {
+      "file": "attempts/0001/simulation/negative-endpoints/process/request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/negative-endpoints/process/request.json",
+      "bytes": 841,
+      "sha256": "aa043c0baa333a1afb5f164c25f2f11b8ff3e9c2cac1f6ff6d113deb81b8666a"
+    },
+    {
+      "file": "attempts/0001/simulation/negative-endpoints/process/result.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/negative-endpoints/process/result.json",
+      "bytes": 79,
+      "sha256": "7c15ad970955736f83e555ac09be640e7f76548e6f1f8370732cab8f9c3bcf46"
+    },
+    {
+      "file": "attempts/0001/simulation/negative-endpoints/process/stderr.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/negative-endpoints/process/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0001/simulation/negative-endpoints/process/stdout.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/negative-endpoints/process/stdout.txt",
+      "bytes": 1942,
+      "sha256": "3eb18e1589170af92f9a7ba27ebd6d843026e88d874dd2d4b6b63e1bebe9c571"
+    },
+    {
+      "file": "attempts/0001/simulation/negative-endpoints/trace.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/negative-endpoints/trace.json",
+      "bytes": 82588,
+      "sha256": "b72dba1e26daef4c86637a1a33e6e4f6a601fd358804064463dd7197acb6dcba"
+    },
+    {
+      "file": "attempts/0001/simulation/negative-endpoints/trace.json.gz",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/negative-endpoints/trace.json.gz",
+      "bytes": 4249,
+      "sha256": "f7badc841a5099be607c89619b592fef2db9cc48bd0d6bb262e7d0c81cd72d29"
+    },
+    {
+      "file": "attempts/0001/simulation/positive-endpoints/input.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/positive-endpoints/input.json",
+      "bytes": 123,
+      "sha256": "d67ac19313528e2ff9bdb5c0741c1fffe77835220bcf3e51b95454e425338ae4"
+    },
+    {
+      "file": "attempts/0001/simulation/positive-endpoints/process/request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/positive-endpoints/process/request.json",
+      "bytes": 841,
+      "sha256": "b0f0e9bb98d249dafd90dfc2134ee30916f2de17062282b955e4787eb944b5f0"
+    },
+    {
+      "file": "attempts/0001/simulation/positive-endpoints/process/result.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/positive-endpoints/process/result.json",
+      "bytes": 79,
+      "sha256": "488769d5030bdc165f6612cafde663f1566341ed0d5434b8be54f7f50730dd7d"
+    },
+    {
+      "file": "attempts/0001/simulation/positive-endpoints/process/stderr.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/positive-endpoints/process/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0001/simulation/positive-endpoints/process/stdout.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/positive-endpoints/process/stdout.txt",
+      "bytes": 1856,
+      "sha256": "dfd4841c113c37cd5ff64a1ed7377d690a81a40481d98688cfe58e5f9fa2ebea"
+    },
+    {
+      "file": "attempts/0001/simulation/positive-endpoints/trace.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/positive-endpoints/trace.json",
+      "bytes": 82351,
+      "sha256": "9ef894438c9badc6074c2ffb051add8100d4459c127c826c6c05d092ddab7358"
+    },
+    {
+      "file": "attempts/0001/simulation/positive-endpoints/trace.json.gz",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/positive-endpoints/trace.json.gz",
+      "bytes": 4238,
+      "sha256": "4ed344fa1455a8751797c572e0623348133a33bb92574d36b1752d5596fba3a7"
+    },
+    {
+      "file": "attempts/0001/simulation/zeros/input.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/zeros/input.json",
+      "bytes": 123,
+      "sha256": "e19d0fc594e35915c0f95ac7542977d4be3d80b46d45e27c787d1e29829c13cf"
+    },
+    {
+      "file": "attempts/0001/simulation/zeros/process/request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/zeros/process/request.json",
+      "bytes": 815,
+      "sha256": "0eab23c5bf5c0cbbce5888e6e5cab34ffbcbac93ed7de359970c1bf15110db7d"
+    },
+    {
+      "file": "attempts/0001/simulation/zeros/process/result.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/zeros/process/result.json",
+      "bytes": 78,
+      "sha256": "b5edc925778a994086ffbe0056e07adbdac158d80d2d35b54380320ed61da251"
+    },
+    {
+      "file": "attempts/0001/simulation/zeros/process/stderr.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/zeros/process/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0001/simulation/zeros/process/stdout.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/zeros/process/stdout.txt",
+      "bytes": 1732,
+      "sha256": "e3b60cb56b2e49d03f1b3dc9ea8840815616b672bba934f008b5af1086299fd8"
+    },
+    {
+      "file": "attempts/0001/simulation/zeros/trace.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/zeros/trace.json",
+      "bytes": 81939,
+      "sha256": "05471936776fffb0c06bf58541db5385fec3bfcccb00b71dfa05e05b88774aec"
+    },
+    {
+      "file": "attempts/0001/simulation/zeros/trace.json.gz",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulation/zeros/trace.json.gz",
+      "bytes": 4177,
+      "sha256": "40ad9fd761b082b5148f3d19c0a3e3ef83b554614e7494e63f254384198d8432"
+    },
+    {
+      "file": "attempts/0001/simulations.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0001/simulations.json",
+      "bytes": 15894,
+      "sha256": "0bae88cba27ff0c7b606068f3fc1ba2b7ec2679204e4a30680510e0cf611cb81"
+    },
+    {
+      "file": "attempts/0002/candidate.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/candidate.json",
+      "bytes": 25499,
+      "sha256": "67b759b0a827fe87555d8e251c355b2cd0dd23cd72c9808cdbac6fc38e75a571"
+    },
+    {
+      "file": "attempts/0002/certification/Certificate.lean",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/certification/Certificate.lean",
+      "bytes": 9829,
+      "sha256": "8aa953f17657b2d2a71f25e6ceceb4e9b5d24b3f1e15c9c88558beb9f6bd1ef9"
+    },
+    {
+      "file": "attempts/0002/certification/candidate.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/certification/candidate.json",
+      "bytes": 25499,
+      "sha256": "67b759b0a827fe87555d8e251c355b2cd0dd23cd72c9808cdbac6fc38e75a571"
+    },
+    {
+      "file": "attempts/0002/certification/kernel/request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/certification/kernel/request.json",
+      "bytes": 363,
+      "sha256": "6e56c9c2e778e78d18c1b1b891f5f2dec570e0845d9aa1ade991a807e547579c"
+    },
+    {
+      "file": "attempts/0002/certification/kernel/result.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/certification/kernel/result.json",
+      "bytes": 77,
+      "sha256": "0dceb99768f8e131a83924735beb419acb4776e7b78bef73d06b1ec49ad9d8f8"
+    },
+    {
+      "file": "attempts/0002/certification/kernel/stderr.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/certification/kernel/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0002/certification/kernel/stdout.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/certification/kernel/stdout.txt",
+      "bytes": 2006,
+      "sha256": "34c41680c5fb448eba860b27c1d5c59d1f81b40479b1d40776c38069e132aa50"
+    },
+    {
+      "file": "attempts/0002/certification/precheck/request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/certification/precheck/request.json",
+      "bytes": 451,
+      "sha256": "92331ce7ffc3029594168f5e69472e529a1d53857f4f7d77296cc0a89154d653"
+    },
+    {
+      "file": "attempts/0002/certification/precheck/result.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/certification/precheck/result.json",
+      "bytes": 79,
+      "sha256": "c3b979d9a6b474ca9a7d677da302eb0410fb1d49b65ec1f47a5f39fa9432b7ba"
+    },
+    {
+      "file": "attempts/0002/certification/precheck/stderr.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/certification/precheck/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0002/certification/precheck/stdout.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/certification/precheck/stdout.txt",
+      "bytes": 10055,
+      "sha256": "a05aa49946f35ac49dace164befae05b7b32bed9c7ca7d18d773ed1a99d62a41"
+    },
+    {
+      "file": "attempts/0002/certification/result.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/certification/result.json",
+      "bytes": 3722,
+      "sha256": "1d69b2ba077c2e6b84079f1c2a4ea200c8fecadb65b04ceae486bd44baff6fb6"
+    },
+    {
+      "file": "attempts/0002/feedback.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/feedback.json",
+      "bytes": 631,
+      "sha256": "7ac8f281554c9cceff669a71dc29e8a00f46f8704309777fb68d84dd469c7fab"
+    },
+    {
+      "file": "attempts/0002/generation/cleanup/request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/generation/cleanup/request.json",
+      "bytes": 260,
+      "sha256": "2affe7644f551a379db15637dfece62977db84a684e7e37d07794a03af89b6bb"
+    },
+    {
+      "file": "attempts/0002/generation/cleanup/result.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/generation/cleanup/result.json",
+      "bytes": 79,
+      "sha256": "acdddbbe96b109b270269140c0cd4d2030b4f63d5671cce5cd813699fcf68c68"
+    },
+    {
+      "file": "attempts/0002/generation/cleanup/stderr.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/generation/cleanup/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0002/generation/cleanup/stdout.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/generation/cleanup/stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0002/generation/container.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/generation/container.json",
+      "bytes": 153,
+      "sha256": "ea5bc4d4a263362280419c2c513b39e665d843a186a27dfa8f80056824385c79"
+    },
+    {
+      "file": "attempts/0002/generation/input/baseline.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/generation/input/baseline.json",
+      "bytes": 152961,
+      "sha256": "53b59455785f790b7591bcfe1a5435c38472768f10b77a4e23d83369bc4675da"
+    },
+    {
+      "file": "attempts/0002/generation/input/candidate_tools.py",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/generation/input/candidate_tools.py",
+      "bytes": 1466,
+      "sha256": "bfcf8e20bba4e4407dbfac9fa7ab919fab6354f367dc1defb8ac61a96061359f"
+    },
+    {
+      "file": "attempts/0002/generation/input/container_entry.py",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/generation/input/container_entry.py",
+      "bytes": 461,
+      "sha256": "0d61c0afde2f5c334ca5705468442b7a113eb814a3cfe76796006ba8b419518e"
+    },
+    {
+      "file": "attempts/0002/generation/input/generator.py",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/generation/input/generator.py",
+      "bytes": 1480,
+      "sha256": "22e2ab3883278d879eb3a44f35c96480d9f01e6ad715e63a465a63fc74fbc894"
+    },
+    {
+      "file": "attempts/0002/generation/input/randomness.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/generation/input/randomness.json",
+      "bytes": 32,
+      "sha256": "cec5b2df021db0fc75cedaa7747ec0dc4d7f3bd14f7233d581d21f503a0b6361"
+    },
+    {
+      "file": "attempts/0002/generation/process/request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/generation/process/request.json",
+      "bytes": 981,
+      "sha256": "86eb1d04b40b2b4db16b654549af70d334789febb9de7f2e1fa05976408668b0"
+    },
+    {
+      "file": "attempts/0002/generation/process/result.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/generation/process/result.json",
+      "bytes": 79,
+      "sha256": "628561f70e685cf496425b4171d28bf79fef05b6751c73b453780f0fe647baca"
+    },
+    {
+      "file": "attempts/0002/generation/process/stderr.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/generation/process/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0002/generation/process/stdout.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/generation/process/stdout.txt",
+      "bytes": 25499,
+      "sha256": "67b759b0a827fe87555d8e251c355b2cd0dd23cd72c9808cdbac6fc38e75a571"
+    },
+    {
+      "file": "attempts/0002/generator.py",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/generator.py",
+      "bytes": 1480,
+      "sha256": "22e2ab3883278d879eb3a44f35c96480d9f01e6ad715e63a465a63fc74fbc894"
+    },
+    {
+      "file": "attempts/0002/model-stderr.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/model-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0002/model-stdout.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/model-stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0002/proposal.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/proposal.json",
+      "bytes": 3571,
+      "sha256": "a769efa53407d3ce376535e69fc276008669edb5136f6f70d6bd52bec4b93918"
+    },
+    {
+      "file": "attempts/0002/provider-001-request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/provider-001-request.json",
+      "bytes": 19178,
+      "sha256": "c24e08944782026133deea6e6e9299572465e99415a4b3f37fbcf1e1a6d0315a"
+    },
+    {
+      "file": "attempts/0002/provider-002-response.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/provider-002-response.json",
+      "bytes": 52670,
+      "sha256": "14af4e268172a969db5e456d0b10c5e454af079e1385022637e630549050a6d4"
+    },
+    {
+      "file": "attempts/0002/randomness.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/randomness.json",
+      "bytes": 134,
+      "sha256": "fb016daf85d047aaa028531e27225fdf459ae2b1184d172022e9d37473675b25"
+    },
+    {
+      "file": "attempts/0002/request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/request.json",
+      "bytes": 9333,
+      "sha256": "8d7cbbbd493470aac7ab8bc9112adfa88ff73d62370edc9186297619cce4b5d2"
+    },
+    {
+      "file": "attempts/0002/response.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/response.json",
+      "bytes": 134094,
+      "sha256": "e750c400a351208e2631e8541e88d26182f2c56019e0dc5f3e89bf95ec3b5108"
+    },
+    {
+      "file": "attempts/0002/score.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/score.json",
+      "bytes": 2542,
+      "sha256": "3529768117e0a4d416a9ac1af0ad3fed4b4d2f9b0d6d784605c9cb7c18e7da41"
+    },
+    {
+      "file": "attempts/0002/simulation/generated-23/input.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/generated-23/input.json",
+      "bytes": 134,
+      "sha256": "351169af8f61a8925174875720f07e831952dc7ee5fea3b2868f94a002e08dec"
+    },
+    {
+      "file": "attempts/0002/simulation/generated-23/process/request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/generated-23/process/request.json",
+      "bytes": 830,
+      "sha256": "4a36eddc37bc703f9f1a656ba813bd4abbfc1ca4a9368a01a3b9e71c041dc50a"
+    },
+    {
+      "file": "attempts/0002/simulation/generated-23/process/result.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/generated-23/process/result.json",
+      "bytes": 79,
+      "sha256": "1e597fdf6bb8e502fd32f34bc775adab7b7f5ab627de153c642db2eade49ede0"
+    },
+    {
+      "file": "attempts/0002/simulation/generated-23/process/stderr.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/generated-23/process/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0002/simulation/generated-23/process/stdout.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/generated-23/process/stdout.txt",
+      "bytes": 1874,
+      "sha256": "73b95dd81303f4197ba96cdcfb597150d4e818880b65bdafa1630e99a84ebf10"
+    },
+    {
+      "file": "attempts/0002/simulation/generated-23/trace.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/generated-23/trace.json",
+      "bytes": 82310,
+      "sha256": "dfed219dd526676ee035c691811a12b1ae9b635771824f2a4f41231d32cdd5ab"
+    },
+    {
+      "file": "attempts/0002/simulation/generated-23/trace.json.gz",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/generated-23/trace.json.gz",
+      "bytes": 4628,
+      "sha256": "3eba494bcb90b5cd4b58e0294e71d8160777364302ed506f55576c570e2de07d"
+    },
+    {
+      "file": "attempts/0002/simulation/mixed-signs/input.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/mixed-signs/input.json",
+      "bytes": 127,
+      "sha256": "f8bdd2dda473deb7d39dd6f6568f2bddec6d61b2dbf64ac399a8c059ff800f89"
+    },
+    {
+      "file": "attempts/0002/simulation/mixed-signs/process/request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/mixed-signs/process/request.json",
+      "bytes": 827,
+      "sha256": "16a8d6a7420135ebd26d0aae3f24b7e73f3cc3461c45aca883652bcb60a6ccc8"
+    },
+    {
+      "file": "attempts/0002/simulation/mixed-signs/process/result.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/mixed-signs/process/result.json",
+      "bytes": 79,
+      "sha256": "ff8e3776dd03080dfa2cee830bd24d27bf746d49fc4c243a81100e5d274f6df1"
+    },
+    {
+      "file": "attempts/0002/simulation/mixed-signs/process/stderr.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/mixed-signs/process/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0002/simulation/mixed-signs/process/stdout.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/mixed-signs/process/stdout.txt",
+      "bytes": 1869,
+      "sha256": "45267ee76b5307df6d55e433d153a06a8e1c0ecec6680de2a83782a9f7314452"
+    },
+    {
+      "file": "attempts/0002/simulation/mixed-signs/trace.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/mixed-signs/trace.json",
+      "bytes": 82524,
+      "sha256": "875599a08705689c75d5bf17acb1801ab36334ad2b01a603ac658b4627313b18"
+    },
+    {
+      "file": "attempts/0002/simulation/mixed-signs/trace.json.gz",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/mixed-signs/trace.json.gz",
+      "bytes": 4272,
+      "sha256": "730f9b09637b42be1eb2b522d55071a89850607ce3bfe7a5ecf5102e362f7402"
+    },
+    {
+      "file": "attempts/0002/simulation/negative-endpoints/input.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/negative-endpoints/input.json",
+      "bytes": 147,
+      "sha256": "332478ef6a5b14ce440a8e2aed8cf27ce096fd80dd16047725a0530862604c21"
+    },
+    {
+      "file": "attempts/0002/simulation/negative-endpoints/process/request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/negative-endpoints/process/request.json",
+      "bytes": 841,
+      "sha256": "d5899bac953ad16164e8df992302c2dc19004df0ffa6b0d155bf63d6b4e26333"
+    },
+    {
+      "file": "attempts/0002/simulation/negative-endpoints/process/result.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/negative-endpoints/process/result.json",
+      "bytes": 78,
+      "sha256": "2554466d486e779d55ce6d866b75f4d2bc0a5df09a413ba2bce7a3d5126c6b60"
+    },
+    {
+      "file": "attempts/0002/simulation/negative-endpoints/process/stderr.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/negative-endpoints/process/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0002/simulation/negative-endpoints/process/stdout.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/negative-endpoints/process/stdout.txt",
+      "bytes": 1942,
+      "sha256": "732b887e0f18d589966f8af269c7dedfacc8eba3608b68439fcb64bcca33d9da"
+    },
+    {
+      "file": "attempts/0002/simulation/negative-endpoints/trace.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/negative-endpoints/trace.json",
+      "bytes": 82588,
+      "sha256": "676a02e1b411f10d5aefaf8c645fdfeddcd9f74f974efd8a491837768e85b2fb"
+    },
+    {
+      "file": "attempts/0002/simulation/negative-endpoints/trace.json.gz",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/negative-endpoints/trace.json.gz",
+      "bytes": 4249,
+      "sha256": "2e4bad9b19b152c5fd6ed102472c644dd254e71af5d15757f096e9449149a9e9"
+    },
+    {
+      "file": "attempts/0002/simulation/positive-endpoints/input.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/positive-endpoints/input.json",
+      "bytes": 123,
+      "sha256": "d67ac19313528e2ff9bdb5c0741c1fffe77835220bcf3e51b95454e425338ae4"
+    },
+    {
+      "file": "attempts/0002/simulation/positive-endpoints/process/request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/positive-endpoints/process/request.json",
+      "bytes": 841,
+      "sha256": "515bdac01ad0e5ed99679c62b4b34ff5cc02cb4cb47de7d5cfca0b8abad382ef"
+    },
+    {
+      "file": "attempts/0002/simulation/positive-endpoints/process/result.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/positive-endpoints/process/result.json",
+      "bytes": 79,
+      "sha256": "50f6c9986b1269159a73e1dffc84a5a07f7138424f5fcc1d571877fd3800d44b"
+    },
+    {
+      "file": "attempts/0002/simulation/positive-endpoints/process/stderr.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/positive-endpoints/process/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0002/simulation/positive-endpoints/process/stdout.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/positive-endpoints/process/stdout.txt",
+      "bytes": 1856,
+      "sha256": "8e4ee7dd549cfd98db5a20942ab2932cf9b82eb871097260c352a644759c5a5e"
+    },
+    {
+      "file": "attempts/0002/simulation/positive-endpoints/trace.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/positive-endpoints/trace.json",
+      "bytes": 82351,
+      "sha256": "0a2425324d219b3bd5a1292ab446550b466a12e0565810e3fd489e00781b5539"
+    },
+    {
+      "file": "attempts/0002/simulation/positive-endpoints/trace.json.gz",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/positive-endpoints/trace.json.gz",
+      "bytes": 4238,
+      "sha256": "10c4644929849dbc27076b230ebb2a27cbe700a683b3602d9b8b1bd53cb92ce2"
+    },
+    {
+      "file": "attempts/0002/simulation/zeros/input.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/zeros/input.json",
+      "bytes": 123,
+      "sha256": "e19d0fc594e35915c0f95ac7542977d4be3d80b46d45e27c787d1e29829c13cf"
+    },
+    {
+      "file": "attempts/0002/simulation/zeros/process/request.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/zeros/process/request.json",
+      "bytes": 815,
+      "sha256": "17ad41b22a2346c48c04d6cca7e477ecaeec861e55a3842bb3ccba9516dd6405"
+    },
+    {
+      "file": "attempts/0002/simulation/zeros/process/result.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/zeros/process/result.json",
+      "bytes": 79,
+      "sha256": "b86fd77aa3d58ab0e835b6c4ca9b5adc9f9b4156e83f3bae8a05fe203c52a936"
+    },
+    {
+      "file": "attempts/0002/simulation/zeros/process/stderr.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/zeros/process/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempts/0002/simulation/zeros/process/stdout.txt",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/zeros/process/stdout.txt",
+      "bytes": 1732,
+      "sha256": "1e677e891078234c1089dafdaa00967a5a9b9ea06dcd3bcc13ad52f34f40642a"
+    },
+    {
+      "file": "attempts/0002/simulation/zeros/trace.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/zeros/trace.json",
+      "bytes": 81939,
+      "sha256": "acb2ec5af5811ed6107769ec8d2ea9c809e65a5fadbce4a252b1016753cbc6b0"
+    },
+    {
+      "file": "attempts/0002/simulation/zeros/trace.json.gz",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulation/zeros/trace.json.gz",
+      "bytes": 4177,
+      "sha256": "6da02828ade1bafe3f15c1e4d6a1496193f88486597c09eea2e464964de2e1ac"
+    },
+    {
+      "file": "attempts/0002/simulations.json",
+      "source": "runs/nightly-five-models-20261123/runs/fable/seed-11/attempts/0002/simulations.json",
+      "bytes": 15894,
+      "sha256": "2c9905dc3b39a2c9c67eaef255e9a51a2e0c7cb909fff37e48d9161babdd35e2"
+    }
+  ]
+}

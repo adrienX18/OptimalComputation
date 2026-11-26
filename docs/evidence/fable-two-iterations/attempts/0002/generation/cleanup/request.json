@@ -1,0 +1,12 @@
+{
+  "args": [
+    "docker",
+    "rm",
+    "-f",
+    "optimal-generator-a988b1eeac8e489c8d45c3f277c2dc59"
+  ],
+  "cwd": "/Users/adrien/Desktop/Niko projects/OptimalComputation",
+  "timeout": 30,
+  "outputLimitBytes": 67108864,
+  "started": 1795422577.2855911
+}

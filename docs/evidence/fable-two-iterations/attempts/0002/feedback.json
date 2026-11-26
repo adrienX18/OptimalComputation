@@ -1,0 +1,14 @@
+{
+  "accepted": true,
+  "category": "certified",
+  "score": 30,
+  "unit": "cycles",
+  "cycles": 30,
+  "certificate": "Certificate_464c3fbeaa50f25e30ab519e3963f7e54ef35b085e33c54dd49762597aaf1469.artifact",
+  "attempt": 2,
+  "idea": "Resubmit the certified 30-cycle design unchanged. I tried to reach 29 on paper and could not find a legal schedule: Horner, mixed Horner/shallow and a late c0 load all break the one-writeback-per-cycle rule or need too many loads. Each lane takes two points, loads all 8 coefficients in rotated order",
+  "directory": "attempts/0002",
+  "seconds": 136.334,
+  "improved": false,
+  "bestScore": 30
+}

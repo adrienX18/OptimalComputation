@@ -1,0 +1,76 @@
+I have a certified 30 cycles already, so the question is whether something better is reachable without much effort. The limits are one instruction per lane per cycle and one register writeback per cycle, with loads taking 1 cycle and arithmetic 3. Each lane needs 10 loads, 16 arithmetic ops, and 2 stores, which is 28 instructions and so at least 28 cycles if no slot goes idle.
+
+I'm weighing whether splitting the work across lanes, with the low and high halves of the polynomial computed separately and combined through scratch memory, could beat the 28-cycle bound, and I'm checking the op count for that Estrin-style split. It comes to 28 instructions per lane again, so no gain there. I'm now looking at whether overlapping loads with arithmetic can avoid writeback clashes.
+
+I'm checking whether the store timing can reach 28 or 29 cycles. The dependency chains fit, so slot filling is the real constraint, and the last arithmetic result lands too late for a store to finish by 28.
+
+Checking the slot arithmetic at the end: if the last arithmetic op issues at slot t, its store can't go until t+3, and with only 26 non-store instructions the schedule lands at 29 cycles, not 28. The earlier note about one wasted slot holds up.
+
+I'm checking whether any instruction can fill the slot two before the last arithmetic op, and it looks like nothing can, since anything there would have to feed the final ops. I'm considering whether uneven work, like a lane handling three points with finals at t, t-1, and t-2, could avoid that idle slot and bring the total down to 29.
+
+I'm weighing whether uneven splits or sharing partial results through memory could cut the idle slot, but a lane with three points needs 35 slots and a single-point lane ends by cycle 20, so neither helps across 16 points on 8 lanes. Reducing the instruction count by exploiting the small range of x is tempting, yet the schedule has to stay static with no branching, so that route doesn't work.
+
+I'm testing a Horner-style split where two interleaved chains share the load work, and I'm working out the start times so that the loads don't clash with the arithmetic writebacks.
+
+I'm checking whether loads can fit into the free slots without clashing with arithmetic writebacks, and it looks like every free slot collides with an arithmetic op two cycles earlier, since the arithmetic fills two of every three residues.
+
+I'm checking whether loads can be pushed earlier to make room for a staggered second chain, but any preload pushes the finish to cycle 31, which is worse than the current 30.
+
+I'm checking whether the wasted slot before the final ops can be filled by a load that completes just in time for the last arithmetic op, which would remove the idle cycle.
+
+I'm checking whether a Horner-style split with the final result computed as q*x + c0 could avoid the idle slot, but each load needs the slot two cycles earlier to be free of arithmetic writebacks, which pushes the constraint back through the whole schedule.
+
+I'm working out a schedule that alternates loads and arithmetic ops, since a load at slot s only clashes with an arithmetic writeback at s+2. Parity then lets the pipeline run without idle slots, and I'm going to see whether 26 instructions fit into slots 0 through 25.
+
+I'm working through whether a split with depth-21 Horner chains can still land at 29 cycles, and the plan is to place the final ops so the last arithmetic result doesn't block the stores. I'm now evaluating the polynomial by rewriting it as q times x plus c0, with q built from nested pairs of coefficients.
+
+I'm trying a Horner-style form where the last load of c0 lands just in time, which would give 29 cycles. That only works if the loads sit in slots that avoid writeback clashes with the arithmetic, so I'm checking where the loads have to fall, back to the start.
+
+I'm checking whether a 7-op Horner form per point, at 24 instructions, leaves enough spare slots to reach 29 cycles despite the load and writeback constraints.
+
+I'm laying out the timing: the final two ops land at slots 24 and 25, and the loads have to sit at slots that don't collide with arithmetic writebacks. With a 7-op Horner chain per point, the free slots are the start of the schedule and a handful spaced every three cycles, so I'm checking whether that pattern leaves room for all the loads.
+
+I'm trying to place the Horner chains so that A's and B's steps fit around the load slots, with the first chain starting at slot 3 and the second at slot 4. Each chain has about three cycles of slack, and I'm laying out the times for each step and the coefficient loads that must come before them.
+
+I'm checking whether a period-4 pattern of load, arithmetic, and idle slots can avoid writeback clashes, but it's too slow for the three-cycle chain steps, leaving only about three cycles of slack to work with.
+
+I'm considering whether a mixed scheme, with one shallower 8-op point and one 7-op Horner point, could fit 25 arithmetic and load slots into the 26 available, leaving just one idle cycle.
+
+I'm arranging the remaining slots so that loads come first and the arithmetic follows, with one idle slot placed so later loads can still fit without colliding with writebacks.
+
+I'm noticing that if the loads fill the first few slots and then alternate with arithmetic ops, the pipeline can run with no idle slots, so I'm working out how the 8-op version fits into the 26 instructions.
+
+I'm checking the simpler alternative: the 8-op version can't put its last load at t-2 because the alternating load pattern would need about ten loads in a slot range that only fits about half that, so that trick fails. Next I'm turning to the 7-op Horner form for both points, which leaves two idle slots, and starting to place the loads for c7, c6, and xA.
+
+Still working out the slot assignments: I'm placing the first loads and the first Horner step for point A, then checking whether B's steps can interleave without clashing with the load writebacks.
+
+I'm placing the coefficient loads around the arithmetic so that load c3 lands at slot 10, which leaves slot 11 for A2. With c2 loaded at 12 and B2 at 13, the A3 step at 14 can go ahead, though slot 15 still has no free load slot.
+
+Still working through the slot schedule: I'm lining up the chain steps for A and B against the load slots, and checking whether the pattern of loads and arithmetic ops can keep both chains within their deadlines.
+
+I'm still stuck on where to put the last two coefficient loads, c1 and c0. The free slots after 14 all fall right after an arithmetic op, so loading there would clash with a writeback, and the earlier slots are already full.
+
+I'm working out how many slots the loads and arithmetic ops need before the alternating pattern can take over, since the total slot count has to cover all 10 loads plus the steps of both chains.
+
+I'm testing the idea that the steady state can only start once enough arithmetic has been issued, which gives a minimum of four steps per chain before the pattern can settle. With four steps each, the schedule works out to A and B issuing at 18 and 19, then the last steps at 24 and 25.
+
+I'm now looking at the constraint that an arithmetic op at slot s forces slot s+2 to be non-load, which pushes the arithmetic ops into upward-closed sets within each parity class up to slot 17. With 8 arithmetic ops and 10 loads all needing to fit in slots 0 through 17, I'm trying to find an arrangement that satisfies that rule.
+
+I'm testing whether the arithmetic slots can be packed into the 0–17 range with the required spacing, trying each split between even and odd slots. Every split I check leaves either the chains too far apart or too many slots needed, so a four-step-per-chain start looks impossible.
+
+I'm testing whether the arithmetic can sit at the even or odd slots up to 20 with the leftover idle slot, since A's first step has to land by slot 6 and B's by slot 7.
+
+I'm ruling out a pure Horner schedule at 29 cycles, since the early arithmetic forces every later slot of the same parity to be arithmetic, leaving no room for the loads. Now I'm checking a mixed scheme where one point uses the shallower 8-op form and the other keeps the 7-op Horner chain, which would give 25 instructions and one idle slot.
+
+I'm ruling out pure Horner for the remaining slots, since the B chain's parity would block almost every later load. I'm now considering whether a medium-depth scheme with seven multiplications could do better.
+
+I'm now checking whether a shallow 8-op form for each point, which packs all 26 slots from 0 to 25, could reach the 24-cycle target.
+
+I'm checking where the last instructions can sit: the final op feeding B has to land by slot 25, which means the slots near the end must be loads or the op for A, since nothing arithmetic can start late enough to help.
+
+I'm seeing that any load at a late slot forces a chain of loads back through the same parity down to the start, which would need more than twelve loads, so a 29-cycle schedule with two points per lane is ruled out. I'm wondering whether sharing work across lanes, such as precomputing coefficient-only values, could cut the count, but nothing useful comes to mind yet.
+
+I'm ruling out the idea of preprocessing the coefficients, since that would need division or root-finding, which integer ops can't do. Exploiting the small input domain doesn't work either, because selecting a result without branches would need indexing or expensive indicator polynomials. Splitting work through memory adds store-and-load overhead, and the total already comes to exactly 28 per lane, so 29 cycles would demand near-perfect packing that looks infeasible.
+
+I'm checking whether counting the stores could fill any slots differently, but each lane still seems to end up with the same schedule constraints. Even allowing for transfers, there's no clear way to squeeze it to 29, so I'll settle on the current 30-cycle version and finish up the notes.
+

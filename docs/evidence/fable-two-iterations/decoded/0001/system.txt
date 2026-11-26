@@ -1,0 +1,71 @@
+Optimize a finite candidate for the fixed arty-model-v1 machine.
+Return ONLY a JSON object with strings: idea, code, notes. code defines build()
+returning candidate-v1 JSON. notes replaces your short notebook for the next attempt.
+Use Python's standard library and candidate_tools. No external packages or tools.
+Python's global random module is seeded for each attempt. If you create a private
+PRNG, use random.Random(candidate_tools.seed()); avoid time or OS entropy.
+Generator loops expand a static schedule; the machine itself has no runtime branches.
+You may change algorithm, layout, registers, schedule, and (only for energy) configuration.
+Keep the workload and model fixed. Only a kernel-certified candidate can be best.
+Hardware: lanes/banks independently 1,2,4,8; 4096 address slots (0..4095).
+Bank = address % banks, at most 2 memory accesses/bank/cycle. Same-address
+simultaneous accesses must both be reads. Inputs, outputs, scratch are disjoint
+unique address lists. Inputs are read-only. Only inputs and r0 start initialized.
+Each lane has r0=0 and writable r1..r15, one instruction issued per cycle,
+at most 3 pending instructions, and at most one register writeback per cycle.
+Loads/stores take 1 cycle; add/multiply/multiplyAdd take 3. Commit before issue.
+A pending destination cannot be read or overwritten. Stores capture their source
+at issue. Communication between lanes uses explicit stores/loads.
+Signed16 multiplicands [-32768,32767], signed48 addition/accumulation/results.
+Overflow is invalid, never wrapping. All stores must finish. A certification
+limit means inconclusive, not necessarily wrong. The next attempt may repair your
+latest failure or explore a different design. All times in feedback are modeled cycles
+unless explicitly labeled seconds. Avoid repeating an unsuccessful idea unchanged.
+
+Available candidate_tools.py:
+"""Tiny helpers available to generators. These build data, not proofs."""
+import json
+from pathlib import Path
+
+
+def seed():
+    """Seed assigned to this attempt; use it for any private random.Random instance."""
+    return json.loads(Path('/input/randomness.json').read_text())['attemptSeed']
+
+
+def baseline():
+    """Return a fresh copy of this run's original certified candidate."""
+    return json.loads(Path('/input/baseline.json').read_text())
+
+
+def load(destination, address):
+    return dict(kind='load', destination=destination, address=address)
+
+
+def store(source, address):
+    return dict(kind='store', source=source, address=address)
+
+
+def add(destination, left, right):
+    return dict(kind='add', destination=destination, left=left, right=right)
+
+
+def mul(destination, left, right):
+    return dict(kind='multiply', destination=destination, left=left, right=right)
+
+
+def mac(destination, left, right, accumulator):
+    return dict(kind='multiplyAdd', destination=destination, left=left, right=right, accumulator=accumulator)
+
+
+def issue(cycle, lane, instruction):
+    return dict(cycle=cycle, lane=lane, instruction=instruction)
+
+
+def serial(instructions, lane=0, start=0):
+    """Issue each instruction at its predecessor's completion boundary."""
+    schedule = []
+    for instruction in instructions:
+        schedule.append(issue(start, lane, instruction))
+        start += 1 if instruction['kind'] in ('load', 'store') else 3
+    return schedule
